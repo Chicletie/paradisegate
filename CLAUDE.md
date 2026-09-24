@@ -3,7 +3,7 @@
 Site público do mundo **Paradise Gate**, incluindo a wiki (`/wiki`). Este é um repositório novo,
 em construção a partir do roteiro `docs/fase4-site.md` do repositório `chicletie/arvore` (autor:
 fonte de consulta, nunca faça push nele). Uma colaboradora vai construir o resto do site aqui;
-o editor e o Ursprung (console do autor) ficam de fora deste repositório.
+as ferramentas de edição do autor ficam de fora deste repositório.
 
 ## Stack
 
@@ -13,15 +13,18 @@ Vite + React 19 + TypeScript + Tailwind v4 + react-router. `npm test` roda os te
 
 ## Regras que não se quebram
 
-1. **Só Paradise Gate.** Nada do modo Ursprung, dos tokens herbário, nem nomes/cores/ids de
-   outros universos — nem a palavra "multiverso" — no código, nos textos ou nos comentários. O
-   site lê só `wikiIndex/lotus` (e as coleções listadas no contrato de dados, ver abaixo).
+1. **Só Paradise Gate — o repositório é público.** Nada que não seja o próprio Paradise Gate no
+   código, nos textos, nos comentários ou nos commits: nomes de outros projetos ou das
+   ferramentas internas do autor, paletas, ids ou tipos que o PG não usa. O único endereço de
+   fora é o do redirecionamento de endereços antigos (`public/404.html` e
+   `public/tree/index.html`), só a URL. O site lê só `wikiIndex/lotus` (e as coleções listadas
+   no contrato de dados, ver abaixo).
 2. **Função acima de estética.** Um redesenho nunca remove nem piora uma função que já existia.
 3. **Paridade de visual e de função com a wiki de hoje** (`https://paradisegate.com.br/wiki`),
    provada por capturas antes/depois — não por achismo. `wiki-core.js` (no arvore) é a
    referência de comportamento; `DESIGN.md` (raiz do arvore) é o sistema visual.
 4. **O CSS PG (`src/styles/wiki.css`) veio do arvore, só com as regras usadas no modo PG** (sem
-   a base clara/escura genérica que só o Ursprung usava). Não reescreva em Tailwind — a
+   a base clara/escura genérica que o site não usa). Não reescreva em Tailwind — a
    paridade visual depende disso. `src/styles/tokens.css` tem os mesmos tokens `--pg-*` (e o
    bloco `@theme` que os expõe como classes Tailwind) pras páginas novas, fora da wiki.
    `public/reset-senha.html` (fora do bundle) carrega esse mesmo CSS pelo nome fixo que
@@ -82,8 +85,8 @@ Vite + React 19 + TypeScript + Tailwind v4 + react-router. `npm test` roda os te
 | `src/lib/` | Acesso ao Firebase (`api.ts`, o único que importa `firebase.ts`), índice da wiki com suporte a `shards/` (`wikiIndex.tsx`), conta do leitor e modal "Entrar" (`account.tsx`), markdown/spoilers (`markdown.tsx`), citações (`quotes.tsx`), relações/família/linha do tempo da entrada (`relations.tsx`), home (`home.ts`, `daily.ts`), linha do tempo geral (`timeline.ts`), perfil (`profile.ts`) — lógica pura testável sem DOM onde dá. |
 | `src/styles/tokens.css` | Tokens `--pg-*` + `@theme` do Tailwind, pras páginas novas. |
 | `src/styles/wiki.css` | CSS da wiki, herdado do arvore como está. |
-| `public/404.html` | Rotas de SPA no GitHub Pages: `/ursprung`\*/`/tree`\* vão pro subdomínio do console; o resto reconstrói a URL bonita via `?p=`. |
-| `public/tree/index.html` | Só a guarda do endereço antigo do editor (encaminha pro console; `?limpar` apaga o que sobrou daqui). Não é o editor. |
+| `public/404.html` | Rotas de SPA no GitHub Pages: endereços antigos que mudaram de lugar são encaminhados com o mesmo caminho; o resto reconstrói a URL bonita via `?p=`. |
+| `public/tree/index.html` | Só a guarda de um endereço antigo que mudou de lugar (encaminha pro endereço novo; `?limpar` apaga o que sobrou guardado aqui). |
 | `public/sw.js` | Service worker de desligamento — apaga caches antigos e se desregistra. |
 | `public/reset-senha.html` | "Esqueci minha senha", fora do bundle (link fixo nos e-mails). |
 

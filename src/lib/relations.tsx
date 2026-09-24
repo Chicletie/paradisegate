@@ -18,7 +18,6 @@ export const EDGE_STYLE: Record<LinkStyle, string> = {
   faction: "#3f7d94",
   location: "#4a8f7d",
   narrative: "#7d6a9d",
-  multiversal: "#8f5cc9",
   neutral: "var(--pg-line-strong)",
 };
 

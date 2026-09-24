@@ -148,7 +148,6 @@ export type LinkStyle =
   | "faction"
   | "location"
   | "narrative"
-  | "multiversal"
   | "neutral";
 
 export interface WikiLink {

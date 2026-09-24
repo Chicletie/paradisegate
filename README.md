@@ -32,7 +32,7 @@ npm test           # vitest
 - `src/styles/wiki.css` — o CSS da wiki Paradise Gate, herdado do repositório `chicletie/arvore`
   como está (paridade visual).
 - `public/` — arquivos estáticos servidos como estão: `404.html` (rotas de SPA no GitHub
-  Pages), `tree/index.html` (guarda do endereço antigo do editor), `sw.js` (desliga o service
+  Pages), `tree/index.html` (guarda de um endereço antigo que mudou de lugar), `sw.js` (desliga o service
   worker antigo), `reset-senha.html`, `selo-whitmore.png`, `icon.svg`.
 
 ## Deploy

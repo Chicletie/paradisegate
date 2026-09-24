@@ -7,10 +7,10 @@
 <title>Paradise Gate</title>
 <!-- GitHub Pages serve isto (com status HTTP 404 de verdade) pra todo caminho que não é um
      arquivo físico — é assim que uma SPA responde por rotas "bonitas" (/wiki/<slug>) aqui.
-     /ursprung/* e /tree/* são o editor e a wiki restrita: moram num subdomínio à parte
-     (docs/plano-passagem.md), então encaminham pra lá com o mesmo caminho. O resto vira
-     /?p=<caminho original>; o app restaura a URL bonita com history.replaceState antes de
-     montar (ver restorePrettyUrl em src/lib), então ninguém vê o redirecionamento. -->
+     Endereços antigos que mudaram de lugar encaminham pro endereço novo com o mesmo caminho.
+     O resto vira /?p=<caminho original>; o app restaura a URL bonita com
+     history.replaceState antes de montar (ver restorePrettyUrl em src/lib), então ninguém vê
+     o redirecionamento. -->
 <script>
 (function () {
   var path = location.pathname;
