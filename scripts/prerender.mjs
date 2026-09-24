@@ -13,7 +13,8 @@ const DIST = path.resolve(process.argv[2] || "dist");
 const API = "https://firestore.googleapis.com/v1/projects/rotina-555dd/databases/(default)/documents";
 // Imagem da prévia de link pra home e pra página sem retrato (public/og-padrao.png, 1200×630).
 const DEFAULT_IMAGE = SITE + "/og-padrao.png";
-const HOME_DESC = "Wiki oficial de Paradise Gate: personagens, facções, lugares e a história do mundo.";
+// Texto da prévia de link da home, escrito pelo autor (voz da Academia Whitmore).
+const HOME_DESC = "É com satisfação que a Academia Whitmore confirma sua admissão para a leitura de seu arquivo mais completo. Bem-vindo à Paradise Gate Wiki!";
 
 async function getDoc(p) {
   const r = await fetch(`${API}/${p}`);
