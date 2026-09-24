@@ -267,7 +267,7 @@ export interface WikiSuggestion {
   statusAt?: string;
 }
 
-/** wikiRestrito/{wikiId}/itens/{id} — o Firestore só devolve os itens liberados pro e-mail. */
+/** wikiRestrito/{wikiId}/itens/{id} — cada item diz em `permitidos` quais e-mails podem lê-lo. */
 export interface WikiRestritoItem {
   kind: "campo" | "campo-confidencial" | "secao" | "tag" | "alias" | "galeria" | "sessao" | "post" | string;
   key?: string;

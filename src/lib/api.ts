@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import { onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth, db } from "./firebase";
+import { allOrOwn } from "./restrito";
 import type {
   AuthUser,
   WikiIndex,
@@ -128,9 +129,17 @@ export async function addSuggestion(s: WikiSuggestion): Promise<void> {
 
 // --- Conteúdo restrito: wikiRestrito/{wikiId}/itens ---
 
-/** Os itens desta página liberados pro leitor (o Firestore filtra; o resto nem chega aqui). */
-export async function fetchRestrito(wikiId: string): Promise<WikiRestritoItem[]> {
-  const snap = await getDocs(collection(db, "wikiRestrito", wikiId, "itens"));
+/**
+ * Os itens desta página liberados pro leitor. As regras não filtram listas (recusam a consulta
+ * inteira), então: a lista toda e, se vier permission-denied (algum item é de outra pessoa),
+ * só os com o e-mail do leitor em `permitidos` — ver src/lib/restrito.ts.
+ */
+export async function fetchRestrito(wikiId: string, email: string): Promise<WikiRestritoItem[]> {
+  const itens = collection(db, "wikiRestrito", wikiId, "itens");
+  const snap = await allOrOwn(
+    () => getDocs(itens),
+    () => getDocs(query(itens, where("permitidos", "array-contains", email))),
+  );
   return snap.docs.map((d) => d.data() as WikiRestritoItem);
 }
 

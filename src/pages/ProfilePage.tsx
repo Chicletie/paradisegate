@@ -305,8 +305,8 @@ function Favorites() {
   );
 }
 
-// Seus acessos — trechos restritos liberados pro e-mail do leitor (a regra do Firestore só
-// devolve os itens cujo "permitidos" tem o e-mail dele).
+// Seus acessos — trechos restritos liberados pro e-mail do leitor. A consulta já pede só os
+// itens com o e-mail dele em "permitidos": as regras não filtram, só aprovam ou recusam.
 function Accesses({ user }: { user: AuthUser }) {
   const index = useWikiIndex();
   const [rows, setRows] = useState<{ pageId: string; item: WikiRestritoItem }[] | "error" | null>(null);

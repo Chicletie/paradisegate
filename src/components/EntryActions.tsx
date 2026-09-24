@@ -191,12 +191,13 @@ export function MySuggestionsHere({ wikiId, open }: { wikiId: string; open: numb
 /** Itens de wikiRestrito liberados pro leitor nesta página (lidos de novo a cada login/saída). */
 export function useRestrito(wikiId: string): WikiRestritoItem[] {
   const { user, guest } = useAccount();
-  const req = user && !guest ? user.uid + "|" + wikiId : null;
+  const email = user && !guest ? user.email : null;
+  const req = email ? user!.uid + "|" + wikiId : null;
   const [got, setGot] = useState<{ req: string; items: WikiRestritoItem[] } | null>(null);
   useEffect(() => {
-    if (!req) return;
+    if (!req || !email) return;
     let cancelled = false;
-    fetchRestrito(wikiId).then(
+    fetchRestrito(wikiId, email).then(
       (items) => {
         if (!cancelled) setGot({ req, items });
       },
@@ -207,7 +208,7 @@ export function useRestrito(wikiId: string): WikiRestritoItem[] {
     return () => {
       cancelled = true;
     };
-  }, [req, wikiId]);
+  }, [req, email, wikiId]);
   return got && got.req === req ? got.items : NONE;
 }
 const NONE: WikiRestritoItem[] = [];
