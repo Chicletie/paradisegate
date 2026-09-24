@@ -1,0 +1,63 @@
+/* Tokens de design Paradise Gate (ver DESIGN.md), pras páginas novas do site (fora da wiki)
+   usarem: em `var(--pg-*)` ou pelas classes utilitárias do Tailwind, geradas pelo bloco @theme
+   abaixo. Os mesmos valores também vivem em `body.pg-site` dentro de src/styles/wiki.css, que
+   veio do arvore como está — as duas fontes ficam iguais de propósito, não uma referenciando a
+   outra, pra não arriscar a paridade visual da wiki mexendo nela. */
+:root {
+  --pg-night: #0b1a3f;
+  --pg-band: #132c6e;
+  --pg-card-back: #0d1f4f;
+  --pg-page: #f2f4f9;
+  --pg-panel: #ffffff;
+  --pg-line: #dce2ee;
+  --pg-line-strong: #b7c2d9;
+  --pg-ink: #121a2c;
+  --pg-muted: #4d5870;
+  --pg-link: #1f4fc4;
+  --pg-link-hover: #163b96;
+  --pg-link-wash: rgba(31, 79, 196, 0.08);
+  --pg-gold: #c9a45c;
+  --pg-gold-soft: rgba(201, 164, 92, 0.55);
+  --pg-on-dark: #eef2fb;
+  --pg-on-dark-muted: #b9c8ec;
+  --pg-f-title: "Castoro Titling", "Castoro", Georgia, serif;
+  --pg-f-serif: "Castoro", Georgia, serif;
+  --pg-f-ui: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --pg-night: #070f26;
+    --pg-band: #0f2358;
+    --pg-card-back: #0b1a44;
+    --pg-page: #0a1226;
+    --pg-panel: #0f1a33;
+    --pg-line: #1f2d52;
+    --pg-line-strong: #33487c;
+    --pg-ink: #e4e9f4;
+    --pg-muted: #a3aec6;
+    --pg-link: #93b2f5;
+    --pg-link-hover: #bccefa;
+    --pg-link-wash: rgba(147, 178, 245, 0.1);
+  }
+}
+
+@theme {
+  --color-pg-night: var(--pg-night);
+  --color-pg-band: var(--pg-band);
+  --color-pg-card-back: var(--pg-card-back);
+  --color-pg-page: var(--pg-page);
+  --color-pg-panel: var(--pg-panel);
+  --color-pg-line: var(--pg-line);
+  --color-pg-line-strong: var(--pg-line-strong);
+  --color-pg-ink: var(--pg-ink);
+  --color-pg-muted: var(--pg-muted);
+  --color-pg-link: var(--pg-link);
+  --color-pg-link-hover: var(--pg-link-hover);
+  --color-pg-gold: var(--pg-gold);
+  --color-pg-on-dark: var(--pg-on-dark);
+  --color-pg-on-dark-muted: var(--pg-on-dark-muted);
+  --font-pg-title: var(--pg-f-title);
+  --font-pg-serif: var(--pg-f-serif);
+  --font-pg-ui: var(--pg-f-ui);
+}
