@@ -8,11 +8,24 @@ import type { WikiLink } from "../types";
  * em" (backlink, `back`): o rótulo de um backlink é do ponto de vista da OUTRA página
  * ("Fulano / é pai/mãe de Beltrano"), não invertido.
  */
-export function LinkCard({ link, back, pageTitle }: { link: WikiLink; back?: boolean; pageTitle: string }) {
+export function LinkCard({
+  link,
+  back,
+  pageTitle,
+  titleOnly,
+}: {
+  link: WikiLink;
+  back?: boolean;
+  pageTitle: string;
+  /** Cartão de Afinidade: só o nome, sem rótulo (como no original). */
+  titleOnly?: boolean;
+}) {
   const index = useWikiIndex();
   const hasThumb = !!(link.targetId && index?.[link.targetId]);
   const label = back ? `${link.label || "menciona"} ${pageTitle}` : link.label || "ligação";
-  const kids = back ? (
+  const kids = titleOnly ? (
+    <span className="link-card-title">{link.targetTitle}</span>
+  ) : back ? (
     <>
       <span className="link-card-title">{link.targetTitle}</span>
       <span className="link-card-label">{label}</span>

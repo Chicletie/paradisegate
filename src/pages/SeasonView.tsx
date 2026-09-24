@@ -1,5 +1,5 @@
 import { pgShortDate } from "../lib/format";
-import { RenderMarkdown, SpoilerBlock, SpoilerFlag } from "../lib/markdown";
+import { RenderMarkdown, SpoilerBlock } from "../lib/markdown";
 import type { WikiSeasonDoc } from "../types";
 
 /** Recaps de sessão de uma temporada de campanha — porta de renderSeason em wiki-core.js
@@ -43,7 +43,6 @@ export function SeasonView({ data }: { data: WikiSeasonDoc }) {
           <div key={i}>
             <h2 className="cathead" id={`s${i}`}>
               {(sx.title || `Sessão ${i + 1}`) + (sx.date ? ` · ${sx.date}` : "")}
-              {sx.vis === "spoiler" && <SpoilerFlag />}
             </h2>
             {sx.vis === "spoiler" ? (
               <SpoilerBlock>

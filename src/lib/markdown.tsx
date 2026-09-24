@@ -1,16 +1,53 @@
 import { useState, type ReactNode } from "react";
+import { Link } from "react-router-dom";
 
-// Porta literal da lógica de markdown isolado de wiki-core.js (mdInline/renderMarkdown,
-// arvore) — mesmo regex de tokens, mesmo comportamento por token, só trocando construção de
-// DOM por elementos React. [[link]] continua como texto simples (.wl-plain): resolver contra
-// as ligações da própria entrada (wbUpgradeWikiLinks) fica pra depois.
+// Porta literal do markdown da casa de wiki-core.js (mdInline/renderMarkdown/fieldValue,
+// arvore; contrato em docs/formato-wiki.md, "Texto dentro da página") — mesmo regex de
+// tokens, mesmo comportamento por token, só trocando construção de DOM por elementos React.
+// [[link]] continua como texto simples (.wl-plain): a página não está publicada ou o link
+// não foi resolvido na publicação.
 
 const INLINE_TOKEN_SOURCE =
-  "(!\\[[^\\]]*\\]\\([^)\\s]+\\)|`[^`]+`|\\[\\[[^\\]\\[]+\\]\\]|\\[[^\\]]+\\]\\((?:https?:|mailto:)[^)\\s]+\\)|\\|\\|[^|]+\\|\\||\\*\\*[^*]+\\*\\*|__[^_]+__|~~[^~]+~~|\\*[^*\\n]+\\*|(?:^|\\s)_[^_\\n]+_(?=\\s|$))";
+  "(!\\[[^\\]]*\\]\\([^)\\s]+\\)|`[^`]+`|\\[\\[[^\\]\\[]+\\]\\]|\\[[^\\]]+\\]\\((?:https?:|mailto:|wiki:)[^)\\s]+\\)|\\|\\|(?:\\[\\[[^\\]\\[]+\\]\\]|[^|])+\\|\\||\\*\\*[^*]+\\*\\*|__[^_]+__|~~[^~]+~~|\\*[^*\\n]+\\*|(?:^|\\s)_[^_\\n]+_(?=\\s|$))";
 
-/** Porta de mdInline's próprio `||spoiler||`: alterna revelado/escondido a cada toque
- * (diferente do spoiler de campo/seção, que revela uma vez e fica). */
-function ToggleSpoiler({ children }: { children: ReactNode }) {
+/**
+ * `||trecho||`: tarja só naquele trecho, lido como markdown por dentro (pode ter link).
+ * Escondido, o primeiro toque só revela — nunca segue um link que esteja embaixo da tarja;
+ * revelado, um toque fora de link esconde de novo. Na fase de captura, pra rodar antes do
+ * clique do `<Link>` do react-router (que navega no próprio onClick).
+ */
+function InlineSpoiler({ children }: { children: ReactNode }) {
+  const [on, setOn] = useState(false);
+  return (
+    <span
+      className={"md-spoiler" + (on ? " on" : "")}
+      tabIndex={0}
+      role="button"
+      title="Spoiler — toque pra revelar"
+      aria-label="spoiler, toque para revelar"
+      onClickCapture={(ev) => {
+        if (!on) {
+          ev.preventDefault();
+          setOn(true);
+          return;
+        }
+        if ((ev.target as Element).closest?.("a")) return;
+        setOn(false);
+      }}
+      onKeyDown={(ev) => {
+        if ((ev.key === "Enter" || ev.key === " ") && ev.target === ev.currentTarget) {
+          ev.preventDefault();
+          setOn((v) => !v);
+        }
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+/** Porta de spoilerSpan (tag spoiler): texto puro atrás da tarja, cada toque alterna. */
+export function SpoilerSpan({ text }: { text: string }) {
   const [on, setOn] = useState(false);
   return (
     <span
@@ -19,14 +56,8 @@ function ToggleSpoiler({ children }: { children: ReactNode }) {
       role="button"
       title="Spoiler — toque pra revelar"
       onClick={() => setOn((v) => !v)}
-      onKeyDown={(ev) => {
-        if (ev.key === "Enter" || ev.key === " ") {
-          ev.preventDefault();
-          setOn((v) => !v);
-        }
-      }}
     >
-      {children}
+      {text}
     </span>
   );
 }
@@ -51,7 +82,7 @@ export function RevealSpoiler({ children, preview }: { children: ReactNode; prev
         if (ev.key === "Enter" || ev.key === " ") reveal(ev);
       }}
     >
-      {preview || "spoiler · toque"}
+      {preview || "spoiler, toque para revelar"}
     </span>
   );
 }
@@ -66,21 +97,37 @@ export function SpoilerBlock({ children }: { children: ReactNode }) {
         children
       ) : (
         <button type="button" className="spoiler-reveal" onClick={() => setRevealed(true)}>
-          🙈 spoiler, toque para revelar
+          spoiler, toque para revelar
         </button>
       )}
     </div>
   );
 }
 
-/** Porta de spoilerFlag: o emoji ao lado de um título de campo/seção marcado como spoiler. */
-export function SpoilerFlag() {
-  return (
-    <span role="img" aria-label="(spoiler)">
-      {" "}
-      🙈
-    </span>
-  );
+/**
+ * Valor de um campo curto (infobox, taxonomia) — porta de fieldValue: numa linha só, texto
+ * corrido; com várias linhas (`\n`), uma por linha com "•" na frente, igual às Alcunhas.
+ * Linhas vazias são ignoradas. Cada linha aceita o markdown de linha.
+ */
+export function fieldValue(value: string | undefined): ReactNode {
+  const lines = String(value || "")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+  if (lines.length < 2) return mdInline(lines[0] || "");
+  return lines.map((l, i) => (
+    <div key={i} className="infobox-alias-line infobox-line">
+      • {mdInline(l)}
+    </div>
+  ));
+}
+
+function wikiLinkTarget(raw: string): string {
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
 }
 
 export function mdInline(s: string | undefined): ReactNode[] {
@@ -121,7 +168,14 @@ export function mdInline(s: string | undefined): ReactNode[] {
       );
     } else if (tok.charAt(0) === "[") {
       const lm = tok.match(/^\[([^\]]+)\]\(([^)\s]+)\)$/);
-      if (lm)
+      // wiki:<id> = página da própria wiki (o editor só gera pra página publicada): mesma aba.
+      if (lm && lm[2].slice(0, 5) === "wiki:")
+        nodes.push(
+          <Link key={k} className="wl-live" to={`/wiki/${encodeURIComponent(wikiLinkTarget(lm[2].slice(5)))}`}>
+            {lm[1]}
+          </Link>,
+        );
+      else if (lm)
         nodes.push(
           <a key={k} href={lm[2]} target="_blank" rel="noopener noreferrer">
             {lm[1]}
@@ -132,7 +186,7 @@ export function mdInline(s: string | undefined): ReactNode[] {
     } else if (tok.slice(0, 2) === "~~") {
       nodes.push(<del key={k}>{tok.slice(2, -2)}</del>);
     } else if (tok.slice(0, 2) === "||") {
-      nodes.push(<ToggleSpoiler key={k}>{tok.slice(2, -2)}</ToggleSpoiler>);
+      nodes.push(<InlineSpoiler key={k}>{mdInline(tok.slice(2, -2))}</InlineSpoiler>);
     } else {
       nodes.push(<em key={k}>{tok.slice(1, -1)}</em>);
     }

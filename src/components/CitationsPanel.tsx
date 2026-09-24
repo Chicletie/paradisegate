@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { SpoilerBlock } from "../lib/markdown";
 import { quoteAttrKids, quoteNorm, QuoteBody } from "../lib/quotes";
 import type { WikiCitation, QuoteRole } from "../types";
@@ -23,17 +24,20 @@ export function CitationsPanel({ citacoes, title }: { citacoes: WikiCitation[]; 
             <div className="gal-grouphead">{label(title)}</div>
             <div className="cit-list">
               {items.map((q, i) => {
-                const kids = quoteAttrKids(q, role === "fala" || role === "trecho");
-                const meta = q.note ? [...kids, kids.length ? " · " : "", q.note] : kids;
+                const meta = quoteAttrKids(q, role === "fala" || role === "trecho");
+                if (q.note) {
+                  if (meta.length) meta.push(" · ");
+                  meta.push(q.note);
+                }
                 const body = <QuoteBody q={q} />;
                 return (
                   <div key={i} className={"cit-item" + (q.kind === "dialogo" ? " is-dialogue" : "")}>
                     {q.vis === "spoiler" ? <SpoilerBlock>{body}</SpoilerBlock> : body}
                     {meta.length > 0 && (
                       <div className="cit-meta">
-                        —{" "}
+                        {"— "}
                         {meta.map((m, mi) => (
-                          <span key={mi}>{m}</span>
+                          <Fragment key={mi}>{m}</Fragment>
                         ))}
                       </div>
                     )}

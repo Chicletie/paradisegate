@@ -1,4 +1,4 @@
-import { mdInline, RenderMarkdown, SpoilerBlock, SpoilerFlag } from "../lib/markdown";
+import { mdInline, RenderMarkdown, SpoilerBlock } from "../lib/markdown";
 import { QuoteEpigraph } from "../lib/quotes";
 import type { WikiArticleBundle, WikiCitation } from "../types";
 
@@ -50,7 +50,16 @@ export function ArticleBundle({
           <ol>
             {tocEntries.map((t) => (
               <li key={t.id}>
-                <a href={`#${t.id}`}>{t.label}</a>
+                <a
+                  href={`#${t.id}`}
+                  onClick={() => {
+                    // Seção recolhida reabre antes de rolar até ela (senão só aparece o título).
+                    const target = document.getElementById(t.id);
+                    if (target instanceof HTMLDetailsElement) target.open = true;
+                  }}
+                >
+                  {t.label}
+                </a>
               </li>
             ))}
           </ol>
@@ -62,7 +71,6 @@ export function ArticleBundle({
           <div key={id}>
             <h2 className="cathead" id={id}>
               {f.key}
-              {f.vis === "spoiler" && <SpoilerFlag />}
             </h2>
             {f.vis === "spoiler" ? (
               <SpoilerBlock>
@@ -80,7 +88,6 @@ export function ArticleBundle({
           <details key={id} className="wiki-section" id={id} open>
             <summary className="cathead">
               {s.title || "Seção"}
-              {s.vis === "spoiler" && <SpoilerFlag />}
             </summary>
             {s.vis === "spoiler" ? (
               <SpoilerBlock>

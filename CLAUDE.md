@@ -39,7 +39,19 @@ Vite + React 19 + TypeScript + Tailwind v4 + react-router. `npm test` roda os te
 10. **Nada vai pro `main` sem o OK do autor.** Um PR por etapa, com capturas antes/depois e
     resumo em português simples; ele aprova a mesclagem.
 11. Commits em português, dizendo o que mudou; mantenha a linha `Co-Authored-By` de atribuição.
-12. **Nó de SVG clicável (árvore genealógica) nunca dentro de `<Link>`.** Um `<a>` do
+12. **Sem o preflight (reset) do Tailwind.** `src/index.css` importa só o tema e os
+    utilitários: a wiki foi desenhada em cima dos padrões do navegador (lista numerada no
+    índice, link sublinhado, `##` do markdown em negrito) e o reset apagava isso. Página nova
+    que quiser um reset aplica num escopo próprio, nunca global.
+13. **Texto que o original monta de uma vez vai num pedaço só.** `{"#" + t.text}`, não
+    `#{t.text}`: o React quebra o segundo em dois nós de texto e o navegador desenha a junção
+    diferente (aparece na comparação por pixel). Vale pra tags, rubrica "(rindo) ", "— " da
+    autoria, aspas da citação.
+14. **Markdown da casa** (`docs/formato-wiki.md` no arvore, "Texto dentro da página"):
+    `||trecho||` lido como markdown por dentro, 1º toque só revela; `[texto](wiki:<id>)` é
+    link interno (`wl-live`); campo curto com várias linhas vira uma por "•"; tarja lisa; e
+    nada de 🙈 na wiki (nem no rótulo, nem no botão).
+15. **Nó de SVG clicável (árvore genealógica) nunca dentro de `<Link>`.** Um `<a>` do
     react-router (mesmo com `display:contents`) dentro de `<svg>` não pinta os filhos em todo
     navegador — use `onClick` + `useNavigate()` no próprio elemento SVG (ver `TreeNode` em
     `src/lib/relations.tsx`), igual ao clique direto que `wiki-core.js` já usa ali.
@@ -57,6 +69,18 @@ Vite + React 19 + TypeScript + Tailwind v4 + react-router. `npm test` roda os te
 | `public/tree/index.html` | Só a guarda do endereço antigo do editor (encaminha pro console; `?limpar` apaga o que sobrou daqui). Não é o editor. |
 | `public/sw.js` | Service worker de desligamento — apaga caches antigos e se desregistra. |
 | `public/reset-senha.html` | "Esqueci minha senha", fora do bundle (link fixo nos e-mails). |
+
+## Como provar paridade sem rede
+
+O Firestore e `paradisegate.com.br` podem estar bloqueados na sessão; o autor compara com os
+dados reais a cada PR. Pra capturas antes/depois com os **mesmos dados**: o `wiki-core.js` do
+arvore expõe `window.wikiCoreRenderStatic(data)` e, sem `firebase` na página, as partes de
+login/restrito saem cedo sozinhas. Monte uma página com `wiki-style.css` + `wiki-core.js` do
+arvore + um JSON de exemplo (servida num caminho `/wiki.html`, pra cair no modo Paradise Gate;
+ponha `pg-theme` no `<body>`), e uma rota temporária no app lendo o mesmo JSON. Compare o
+`innerText` do `.card` e a diferença de pixels (canvas no próprio Chromium) em 1280/390,
+claro/escuro, e depois de cada clique (abas, spoilers). Remova a rota temporária antes do
+commit.
 
 ## Ramos e PRs
 

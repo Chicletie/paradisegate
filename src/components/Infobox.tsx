@@ -1,26 +1,39 @@
 import { Fragment, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { mdInline, RevealSpoiler, SpoilerFlag } from "../lib/markdown";
+import { fieldValue, RevealSpoiler, SpoilerBlock } from "../lib/markdown";
 import { objPos } from "../lib/format";
 import type { InfoboxImage, WikiAlias, WikiCrumb, WikiEntryDoc, WikiField } from "../types";
 
-function AliasLine({ alias }: { alias: WikiAlias }) {
+/** Porta de buildAlias/appendAliasNote: a anotação entre parênteses junta só os pedaços que
+ * têm texto (antes / trecho-com-link / depois), com um espaço ENTRE eles — nunca sobrando
+ * espaço antes do ")". */
+export function AliasLine({ alias }: { alias: WikiAlias }) {
   const note = alias.note;
-  const noteFlat = note ? [note.before, note.link, note.after].filter(Boolean).join(" ") : "";
+  const segs: ReactNode[] = [];
+  if (note?.before) segs.push(note.before);
+  if (note?.link)
+    segs.push(
+      note.linkWikiId ? (
+        <Link key="lk" to={`/wiki/${encodeURIComponent(note.linkWikiId)}`}>
+          {note.link}
+        </Link>
+      ) : (
+        note.link
+      ),
+    );
+  if (note?.after) segs.push(note.after);
   const content = (
     <span>
       {alias.selfLink ? <Link to={`/wiki/${encodeURIComponent(alias.selfLink)}`}>{alias.text}</Link> : alias.text}
-      {noteFlat && (
+      {segs.length > 0 && (
         <>
           {" ("}
-          {note?.before && <span>{note.before} </span>}
-          {note?.link &&
-            (note.linkWikiId ? (
-              <Link to={`/wiki/${encodeURIComponent(note.linkWikiId)}`}>{note.link}</Link>
-            ) : (
-              <span>{note.link}</span>
-            ))}
-          {note?.after && <span> {note.after}</span>}
+          {segs.map((seg, i) => (
+            <Fragment key={i}>
+              {i > 0 && " "}
+              {seg}
+            </Fragment>
+          ))}
           {")"}
         </>
       )}
@@ -33,6 +46,8 @@ function AliasLine({ alias }: { alias: WikiAlias }) {
   );
 }
 
+// As abas de retrato ficam antes do `.infobox-portrait`, como irmãs (mesma ordem de
+// wiki-core.js); trocar de aba repinta o retrato, e um retrato-spoiler volta coberto.
 function Portrait({ images, title }: { images: InfoboxImage[]; title: string }) {
   const [active, setActive] = useState(0);
   const opt = images[active];
@@ -40,7 +55,7 @@ function Portrait({ images, title }: { images: InfoboxImage[]; title: string }) 
     <img className="cover" style={{ objectPosition: objPos(opt.focus) }} src={opt.url} alt={title} />
   );
   return (
-    <div className="infobox-portrait">
+    <>
       {images.length > 1 && (
         <div className="infobox-tabs" role="tablist" aria-label="Retratos">
           {images.map((im, i) => (
@@ -58,20 +73,8 @@ function Portrait({ images, title }: { images: InfoboxImage[]; title: string }) 
           ))}
         </div>
       )}
-      {opt.vis === "spoiler" ? <SpoilerCoverImg img={img} /> : img}
-    </div>
-  );
-}
-
-// Cobre o retrato atrás do botão de spoiler, sem trocar de imagem depois (o `key` no active
-// index já cuida disso quando a aba muda).
-function SpoilerCoverImg({ img }: { img: ReactNode }) {
-  const [revealed, setRevealed] = useState(false);
-  if (revealed) return <>{img}</>;
-  return (
-    <button type="button" className="spoiler-reveal" onClick={() => setRevealed(true)}>
-      🙈 spoiler, toque para revelar
-    </button>
+      <div className="infobox-portrait">{opt.vis === "spoiler" ? <SpoilerBlock key={active}>{img}</SpoilerBlock> : img}</div>
+    </>
   );
 }
 
@@ -91,22 +94,22 @@ export function Infobox({ data }: { data: WikiEntryDoc }) {
 
   const isBasicsHead = (f: WikiField) => f.type === "cabecalho" && /^dados b[áa]sicos$/i.test((f.key || "").trim());
   const hasBasicsHead = shortFields.some(isBasicsHead);
-  const birthRows = (
-    <>
-      {data.birth && (
-        <tr>
-          <th>Nascimento</th>
-          <td>{data.birth}</td>
-        </tr>
-      )}
-      {data.lunarBirth && (
-        <tr>
-          <th>Nascimento Lunar</th>
-          <td>{data.lunarBirth}</td>
-        </tr>
-      )}
-    </>
-  );
+  const birthRows: ReactNode[] = [];
+  if (data.birth)
+    birthRows.push(
+      <tr key="birth">
+        <th>Nascimento</th>
+        <td>{data.birth}</td>
+      </tr>,
+    );
+  if (data.lunarBirth)
+    birthRows.push(
+      <tr key="lunar">
+        <th>Nascimento Lunar</th>
+        <td>{data.lunarBirth}</td>
+      </tr>,
+    );
+  let birthInBasics = hasBasicsHead;
 
   const rows: ReactNode[] = [];
   if (aliases.length) {
@@ -121,7 +124,7 @@ export function Infobox({ data }: { data: WikiEntryDoc }) {
       </tr>,
     );
   }
-  if (hasBirth && !hasBasicsHead) rows.push(<Fragment key="birth">{birthRows}</Fragment>);
+  if (!birthInBasics) rows.push(...birthRows);
   shortFields.forEach((f, i) => {
     if (f.type === "cabecalho") {
       rows.push(
@@ -129,16 +132,26 @@ export function Infobox({ data }: { data: WikiEntryDoc }) {
           <th colSpan={2}>{f.key}</th>
         </tr>,
       );
-      if (hasBirth && isBasicsHead(f)) rows.push(<Fragment key={"hb" + i}>{birthRows}</Fragment>);
+      if (birthInBasics && isBasicsHead(f)) {
+        rows.push(...birthRows);
+        birthInBasics = false;
+      }
       return;
     }
     rows.push(
       <tr key={i}>
         <th>
           {f.key}
-          {f.vis === "spoiler" && <SpoilerFlag />}
         </th>
-        <td>{f.vis === "spoiler" ? <RevealSpoiler preview="spoiler · toque">{mdInline(f.value)}</RevealSpoiler> : mdInline(f.value)}</td>
+        <td>
+          {f.vis === "spoiler" ? (
+            <RevealSpoiler preview="spoiler · toque">
+              <span>{fieldValue(f.value)}</span>
+            </RevealSpoiler>
+          ) : (
+            fieldValue(f.value)
+          )}
+        </td>
       </tr>,
     );
   });

@@ -10,7 +10,8 @@ import { pgPlural } from "../lib/format";
  */
 export function PgHeader() {
   return (
-    <header className="pg-mast">
+    // "site-header" junto, como o buildPgMast de hoje: é dele que vem o peso 600 da marca.
+    <header className="site-header pg-mast">
       <div className="pg-mast-inner">
         <div className="brand">
           <Link to="/wiki">

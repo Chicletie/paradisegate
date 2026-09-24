@@ -186,6 +186,17 @@ export function hasRelations(links: WikiLink[] = [], backlinks: WikiLink[] = [])
   return links.length > 0 || backlinks.length > 0;
 }
 
+/** Rótulo da seção combinada (e do item dela no índice): "Relações" quando há ligações,
+ * senão "Linha do tempo" quando há eventos, senão nenhuma (relSectionLabel no original). */
+export function relationsSectionLabel(
+  links: WikiLink[] = [],
+  backlinks: WikiLink[] = [],
+  events: WikiIndexEvent[] = [],
+): "Relações" | "Linha do tempo" | null {
+  if (hasRelations(links, backlinks)) return "Relações";
+  return events.length ? "Linha do tempo" : null;
+}
+
 /** Porta de buildRelGroups: Relações agrupadas por tipo (a estrela do Ursprung não aparece
  * no Paradise Gate). Cada grupo com a cor do tipo e os cartões de retrato; menções de mão
  * única (backlinks que não estão nas ligações de ida) entram no grupo delas, com a relação

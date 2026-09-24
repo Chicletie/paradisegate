@@ -1,4 +1,4 @@
-import { mdInline, RenderMarkdown, SpoilerFlag, RevealSpoiler, SpoilerBlock } from "../lib/markdown";
+import { fieldValue, RenderMarkdown, SpoilerBlock } from "../lib/markdown";
 import type { WikiField } from "../types";
 
 /**
@@ -22,9 +22,16 @@ export function TaxonomyPanel({ taxonomy }: { taxonomy: WikiField[] }) {
                 <tr key={i}>
                   <th>
                     {f.key}
-                    {f.vis === "spoiler" && <SpoilerFlag />}
                   </th>
-                  <td>{f.vis === "spoiler" ? <RevealSpoiler>{mdInline(f.value)}</RevealSpoiler> : mdInline(f.value)}</td>
+                  <td>
+                    {f.vis === "spoiler" ? (
+                      <SpoilerBlock>
+                        <span>{fieldValue(f.value)}</span>
+                      </SpoilerBlock>
+                    ) : (
+                      fieldValue(f.value)
+                    )}
+                  </td>
                 </tr>
               ),
             )}
@@ -35,7 +42,6 @@ export function TaxonomyPanel({ taxonomy }: { taxonomy: WikiField[] }) {
         <div key={i}>
           <h2 className="cathead">
             {f.key}
-            {f.vis === "spoiler" && <SpoilerFlag />}
           </h2>
           {f.vis === "spoiler" ? (
             <SpoilerBlock>

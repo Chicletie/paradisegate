@@ -1,8 +1,17 @@
 import type { ReactNode } from "react";
-import { EntryTimeline, FamilyTree, RelationGroups, affinitiesOf, hasFamilyData, hasRelations } from "../lib/relations";
+import {
+  EntryTimeline,
+  FamilyTree,
+  RelationGroups,
+  affinitiesOf,
+  hasFamilyData,
+  hasRelations,
+  relationsSectionLabel,
+} from "../lib/relations";
+import { eventSortKey } from "../lib/events";
 import { WorkTabs } from "./WorkTabs";
 import { LinkCard } from "./LinkCard";
-import type { WikiEntryDoc, WikiIndexEvent } from "../types";
+import type { WikiEntryDoc } from "../types";
 
 /**
  * Porta do bloco "Relações + Genealogia + Linha do tempo" de renderEntry (wiki-core.js,
@@ -14,8 +23,8 @@ export function RelationsSection({ data }: { data: WikiEntryDoc }) {
   const links = data.links || [];
   const backlinks = data.backlinks || [];
   const hasRel = hasRelations(links, backlinks);
-  const eventsSorted = [...(data.events || [])].sort((a, b) => sortKey(a) - sortKey(b));
-  const label = hasRel ? "Relações" : eventsSorted.length ? "Linha do tempo" : null;
+  const eventsSorted = [...(data.events || [])].sort((a, b) => eventSortKey(a) - eventSortKey(b));
+  const label = relationsSectionLabel(links, backlinks, eventsSorted);
   if (!label) return null;
 
   const panels: { label: string; content: ReactNode }[] = [];
@@ -31,10 +40,6 @@ export function RelationsSection({ data }: { data: WikiEntryDoc }) {
       <WorkTabs tabs={panels} label={label} />
     </>
   );
-}
-
-function sortKey(ev: WikiIndexEvent): number {
-  return ev.y * 100000 + (ev.m || 0) * 100 + (ev.d || 0);
 }
 
 /** Porta do bloco "Afinidades": vínculos de practice/nature em destaque, separados da lista
@@ -54,7 +59,7 @@ export function AffinitiesSection({ data }: { data: WikiEntryDoc }) {
           </div>
           <div className="links-grid">
             {g.items.map((lk, li) => (
-              <LinkCard key={li} link={{ ...lk, label: undefined }} pageTitle={data.title} />
+              <LinkCard key={li} link={lk} pageTitle={data.title} titleOnly />
             ))}
           </div>
         </div>

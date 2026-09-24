@@ -2,13 +2,14 @@ import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { pgShortDate } from "../lib/format";
 import { quoteNorm } from "../lib/quotes";
+import { affinitiesOf, relationsSectionLabel } from "../lib/relations";
 import { Infobox } from "../components/Infobox";
 import { ArticleBundle } from "../components/ArticleBundle";
 import { GalleryPanel } from "../components/GalleryPanel";
 import { CitationsPanel } from "../components/CitationsPanel";
 import { TaxonomyPanel } from "../components/TaxonomyPanel";
 import { RelationsSection, AffinitiesSection } from "../components/RelationsSection";
-import { RenderMarkdown, SpoilerFlag, SpoilerBlock } from "../lib/markdown";
+import { RenderMarkdown, SpoilerBlock, SpoilerSpan } from "../lib/markdown";
 import type { WikiEntryDoc } from "../types";
 
 /**
@@ -19,8 +20,12 @@ import type { WikiEntryDoc } from "../types";
 export function EntryView({ data }: { data: WikiEntryDoc }) {
   const [activeTab, setActiveTab] = useState(0);
   const epigraph = quoteNorm(data.featuredQuote, data.title);
+  // Itens do índice que valem pra página toda (só entram na aba Geral), na ordem do original.
   const sharedToc: { id: string; label: string }[] = [];
   if (data.posts?.length) sharedToc.push({ id: "posts", label: "Posts" });
+  const relLabel = relationsSectionLabel(data.links, data.backlinks, data.events);
+  if (relLabel) sharedToc.push({ id: "relacoes", label: relLabel });
+  if (affinitiesOf(data.links).length) sharedToc.push({ id: "afinidades", label: "Afinidades" });
 
   const tabPanels: { label: string; content: ReactNode }[] = [
     { label: "Geral", content: <ArticleBundle bundle={data} anchorPrefix="geral-" epigraph={epigraph} extraToc={sharedToc} /> },
@@ -86,11 +91,7 @@ export function EntryView({ data }: { data: WikiEntryDoc }) {
           </h2>
           {data.posts.map((p, i) => (
             <details key={i} className="wiki-section post" open>
-              <summary className="post-summary">
-                {p.date ? `${p.date} · ` : ""}
-                {p.title || "(sem título)"}
-                {p.vis === "spoiler" && <SpoilerFlag />}
-              </summary>
+              <summary className="post-summary">{(p.date ? `${p.date} · ` : "") + (p.title || "(sem título)")}</summary>
               {p.vis === "spoiler" ? (
                 <SpoilerBlock>
                   <RenderMarkdown text={p.body} />
@@ -110,12 +111,13 @@ export function EntryView({ data }: { data: WikiEntryDoc }) {
         <div className="tags">
           {data.tags.map((t, i) =>
             t.vis === "spoiler" ? (
+              // Tag spoiler: tarja no texto, sem link pra busca (chip + spoilerSpan no original).
               <span key={i} className="tag">
-                #{t.text}
+                <SpoilerSpan text={"#" + t.text} />
               </span>
             ) : (
               <Link key={i} className="tag" to={`/wiki?q=${encodeURIComponent(t.text)}`}>
-                #{t.text}
+                {"#" + t.text}
               </Link>
             ),
           )}

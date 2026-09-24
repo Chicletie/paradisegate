@@ -46,7 +46,7 @@ export function QuoteDialogue({ q, className }: { q: WikiCitation; className?: s
               <QuoteRefNode r={{ name: l.who, id: l.id }} />
             </span>
             <span className="wb-dl-say">
-              {l.aside && <span className="wb-dl-aside">({l.aside}) </span>}
+              {l.aside && <span className="wb-dl-aside">{"(" + l.aside + ") "}</span>}
               {l.text}
             </span>
           </p>
@@ -88,7 +88,7 @@ export function quoteAttrKids(q: WikiCitation, omitSpeaker: boolean): ReactNode[
 
 export function QuoteBody({ q }: { q: WikiCitation }) {
   if (q.kind === "dialogo") return <QuoteDialogue q={q} />;
-  return <div className="cit-text">“{q.text || ""}”</div>;
+  return <div className="cit-text">{"“" + (q.text || "") + "”"}</div>;
 }
 
 /** Epígrafe: a citação em destaque da entrada, antes da visão geral — aspas grandes, texto em
@@ -108,7 +108,7 @@ export function QuoteEpigraph({ q }: { q: WikiCitation }) {
       {q.vis === "spoiler" ? <SpoilerBlock>{inner}</SpoilerBlock> : inner}
       {attr.length > 0 && (
         <figcaption className="wb-epi-attr">
-          —{" "}
+          {"— "}
           {attr.map((a, i) => (
             <Fragment key={i}>{a}</Fragment>
           ))}
