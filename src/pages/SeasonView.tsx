@@ -1,10 +1,13 @@
 import { pgShortDate } from "../lib/format";
 import { RenderMarkdown, SpoilerBlock } from "../lib/markdown";
+import { MySuggestionsHere, RestritoSlot, SuggestButtons, useMineToggle, useRestrito } from "../components/EntryActions";
 import type { WikiSeasonDoc } from "../types";
 
 /** Recaps de sessão de uma temporada de campanha — porta de renderSeason em wiki-core.js
  * (arvore). Mesma casca da entrada; o conteúdo é uma lista de sessões em vez de campos. */
-export function SeasonView({ data }: { data: WikiSeasonDoc }) {
+export function SeasonView({ data, wikiId }: { data: WikiSeasonDoc; wikiId: string }) {
+  const restrito = useRestrito(wikiId);
+  const [mine, toggleMine] = useMineToggle();
   const sessions = data.sessions || [];
   const factRows: [string, string][] = [];
   if (data.system) factRows.push(["Sistema", data.system]);
@@ -19,6 +22,10 @@ export function SeasonView({ data }: { data: WikiSeasonDoc }) {
         <span className="pg-entry-type">
           {"Temporada" + (data.publishedAt ? ` · atualizado em ${pgShortDate(data.publishedAt)}` : "")}
         </span>
+        {/* Sem Favoritar aqui: o original só põe a estrela nas entradas. */}
+        <div className="pg-entry-actions">
+          <SuggestButtons wikiId={wikiId} pageTitle={data.title} tab="" onToggleMine={toggleMine} />
+        </div>
       </div>
 
       {factRows.length > 0 && (
@@ -54,6 +61,8 @@ export function SeasonView({ data }: { data: WikiSeasonDoc }) {
           </div>
         ))
       )}
+      <RestritoSlot items={restrito} />
+      <MySuggestionsHere wikiId={wikiId} open={mine} />
     </article>
   );
 }

@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useWikiIndex, hasEvents } from "../lib/wikiIndex";
 import { pgPlural } from "../lib/format";
 import { PgSearchIcon, PgStar } from "./PgIcons";
+import { LoginBar } from "./AccountMenu";
 
 /** Busca controlada por quem chama (a home: filtra a lista a cada letra, sem Enter). */
 export interface HeaderSearch {
@@ -12,8 +13,8 @@ export interface HeaderSearch {
 
 /**
  * Cabeçalho PG (`.pg-mast`, porta de buildPgMast em wiki-core.js, arvore): marca, busca e a
- * barra de categorias/linha do tempo/página aleatória (`.pg-nav`). O menu de conta (entrar/
- * avatar) chega numa próxima etapa (docs/fase4-site.md no arvore, etapa 4).
+ * barra de categorias/linha do tempo/página aleatória (`.pg-nav`), e o "Entrar"/menu da conta
+ * no canto (mountLoginBar).
  */
 export function PgHeader({ search }: { search?: HeaderSearch }) {
   return (
@@ -29,6 +30,7 @@ export function PgHeader({ search }: { search?: HeaderSearch }) {
           </Link>
         </div>
         {search ? <SearchInput value={search.value} onChange={search.onChange} /> : <SearchBox />}
+        <LoginBar />
       </div>
       <PgNavBar />
     </header>

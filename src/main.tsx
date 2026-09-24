@@ -5,6 +5,7 @@ import "./index.css";
 import App from "./App";
 import { restorePrettyUrl } from "./lib/restorePrettyUrl";
 import { WikiIndexProvider } from "./lib/wikiIndex";
+import { AccountProvider } from "./lib/account";
 
 restorePrettyUrl(location.search, (url) => history.replaceState(null, "", url));
 
@@ -16,7 +17,9 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <WikiIndexProvider>
-        <App />
+        <AccountProvider>
+          <App />
+        </AccountProvider>
       </WikiIndexProvider>
     </BrowserRouter>
   </StrictMode>,

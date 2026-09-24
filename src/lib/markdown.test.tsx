@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import type { ReactNode } from "react";
-import { fieldValue, mdInline, RenderMarkdown, SpoilerBlock } from "./markdown";
+import { fieldValue, mdInline, RenderMarkdown, SpoilerBlock, WikiLinkUpgrade } from "./markdown";
+import { swapWinners } from "../components/EntryActions";
 import { AliasLine } from "../components/Infobox";
 import { EntryView } from "../pages/EntryView";
 
@@ -84,6 +85,7 @@ describe("índice da entrada", () => {
           posts: [{ body: "p" }],
           links: [{ label: "pratica", targetId: "y", targetTitle: "Y" }],
         }}
+        wikiId="x"
       />,
     );
     const toc = out.match(/<div class="toc">.*?<\/ol>/)?.[0] ?? "";
@@ -96,5 +98,33 @@ describe("índice da entrada", () => {
       "Relações",
       "Afinidades",
     ]);
+  });
+});
+
+describe("[[Nome]] na descrição de um evento", () => {
+  it("vira link quando é uma ligação publicada da entrada (até dentro de spoiler)", () => {
+    const out = html(
+      <WikiLinkUpgrade links={[{ targetId: "hades", targetTitle: "Hades" }, { targetTitle: "Sem página" }]}>
+        {mdInline("com [[hades]], [[Sem página]] e ||[[Hades|Hades]]||")}
+      </WikiLinkUpgrade>,
+    );
+    expect(out).toContain('<a class="wl-live" href="/wiki/hades" data-discover="true">hades</a>');
+    expect(out).toContain('<span class="wl-plain">Sem página</span>');
+    expect(out.match(/wl-live/g)).toHaveLength(2);
+  });
+});
+
+describe("versão confidencial no próprio campo", () => {
+  it("com o mesmo nome em dois lugares, vale o último da página", () => {
+    const w = swapWinners(
+      [
+        { key: "Idade", value: "1" },
+        { key: "História", type: "nota", value: "" },
+        { key: "Idade", type: "nota", value: "" },
+        { key: "Dados", type: "cabecalho", value: "" },
+      ],
+      [{ key: "História", value: "" }],
+    );
+    expect(w).toEqual({ Idade: "lf:1", História: "lf:0", "tax:História": "ts:0" });
   });
 });

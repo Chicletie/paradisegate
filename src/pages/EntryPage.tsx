@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { fetchPublicDoc } from "../lib/api";
 import { usePgBody } from "../lib/usePgBody";
 import { PgHeader } from "../components/PgHeader";
 import { PgFooter } from "../components/PgFooter";
@@ -30,14 +29,9 @@ export function EntryPage() {
     if (!slug) return;
     let cancelled = false;
     setState({ status: "loading" });
-    getDoc(doc(db, "wikiPublic", slug))
-      .then((snap) => {
-        if (cancelled) return;
-        if (!snap.exists() || snap.data().universeId !== "lotus") {
-          setState({ status: "not-found" });
-          return;
-        }
-        setState({ status: "ready", data: snap.data() as WikiPublicDoc });
+    fetchPublicDoc(slug)
+      .then((data) => {
+        if (!cancelled) setState(data ? { status: "ready", data } : { status: "not-found" });
       })
       .catch(() => {
         if (!cancelled) setState({ status: "error" });
@@ -70,9 +64,9 @@ export function EntryPage() {
             <div className="empty">Carregando…</div>
           </div>
         ) : state.data.kind === "temporada" ? (
-          <SeasonView data={state.data} />
+          <SeasonView data={state.data} wikiId={slug!} />
         ) : (
-          <EntryView data={state.data} />
+          <EntryView data={state.data} wikiId={slug!} />
         )}
       </main>
       <PgFooter />

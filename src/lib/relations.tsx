@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { WikiIndexEvent, WikiLink, LinkStyle } from "../types";
 import { fmtEventDate, eventSortKey } from "./events";
-import { RenderMarkdown } from "./markdown";
+import { RenderMarkdown, WikiLinkUpgrade } from "./markdown";
 import { LinkCard } from "../components/LinkCard";
 
 // Porta de FAMILY_LABEL_BUCKET/familyOf/buildFamilyTree, EDGE_STYLE/affinitiesOf/
@@ -18,7 +18,6 @@ export const EDGE_STYLE: Record<LinkStyle, string> = {
   faction: "#3f7d94",
   location: "#4a8f7d",
   narrative: "#7d6a9d",
-  multiversal: "#8f5cc9",
   neutral: "var(--pg-line-strong)",
 };
 
@@ -197,8 +196,7 @@ export function relationsSectionLabel(
   return events.length ? "Linha do tempo" : null;
 }
 
-/** Porta de buildRelGroups: Relações agrupadas por tipo (a estrela do Ursprung não aparece
- * no Paradise Gate). Cada grupo com a cor do tipo e os cartões de retrato; menções de mão
+/** Porta de buildRelGroups: Relações agrupadas por tipo. Cada grupo com a cor do tipo e os cartões de retrato; menções de mão
  * única (backlinks que não estão nas ligações de ida) entram no grupo delas, com a relação
  * escrita do ponto de vista da outra página. */
 export function RelationGroups({ title, links = [], backlinks = [] }: { title: string; links?: WikiLink[]; backlinks?: WikiLink[] }) {
@@ -264,15 +262,20 @@ export function affinitiesOf(links: WikiLink[] = []): { label: string; items: Wi
   return AFFINITY_LABELS.filter((lbl) => byLabel[lbl]?.length).map((lbl) => ({ label: cap1(lbl), items: byLabel[lbl] }));
 }
 
-/** Porta de buildTimelineViz: eventos da própria entrada, ordenados, cada um expansível. */
-export function EntryTimeline({ events }: { events: WikiIndexEvent[] }) {
+/**
+ * Porta de buildTimelineViz: eventos da própria entrada, ordenados, cada um expansível. Na
+ * descrição, um [[Nome]] que é uma ligação publicada da entrada vira link (wbUpgradeWikiLinks).
+ */
+export function EntryTimeline({ events, links = [] }: { events: WikiIndexEvent[]; links?: WikiLink[] }) {
   const sorted = [...events].sort((a, b) => eventSortKey(a) - eventSortKey(b));
   return (
-    <div className="wb-tl">
-      {sorted.map((ev, i) => {
-        return <TimelineItem key={i} ev={ev} />;
-      })}
-    </div>
+    <WikiLinkUpgrade links={links}>
+      <div className="wb-tl">
+        {sorted.map((ev, i) => {
+          return <TimelineItem key={i} ev={ev} />;
+        })}
+      </div>
+    </WikiLinkUpgrade>
   );
 }
 

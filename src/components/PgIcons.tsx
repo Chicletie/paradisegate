@@ -150,3 +150,22 @@ export function PgSectionHead({ text, count, id }: { text: string; count?: strin
     </h2>
   );
 }
+
+/** Silhueta do botão "Entrar" (pgUserIcon). */
+export function PgUserIcon() {
+  return (
+    <svg
+      className="pg-user-icon"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    >
+      <circle cx="12" cy="8.5" r="3.8" />
+      <path d="M4.5 20c1.2-3.6 4-5.3 7.5-5.3s6.3 1.7 7.5 5.3" />
+    </svg>
+  );
+}
