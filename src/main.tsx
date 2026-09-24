@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import "./index.css";
 import App from "./App";
 import { restorePrettyUrl } from "./lib/restorePrettyUrl";
+import { WikiIndexProvider } from "./lib/wikiIndex";
 
 restorePrettyUrl(location.search, (url) => history.replaceState(null, "", url));
 
@@ -14,7 +15,9 @@ if ("serviceWorker" in navigator) {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+      <WikiIndexProvider>
+        <App />
+      </WikiIndexProvider>
     </BrowserRouter>
   </StrictMode>,
 );

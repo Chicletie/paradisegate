@@ -3,23 +3,28 @@ import { usePgBody } from "../lib/usePgBody";
 import { PgHeader } from "../components/PgHeader";
 import { PgFooter } from "../components/PgFooter";
 
-/** Página de erro (rota sem página correspondente na wiki). */
-export function ErrorPage() {
+/** Porta de showMessage em wiki-core.js (arvore) — usada tanto pra uma rota sem
+ * correspondência quanto por EntryPage quando a busca no Firestore falha ou a página não
+ * existe mais. */
+export function ErrorPage({ message = "Esta página não existe ou ainda não foi publicada." }: { message?: string }) {
   usePgBody();
   return (
     <>
       <PgHeader />
-      <div className="pg-page-main">
+      <main className="pg-page-main">
         <div className="card">
-          <h1 className="pg-msg-title">Página não encontrada</h1>
-          <p className="empty">Esta página não existe ou ainda não foi publicada.</p>
-          <p className="pg-msg-actions">
+          <h1 className="pg-msg-title">Página indisponível</h1>
+          <div className="empty">{message}</div>
+          <div className="pg-msg-actions">
             <Link className="back-home-link" to="/wiki">
               Voltar pro início
             </Link>
-          </p>
+            <Link className="back-home-link" to="/wiki?aleatoria=1">
+              Página aleatória
+            </Link>
+          </div>
         </div>
-      </div>
+      </main>
       <PgFooter />
     </>
   );
