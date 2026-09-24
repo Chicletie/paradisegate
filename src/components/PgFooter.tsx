@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useWikiIndex, hasEvents } from "../lib/wikiIndex";
-import { PgStar } from "./PgHeader";
+import { PgStar } from "./PgIcons";
 
 /** Porta de pgFoot em wiki-core.js (arvore): navegação curta + marca. */
 export function PgFooter() {
@@ -13,10 +13,10 @@ export function PgFooter() {
         {showTimeline && <Link to="/wiki/_timeline">Linha do tempo</Link>}
         <Link to="/wiki?aleatoria=1">Página aleatória</Link>
       </nav>
-      <span className="pg-foot-brand">
+      <div className="pg-foot-brand">
         <PgStar className="pg-foot-star" />
-        Paradise Gate · Wiki
-      </span>
+        <span>Paradise Gate · Wiki</span>
+      </div>
     </footer>
   );
 }

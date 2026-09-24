@@ -47,6 +47,11 @@ export function EntryPage() {
     };
   }, [slug]);
 
+  const readyTitle = state.status === "ready" ? state.data.title : null;
+  useEffect(() => {
+    if (readyTitle !== null) document.title = readyTitle || "wiki";
+  }, [readyTitle]);
+
   if (state.status === "not-found") {
     return <ErrorPage message="Essa página não existe mais (o link pode ter sido despublicado)." />;
   }
