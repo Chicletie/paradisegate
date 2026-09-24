@@ -18,7 +18,7 @@ function slugifyAnchor(s: string | undefined, i: string): string {
 }
 
 /**
- * Porta de buildArticle em wiki-core.js (arvore) — usado tanto pra "Geral" quanto pra cada
+ * Porta de buildArticle na wiki original — usado tanto pra "Geral" quanto pra cada
  * variante de obra (mesma forma de dado, cada uma vira uma aba). A epígrafe (citação em
  * destaque da entrada) abre toda aba de texto, igual ao original.
  */

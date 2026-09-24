@@ -2,7 +2,7 @@ import { createContext, useContext, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 
 // Porta literal do markdown da casa de wiki-core.js (mdInline/renderMarkdown/fieldValue,
-// arvore; contrato em docs/formato-wiki.md, "Texto dentro da página") — mesmo regex de
+// wiki original; contrato em docs/dados-da-wiki.md, "Texto dentro da página") — mesmo regex de
 // tokens, mesmo comportamento por token, só trocando construção de DOM por elementos React.
 // [[link]] continua como texto simples (.wl-plain): a página não está publicada ou o link
 // não foi resolvido na publicação — exceto dentro de um WikiLinkUpgrade (abaixo).

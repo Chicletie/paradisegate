@@ -1,7 +1,7 @@
 /* Tokens de design Paradise Gate (ver DESIGN.md), pras páginas novas do site (fora da wiki)
    usarem: em `var(--pg-*)` ou pelas classes utilitárias do Tailwind, geradas pelo bloco @theme
    abaixo. Os mesmos valores também vivem em `body.pg-site` dentro de src/styles/wiki.css, que
-   veio do arvore como está — as duas fontes ficam iguais de propósito, não uma referenciando a
+   veio da wiki original como está — as duas fontes ficam iguais de propósito, não uma referenciando a
    outra, pra não arriscar a paridade visual da wiki mexendo nela. */
 :root {
   --pg-night: #0b1a3f;

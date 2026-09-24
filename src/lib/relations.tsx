@@ -6,7 +6,7 @@ import { RenderMarkdown, WikiLinkUpgrade } from "./markdown";
 import { LinkCard } from "../components/LinkCard";
 
 // Porta de FAMILY_LABEL_BUCKET/familyOf/buildFamilyTree, EDGE_STYLE/affinitiesOf/
-// relNeighbors/buildRelGroups e buildTimelineViz em wiki-core.js (arvore).
+// relNeighbors/buildRelGroups e buildTimelineViz na wiki original.
 
 export const EDGE_STYLE: Record<LinkStyle, string> = {
   ally: "#3f9d5f",

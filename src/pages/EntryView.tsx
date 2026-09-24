@@ -23,7 +23,7 @@ import {
 import type { WikiEntryDoc } from "../types";
 
 /**
- * Página de entrada (`/wiki/<slug>`) — porta de renderEntry em wiki-core.js (arvore). Pra quem
+ * Página de entrada (`/wiki/<slug>`) — porta de renderEntry na wiki original. Pra quem
  * entrou: Favoritar, Sugerir alteração e Minhas sugestões aqui no alto, e o conteúdo restrito
  * (wikiRestrito) no fim da página ou trocado no próprio campo (versão confidencial).
  */

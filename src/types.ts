@@ -1,5 +1,5 @@
-// Tipos dos documentos lidos do Firestore, derivados de docs/formato-wiki.md e do
-// comportamento de renderEntry/renderSeason/renderHome em wiki-core.js (arvore) — a
+// Tipos dos documentos lidos do Firestore, derivados de docs/dados-da-wiki.md e do
+// comportamento de renderEntry/renderSeason/renderHome na wiki original — a
 // referência de verdade é o comportamento, não este arquivo; ajuste aqui primeiro se um
 // campo aparecer com formato diferente ao testar contra dados reais.
 
@@ -16,7 +16,7 @@ export interface WikiIndexEvent {
   major?: boolean;
 }
 
-// IndexEntry (docs/formato-wiki.md) — um item de wikiIndex/lotus (+ shards/).
+// IndexEntry (docs/dados-da-wiki.md) — um item de wikiIndex/lotus (+ shards/).
 export interface WikiIndexEntry {
   title: string;
   type: string;

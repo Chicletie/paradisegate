@@ -1,7 +1,7 @@
 import type { WikiIndex } from "../types";
 import { eventSortKey } from "./events";
 
-// Linha do tempo geral — porta da parte pura de renderTimeline em wiki-core.js (arvore): os
+// Linha do tempo geral — porta da parte pura de renderTimeline na wiki original: os
 // eventos de todas as entradas publicadas (o índice só traz os públicos), em ordem de data.
 
 export interface TimelineEvent {

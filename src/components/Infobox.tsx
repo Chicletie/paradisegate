@@ -80,7 +80,7 @@ function Portrait({ images, title }: { images: InfoboxImage[]; title: string }) 
 }
 
 /**
- * Porta do bloco de infobox em renderEntry (wiki-core.js, arvore): retrato (abas quando há
+ * Porta do bloco de infobox em renderEntry (wiki original): retrato (abas quando há
  * mais de uma imagem marcada), fatos curtos numa tabela, Alcunhas, Nascimento/Nascimento
  * Lunar (dentro de "Dados básicos" quando esse cabeçalho existe), Contém.
  */

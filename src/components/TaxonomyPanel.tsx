@@ -4,7 +4,7 @@ import type { WikiField } from "../types";
 import { SwapBody, SwapCell } from "./EntryActions";
 
 /**
- * Porta de buildTaxonomyPanel em wiki-core.js (arvore) — só pro tipo Criatura: fatos curtos
+ * Porta de buildTaxonomyPanel na wiki original — só pro tipo Criatura: fatos curtos
  * viram tabela (mesmo clima da infobox), campos longos viram blocos de prosa com cathead.
  */
 export function TaxonomyPanel({ taxonomy }: { taxonomy: WikiField[] }) {

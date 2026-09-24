@@ -1,8 +1,8 @@
 import type { WikiArcana } from "../types";
 
 // Carta de tarô associada a um personagem no editor (e.arcana) — porta de WB_ARCANA_*,
-// wbArcanaInfo e wbRoman em wiki-core.js (arvore). Os símbolos são os desenhos da carta, escolhidos
-// pelo autor em 2026-09-25 (não os astrológicos que ficaram no arvore).
+// wbArcanaInfo e wbRoman na wiki original. Os símbolos são os desenhos da carta, escolhidos
+// pelo autor em 2026-09-25 (não os astrológicos de uma versão anterior).
 // Maiores: numeral romano (0 pro Louco) + símbolo próprio; menores: numeral I–X ou a letra da
 // corte (P Pajem/Valete, N Cavaleiro — o N do xadrez, pra não confundir com o K do Rei —,
 // Q Rainha, K Rei) + símbolo do naipe. Símbolos: "c:x,y,r" é círculo, "e:x,y,rx,ry" elipse, o

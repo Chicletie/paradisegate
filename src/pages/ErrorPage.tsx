@@ -4,7 +4,7 @@ import { usePgBody } from "../lib/usePgBody";
 import { PgHeader } from "../components/PgHeader";
 import { PgFooter } from "../components/PgFooter";
 
-/** Porta de showMessage em wiki-core.js (arvore) — usada tanto pra uma rota sem
+/** Porta de showMessage na wiki original — usada tanto pra uma rota sem
  * correspondência quanto por EntryPage quando a busca no Firestore falha ou a página não
  * existe mais. */
 export function ErrorPage({ message = "Esta página não existe ou ainda não foi publicada." }: { message?: string }) {

@@ -1,4 +1,4 @@
-/* CSS da wiki Paradise Gate, trazido do arvore (wiki-style.css) só com as regras usadas no
+/* CSS da wiki Paradise Gate, trazido da wiki original só com as regras usadas no
    modo PG (docs/fase4-site.md): sem a base clara/escura genérica do `:root` (era a paleta de
    outro tema, sem uso aqui — todo body desta wiki carrega `pg-theme`+`pg-site` sempre, então
    os valores abaixo é que realmente aparecem). `body.pg-theme` é o tema de pergaminho ainda em

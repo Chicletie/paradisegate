@@ -6,7 +6,7 @@ import type { AuthUser, WikiProfile, WikiProfilePatch } from "../types";
 
 /*
  * Conta do leitor — porta de mountLoginBar/pgLoadProfile/pgSaveProfile/pgUnreadCount/
- * openLoginModal em wiki-core.js (arvore). Login só importa pro conteúdo restrito, pra
+ * openLoginModal na wiki original. Login só importa pro conteúdo restrito, pra
  * favoritar e pra sugerir; o resto da wiki funciona igual sem ele. A sessão fica guardada pelo
  * próprio Firebase (quem entra uma vez continua dentro nas próximas visitas).
  */

@@ -17,7 +17,7 @@ type LoadState =
 
 /**
  * Busca `wikiPublic/{slug}` e mostra a entrada ou a temporada — porta do trecho final de
- * wikiCoreBoot em wiki-core.js (arvore): `data.kind === "temporada" ? renderSeason :
+ * wikiCoreBoot na wiki original: `data.kind === "temporada" ? renderSeason :
  * renderEntry`, com as mesmas mensagens de erro.
  */
 export function EntryPage() {

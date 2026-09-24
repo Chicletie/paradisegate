@@ -1,5 +1,5 @@
 // Sorteio diário determinístico — porta literal de wbHashSeed/wbSeededShuffle/wbDailyKey/
-// wbDayIndex/wbDailyPick/wbTodayMD/wbGmt3DateKey/wbInBirthdayWindow em wiki-core.js (arvore).
+// wbDayIndex/wbDailyPick/wbTodayMD/wbGmt3DateKey/wbInBirthdayWindow na wiki original.
 // Sem servidor nem escrita: o mesmo dia (00h GMT-3) dá a mesma escolha pra qualquer visitante.
 // Embaralha o pool inteiro uma vez por ciclo (ciclo = tamanho do pool) e anda um item por dia,
 // então cada item aparece uma vez antes de qualquer repetição. `now` é injetável pra testes.

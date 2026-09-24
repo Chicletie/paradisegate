@@ -9,7 +9,7 @@ import { EntryView } from "../pages/EntryView";
 
 const html = (node: ReactNode) => renderToStaticMarkup(<MemoryRouter>{node}</MemoryRouter>);
 
-describe("markdown da casa (docs/formato-wiki.md)", () => {
+describe("markdown da casa (docs/dados-da-wiki.md)", () => {
   it("[texto](wiki:<id>) é link interno, mesma aba, classe wl-live", () => {
     expect(html(<>{mdInline("ver [Luke](wiki:luke-whitefang)")}</>)).toBe(
       'ver <a class="wl-live" href="/wiki/luke-whitefang" data-discover="true">Luke</a>',

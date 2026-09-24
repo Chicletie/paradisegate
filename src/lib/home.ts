@@ -3,7 +3,7 @@ import { dailyPick, gmt3DateKey, inBirthdayWindow, todayMD } from "./daily";
 import { eventSortKey } from "./events";
 import { quoteNorm } from "./quotes";
 
-// Lógica da home, porta de renderHome em wiki-core.js (arvore), sem DOM — a tela fica em
+// Lógica da home, porta de renderHome na wiki original, sem DOM — a tela fica em
 // src/pages/WikiHomePage.tsx.
 
 export type HomeEntry = WikiIndexEntry & { id: string };

@@ -27,12 +27,12 @@ import type {
 
 /*
  * Tudo o que o site lê e grava no Firebase passa por aqui — a lista fechada de coleções do
- * CLAUDE.md (regra 6) fica num arquivo só. Mesmas consultas que wiki-core.js (arvore) faz hoje,
+ * CLAUDE.md (regra 6) fica num arquivo só. Mesmas consultas que a wiki original faz hoje,
  * no SDK modular. Nenhuma tela importa o Firebase direto.
  */
 
 /**
- * `wikiIndex/lotus` + continuações em `shards/` (docs/formato-wiki.md; porta de
+ * `wikiIndex/lotus` + continuações em `shards/` (docs/dados-da-wiki.md; porta de
  * fetchIndexEntries): sem `shardCount` é só o documento base; um mesmo `wikiId` em duas partes
  * vale o de `updatedAt` mais recente, e uma parte que falhar conta como vazia.
  */

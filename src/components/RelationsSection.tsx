@@ -14,8 +14,8 @@ import { LinkCard } from "./LinkCard";
 import type { WikiEntryDoc } from "../types";
 
 /**
- * Porta do bloco "Relações + Genealogia + Linha do tempo" de renderEntry (wiki-core.js,
- * arvore): dividem uma seção, em abas quando há mais de uma — Relações primeiro quando
+ * Porta do bloco "Relações + Genealogia + Linha do tempo" de renderEntry (wiki
+ * original): dividem uma seção, em abas quando há mais de uma — Relações primeiro quando
  * existe (sempre agrupada por tipo);
  * Genealogia só existe junto de Relações; Linha do tempo é independente das outras duas.
  */

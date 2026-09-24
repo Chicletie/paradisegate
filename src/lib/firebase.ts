@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
-// Mesma configuração pública já usada em wiki-core.js (arvore) — não é segredo, é protegida
+// Mesma configuração pública já usada na wiki original — não é segredo, é protegida
 // pelas regras de segurança do Firestore, não por estar escondida (ver CLAUDE.md).
 const firebaseConfig = {
   apiKey: "AIzaSyC2nVLv97V6D1S6rZ7nwhhyQXgWeFxQLd0",

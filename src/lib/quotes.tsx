@@ -4,7 +4,7 @@ import type { QuoteDialogueLine, QuoteRef, WikiCitation } from "../types";
 import { SpoilerBlock } from "./markdown";
 
 // Porta de quoteNorm/quoteRefNode/quoteDialogue/quoteAttrKids/quoteBody/quoteEpigraph em
-// wiki-core.js (arvore) — citações: falas, diálogos em roteiro e trechos.
+// a wiki original — citações: falas, diálogos em roteiro e trechos.
 
 /** Snapshots publicados antes das citações com papel trazem só {text,group,note,
  * contextTitle,contextId} — normaliza pro formato novo, como fala da própria página. */

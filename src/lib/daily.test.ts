@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { dailyPick, dayIndex, gmt3DateKey, inBirthdayWindow, seededShuffle, todayMD } from "./daily";
-// Respostas do wiki-core.js de hoje (arvore a6bb034) pras mesmas entradas, geradas rodando as
+// Respostas da wiki original (versão de 2026-09-24) pras mesmas entradas, geradas rodando as
 // funções originais — o port tem que dar exatamente o mesmo sorteio, senão a home muda de dia.
 import golden from "./daily.golden.json";
 

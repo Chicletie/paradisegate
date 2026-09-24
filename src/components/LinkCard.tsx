@@ -4,7 +4,7 @@ import { PgThumb } from "./PgThumb";
 import type { WikiLink } from "../types";
 
 /**
- * Porta de linkCard em wiki-core.js (arvore) — cartão de uma ligação (ida) ou "mencionado
+ * Porta de linkCard na wiki original — cartão de uma ligação (ida) ou "mencionado
  * em" (backlink, `back`): o rótulo de um backlink é do ponto de vista da OUTRA página
  * ("Fulano / é pai/mãe de Beltrano"), não invertido.
  */

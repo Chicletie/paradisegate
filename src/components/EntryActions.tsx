@@ -7,7 +7,7 @@ import { PgStar } from "./PgIcons";
 
 /*
  * O que depende de login numa página da wiki — porta de mountFavoriteBtn, mountSuggestBox,
- * openSuggestModal e mountRestrito em wiki-core.js (arvore). Tudo some pra quem não entrou ou
+ * openSuggestModal e mountRestrito na wiki original. Tudo some pra quem não entrou ou
  * está "vendo como convidado".
  */
 

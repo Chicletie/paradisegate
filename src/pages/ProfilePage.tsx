@@ -22,7 +22,7 @@ const SECTIONS: [string, string][] = [
 
 /**
  * Perfil do leitor (`/wiki/_perfil`, âncoras `#sugestoes`/`#favoritos`) — porta de
- * renderProfile em wiki-core.js (arvore): Identidade (foto e apelido em wikiProfiles/{uid}),
+ * renderProfile na wiki original: Identidade (foto e apelido em wikiProfiles/{uid}),
  * Suas sugestões (com a resposta do autor e o aviso de novidade), Favoritos e Seus acessos
  * (trechos de wikiRestrito liberados pro e-mail, só de páginas do Paradise Gate).
  */

@@ -10,7 +10,7 @@ const CLASSES = {
 };
 
 /**
- * Ativa as classes que o CSS Paradise Gate (src/styles/wiki.css, herdado do arvore) espera no
+ * Ativa as classes que o CSS Paradise Gate (src/styles/wiki.css, herdado da wiki original) espera no
  * <body> — mesmo mecanismo de wiki-core.js. Efeito de layout: as classes
  * já valem quando outro efeito mede a página (ex.: a home rolando até a lista). `null` = esta
  * tela não mexe nas classes (outra, dentro dela, cuida).

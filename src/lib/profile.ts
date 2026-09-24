@@ -1,7 +1,7 @@
 import type { AuthUser, WikiIndex, WikiProfile, WikiProfilePatch, WikiRestritoItem, WikiSuggestion } from "../types";
 
 // Partes puras do perfil do leitor — porta de pgAccessLabel e do agrupamento de "Seus acessos"
-// em renderProfile (wiki-core.js, arvore).
+// em renderProfile (wiki original).
 
 /** Como um trecho liberado aparece na lista "Seus acessos". */
 export function accessLabel(it: WikiRestritoItem): string {

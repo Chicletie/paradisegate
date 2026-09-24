@@ -30,7 +30,7 @@ const PAGE = 8;
 const wikiHref = (id: string) => `/wiki/${encodeURIComponent(id)}`;
 
 /**
- * Home da wiki (`/wiki`) — porta de renderHome em wiki-core.js (arvore): faixa "Hoje" com os
+ * Home da wiki (`/wiki`) — porta de renderHome na wiki original: faixa "Hoje" com os
  * destaques do dia (carta do Personagem do dia, Citação, Entrada e Nota do dia), Novidades e
  * Notas recentes (de 8 em 8), coluna lateral (Ano em foco, Explorar, números) e "Todas as
  * páginas" com busca e filtros por tipo e tag. URL: `?q=`, `?tipo=`, `?aleatoria=1` — a rota

@@ -11,7 +11,7 @@ import type { WikiIndex } from "../types";
 
 /**
  * Linha do tempo geral (`/wiki/_timeline`, `?ano=` preenche o filtro de ano) — porta de
- * renderTimeline em wiki-core.js (arvore): os eventos de todas as páginas, filtráveis por tipo
+ * renderTimeline na wiki original: os eventos de todas as páginas, filtráveis por tipo
  * de página, ano e "só principais"; cada evento leva pra página de onde veio.
  */
 export function TimelinePage() {

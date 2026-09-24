@@ -12,7 +12,7 @@ export interface HeaderSearch {
 }
 
 /**
- * Cabeçalho PG (`.pg-mast`, porta de buildPgMast em wiki-core.js, arvore): marca, busca e a
+ * Cabeçalho PG (`.pg-mast`, porta de buildPgMast na wiki original): marca, busca e a
  * barra de categorias/linha do tempo/página aleatória (`.pg-nav`), e o "Entrar"/menu da conta
  * no canto (mountLoginBar).
  */

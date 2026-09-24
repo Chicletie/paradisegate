@@ -1,4 +1,4 @@
-// Porta literal de pgShortDate/pgPlural em wiki-core.js (arvore).
+// Porta literal de pgShortDate/pgPlural na wiki original.
 
 const MESES = ["jan.", "fev.", "mar.", "abr.", "maio", "jun.", "jul.", "ago.", "set.", "out.", "nov.", "dez."];
 

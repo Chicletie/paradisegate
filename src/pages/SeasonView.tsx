@@ -3,8 +3,8 @@ import { RenderMarkdown, SpoilerBlock } from "../lib/markdown";
 import { MySuggestionsHere, RestritoSlot, SuggestButtons, useMineToggle, useRestrito } from "../components/EntryActions";
 import type { WikiSeasonDoc } from "../types";
 
-/** Recaps de sessão de uma temporada de campanha — porta de renderSeason em wiki-core.js
- * (arvore). Mesma casca da entrada; o conteúdo é uma lista de sessões em vez de campos. */
+/** Recaps de sessão de uma temporada de campanha — porta de renderSeason da wiki
+ * original. Mesma casca da entrada; o conteúdo é uma lista de sessões em vez de campos. */
 export function SeasonView({ data, wikiId }: { data: WikiSeasonDoc; wikiId: string }) {
   const restrito = useRestrito(wikiId);
   const [mine, toggleMine] = useMineToggle();

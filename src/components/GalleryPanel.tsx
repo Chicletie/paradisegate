@@ -3,7 +3,7 @@ import { SpoilerBlock } from "../lib/markdown";
 import type { WikiGalleryItem } from "../types";
 
 /**
- * Porta de buildGalleryPanel em wiki-core.js (arvore) — imagem sempre inteira (nunca corta),
+ * Porta de buildGalleryPanel na wiki original — imagem sempre inteira (nunca corta),
  * agrupada por `group`, com lightbox simples ao clicar.
  */
 export function GalleryPanel({ gallery, title }: { gallery: WikiGalleryItem[]; title: string }) {

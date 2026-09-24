@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 
 /**
- * Seletor de abas `.work-tabs`/`.work-tab` (porta de wireTabs em wiki-core.js, arvore):
+ * Seletor de abas `.work-tabs`/`.work-tab` (porta de wireTabs na wiki original):
  * usado pra Geral/variantes/Galeria/Citações/Taxonomia na entrada, e de novo pra
  * Relações/Genealogia/Linha do tempo. Só aparece o seletor quando há mais de uma aba — com
  * uma só, o conteúdo entra direto, sem moldura.

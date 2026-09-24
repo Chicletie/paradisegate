@@ -1,5 +1,5 @@
 /* paradisegate — service worker de desligamento. Aparelhos que visitaram a wiki antes deste
-   repositório assumir o domínio ainda podem ter o service worker do arvore instalado (cache
+   repositório assumir o domínio ainda podem ter o service worker do site antigo instalado (cache
    primeiro, ver docs/fase4-site.md); este arquivo se registra por cima dele, apaga todos os
    caches guardados nesta origem e se desregistra, pra o navegador parar de interceptar pedidos
    e voltar a ir direto pra rede. */

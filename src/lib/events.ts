@@ -1,6 +1,6 @@
 import type { WikiIndexEvent } from "../types";
 
-// Porta literal de wbFmtEventDate/wbEventSortKey em wiki-core.js (arvore).
+// Porta literal de wbFmtEventDate/wbEventSortKey na wiki original.
 export function fmtEventDate(ev: WikiIndexEvent): string {
   if (ev.d != null && ev.m != null) return `${ev.d}/${ev.m}/${ev.y}`;
   if (ev.m != null) return `${ev.m}/${ev.y}`;

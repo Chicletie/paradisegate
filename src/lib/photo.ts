@@ -1,6 +1,6 @@
 /**
  * Foto escolhida → quadrado de 256px (corte central), JPEG ~25KB, guardado no próprio
- * documento do perfil — sem Storage (porta de pgResizePhoto em wiki-core.js, arvore).
+ * documento do perfil — sem Storage (porta de pgResizePhoto na wiki original).
  */
 export function resizePhoto(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
