@@ -4,49 +4,121 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="robots" content="noindex, nofollow" />
-<title>Redefinir senha · Paradise Gate</title>
+<title>Escolha sua senha · Paradise Gate</title>
 <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-<!-- Mesmo arquivo de CSS que o app usa (src/styles/wiki.css, ver vite.config.ts): o build dá
-     um nome fixo só pra esse CSS, sem hash, exatamente pra esta página fora do bundle poder
-     apontar pra ele sem ter uma cópia própria. -->
+<!-- Mesmo arquivo de CSS que o app usa (src/styles/wiki.css + tokens, ver vite.config.ts): o
+     build dá um nome fixo só pra esse CSS, sem hash, exatamente pra esta página fora do bundle
+     poder apontar pra ele sem ter uma cópia própria. -->
 <link rel="stylesheet" href="/assets/wiki.css" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500;1,600&family=Cinzel:wght@600;700&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Castoro:ital@0;1&family=Castoro+Titling&family=Hanken+Grotesk:wght@400;500;600&display=swap" />
 <style>
-  /* O padding de body do wiki-style.css (pra páginas de conteúdo comuns) empurra esta página,
-     que já centraliza tudo com flex, alguns pixels além do viewport — zera aqui, só nesta
-     página. */
-  body { padding: 0; min-height: 100dvh; }
-  body .page { padding: 20px 16px; }
+  /* Só desta página: o cartão do meio. Cores, fontes e o cabeçalho vêm dos tokens do site. */
+  body.pg-reset { margin: 0; padding: 0; min-height: 100dvh; display: flex; flex-direction: column; background: var(--pg-page); color: var(--pg-ink); font-family: var(--pg-f-ui); }
+  .pg-reset .pg-mast-inner { justify-content: center; }
+  .pg-reset .brand a { display: flex; align-items: center; gap: 12px; color: var(--pg-on-dark); text-decoration: none; }
+  .rs-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 16px 56px; }
+  .rs-card { width: 100%; max-width: 420px; box-sizing: border-box; background: var(--pg-panel); border: 1px solid var(--pg-line); border-radius: 14px; box-shadow: var(--pg-card-shadow); padding: 32px 32px 28px; }
+  .rs-card h1 { font-family: var(--pg-f-title); font-weight: 400; font-size: 30px; line-height: 1.15; letter-spacing: 0.02em; margin: 0 0 8px; color: var(--pg-ink); }
+  .rs-lead { margin: 0 0 22px; font-size: 15px; line-height: 1.5; color: var(--pg-muted); overflow-wrap: anywhere; }
+  .rs-lead strong { color: var(--pg-ink); font-weight: 600; }
+  .rs-field { display: block; margin: 0 0 14px; }
+  .rs-label { display: block; font-size: 14px; font-weight: 600; margin: 0 0 6px; color: var(--pg-ink); }
+  .rs-input-wrap { position: relative; display: block; }
+  .rs-input { width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 84px 12px 14px; border: 1px solid var(--pg-line-strong); border-radius: 10px; background: var(--pg-panel); color: var(--pg-ink); font: inherit; font-size: 16px; }
+  .rs-input:focus { outline: none; border-color: var(--pg-link); box-shadow: 0 0 0 3px var(--pg-link-wash); }
+  .rs-show { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); min-height: 36px; padding: 6px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--pg-link); font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; }
+  .rs-show:hover, .rs-show:focus-visible { background: var(--pg-link-wash); outline: none; }
+  .rs-hint { display: block; font-size: 13px; color: var(--pg-muted); margin: 6px 0 0; }
+  .rs-err { min-height: 20px; font-size: 14px; color: #b3261e; margin: 2px 0 10px; }
+  .rs-btn { display: block; width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 20px; border: 0; border-radius: 999px; background: var(--pg-link); color: var(--pg-panel); font: inherit; font-size: 16px; font-weight: 600; text-align: center; text-decoration: none; cursor: pointer; transition: background-color .15s ease-out; }
+  .rs-btn:hover { background: var(--pg-link-hover); }
+  .rs-btn:focus-visible { outline: 3px solid var(--pg-gold); outline-offset: 2px; }
+  .rs-btn:disabled { opacity: .6; cursor: default; }
+  .rs-foot { text-align: center; margin: 18px 0 0; font-size: 14px; }
+  .rs-foot a { color: var(--pg-link); }
+  .rs-mark { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; margin: 0 0 16px; background: var(--pg-link-wash); color: var(--pg-link); }
+  .rs-mark svg { width: 26px; height: 26px; }
+  .rs-loading { display: flex; align-items: center; gap: 10px; color: var(--pg-muted); font-size: 15px; }
+  .rs-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pg-gold); animation: rs-pulse 1s ease-in-out infinite; }
+  @keyframes rs-pulse { 50% { opacity: .25; } }
+  @media (prefers-reduced-motion: reduce) { .rs-dot { animation: none; } }
+  .rs-page-foot { text-align: center; padding: 0 16px 28px; font-family: var(--pg-f-title); font-size: 13px; letter-spacing: 0.12em; color: var(--pg-muted); }
+  .rs-page-foot .pg-star { width: 10px; height: 10px; color: var(--pg-gold); vertical-align: -1px; margin-right: 6px; }
+  @media (prefers-color-scheme: dark) { .rs-err { color: #f2b8b5; } }
+  @media (max-width: 480px) { .rs-card { padding: 26px 20px 22px; } .rs-card h1 { font-size: 26px; } .rs-main { padding-top: 28px; align-items: flex-start; } }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 </head>
-<!-- Página de destino do link de "esqueci minha senha" da wiki. Sem isso, o Firebase manda
-     pro seu próprio endereço padrão sem nenhuma marca do Paradise Gate — essa página troca
-     esse destino (a "Action URL" fica configurada no Firebase Console). Fica fora do bundle
-     React de propósito: e-mails de convite e de redefinição de senha apontam pra ela num
-     caminho fixo, e ela precisa continuar funcionando mesmo que o app novo ainda não tenha
-     carregado. Sempre no tema Paradise Gate: só existe uma versão desta página. -->
-<body class="pg-theme">
-<div class="page" style="min-height:100dvh;display:flex;flex-direction:column">
-  <div class="site-header" style="justify-content:center">
-    <div class="brand"><a href="./wiki">🪶 Paradise Gate</a></div>
-  </div>
-  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px 0">
-    <div class="login-box" style="max-width:360px;width:100%" id="box">
-      <h3>Redefinir senha</h3>
-      <div id="status" style="font-size:13.5px;color:var(--muted);margin-bottom:10px">Confirmando o link…</div>
-      <div id="form" hidden>
-        <input type="password" id="pass1" placeholder="nova senha" autocomplete="new-password" />
-        <input type="password" id="pass2" placeholder="confirme a nova senha" autocomplete="new-password" />
-        <div class="err" id="err"></div>
-        <button class="submit" type="button" id="submitBtn">Salvar nova senha</button>
-      </div>
+<!-- Página de destino dos links de convite e de "esqueci minha senha" da wiki (a "Action URL"
+     fica configurada no Firebase Console, e o e-mail de convite monta o link pra cá). Fica fora
+     do bundle React de propósito: os e-mails apontam pra ela num caminho fixo, e ela precisa
+     continuar funcionando mesmo que o app ainda não tenha carregado. Visual: o mesmo cabeçalho
+     e os mesmos tokens do site. -->
+<body class="pg-theme pg-site pg-reset">
+<header class="site-header pg-mast">
+  <div class="pg-mast-inner">
+    <div class="brand">
+      <a href="/wiki">
+        <span class="pg-seal" aria-hidden="true"><svg class="pg-seal-star" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 1.5c.9 6.1 3.4 8.6 10.5 10.5-7.1 1.9-9.6 4.4-10.5 10.5-.9-6.1-3.4-8.6-10.5-10.5C8.6 10.1 11.1 7.6 12 1.5z" fill="currentColor" /></svg></span>
+        <span class="pg-wordmark">Paradise Gate</span>
+      </a>
     </div>
   </div>
-</div>
+</header>
+
+<main class="rs-main">
+  <section class="rs-card" aria-labelledby="rs-title">
+    <!-- Conferindo o link -->
+    <div id="stLoading">
+      <h1 id="rs-title">Escolha sua senha</h1>
+      <p class="rs-loading" role="status"><span class="rs-dot" aria-hidden="true"></span>Conferindo o link…</p>
+    </div>
+
+    <!-- Formulário -->
+    <form id="stForm" hidden novalidate>
+      <h1>Escolha sua senha</h1>
+      <p class="rs-lead">Pra entrar na wiki com <strong id="emailOut"></strong>.</p>
+      <input type="email" id="user" autocomplete="username" hidden />
+      <label class="rs-field">
+        <span class="rs-label">Nova senha</span>
+        <span class="rs-input-wrap">
+          <input class="rs-input" type="password" id="pass1" autocomplete="new-password" minlength="6" required aria-describedby="passHint" />
+          <button class="rs-show" type="button" data-for="pass1" aria-pressed="false">mostrar</button>
+        </span>
+        <span class="rs-hint" id="passHint">Pelo menos 6 caracteres.</span>
+      </label>
+      <label class="rs-field">
+        <span class="rs-label">Repita a senha</span>
+        <span class="rs-input-wrap">
+          <input class="rs-input" type="password" id="pass2" autocomplete="new-password" required />
+          <button class="rs-show" type="button" data-for="pass2" aria-pressed="false">mostrar</button>
+        </span>
+      </label>
+      <p class="rs-err" id="err" role="alert"></p>
+      <button class="rs-btn" type="submit" id="submitBtn">Salvar senha</button>
+    </form>
+
+    <!-- Pronto -->
+    <div id="stDone" hidden>
+      <span class="rs-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
+      <h1 tabindex="-1" id="doneTitle">Senha salva</h1>
+      <p class="rs-lead">Agora é só entrar na wiki com o seu e-mail e a senha nova, pelo botão <strong>Entrar</strong> no alto da página.</p>
+      <a class="rs-btn" href="/wiki">Ir pra wiki</a>
+    </div>
+
+    <!-- Link que não vale -->
+    <div id="stBad" hidden>
+      <h1 tabindex="-1" id="badTitle">Esse link não vale mais</h1>
+      <p class="rs-lead" id="badMsg">Ele expirou ou já foi usado. Na wiki, clique em <strong>Entrar</strong> e depois em <strong>esqueci minha senha</strong> pra receber um link novo.</p>
+      <a class="rs-btn" href="/wiki">Ir pra wiki</a>
+    </div>
+  </section>
+</main>
+<footer class="rs-page-foot"><svg class="pg-star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.9 6.1 3.4 8.6 10.5 10.5-7.1 1.9-9.6 4.4-10.5 10.5-.9-6.1-3.4-8.6-10.5-10.5C8.6 10.1 11.1 7.6 12 1.5z" fill="currentColor" /></svg>PARADISE GATE · WIKI</footer>
+
 <script>
   var firebaseConfig = {
     apiKey: "AIzaSyC2nVLv97V6D1S6rZ7nwhhyQXgWeFxQLd0",
@@ -61,40 +133,56 @@
   var params = new URLSearchParams(location.search);
   var mode = params.get("mode");
   var oobCode = params.get("oobCode");
-  var statusEl = document.getElementById("status");
-  var formEl = document.getElementById("form");
+  var st = { loading: document.getElementById("stLoading"), form: document.getElementById("stForm"), done: document.getElementById("stDone"), bad: document.getElementById("stBad") };
   var errEl = document.getElementById("err");
   var submitBtn = document.getElementById("submitBtn");
   var pass1 = document.getElementById("pass1");
   var pass2 = document.getElementById("pass2");
 
-  if (mode !== "resetPassword" || !oobCode) {
-    statusEl.textContent = "Link inválido. Peça um novo pelo botão \"esqueci minha senha\" na wiki.";
-  } else {
-    firebase.auth().verifyPasswordResetCode(oobCode).then(function (email) {
-      statusEl.textContent = "Nova senha para " + email + ":";
-      formEl.hidden = false;
-      pass1.focus();
-    }).catch(function () {
-      statusEl.textContent = "Esse link não é mais válido (expirou ou já foi usado). Peça um novo pelo botão \"esqueci minha senha\" na wiki.";
-    });
+  function show(name) {
+    Object.keys(st).forEach(function (k) { st[k].hidden = k !== name; });
+    var focusEl = name === "form" ? pass1 : name === "done" ? document.getElementById("doneTitle") : name === "bad" ? document.getElementById("badTitle") : null;
+    if (focusEl) focusEl.focus();
   }
 
-  function doSubmit() {
-    errEl.textContent = "";
-    if (pass1.value.length < 6) { errEl.textContent = "A senha precisa ter pelo menos 6 caracteres."; return; }
-    if (pass1.value !== pass2.value) { errEl.textContent = "As senhas não coincidem."; return; }
-    submitBtn.disabled = true; submitBtn.textContent = "salvando…";
-    firebase.auth().confirmPasswordReset(oobCode, pass1.value).then(function () {
-      formEl.hidden = true;
-      statusEl.textContent = "Senha alterada! Já pode voltar pra wiki e entrar com a nova senha.";
-    }).catch(function () {
-      submitBtn.disabled = false; submitBtn.textContent = "Salvar nova senha";
-      errEl.textContent = "Não consegui salvar. O link pode ter expirado — peça um novo.";
-    });
+  if (mode !== "resetPassword" || !oobCode) {
+    document.getElementById("badTitle").textContent = "Link incompleto";
+    document.getElementById("badMsg").innerHTML = "Abra o link direto do e-mail, sem cortar nada. Se não der, na wiki clique em <strong>Entrar</strong> e depois em <strong>esqueci minha senha</strong> pra receber um novo.";
+    show("bad");
+  } else {
+    firebase.auth().verifyPasswordResetCode(oobCode).then(function (email) {
+      document.getElementById("emailOut").textContent = email;
+      document.getElementById("user").value = email;
+      show("form");
+    }).catch(function () { show("bad"); });
   }
-  submitBtn.addEventListener("click", doSubmit);
-  pass2.addEventListener("keydown", function (ev) { if (ev.key === "Enter") doSubmit(); });
+
+  // Mostrar/esconder a senha (cada campo tem o seu botão).
+  Array.prototype.forEach.call(document.querySelectorAll(".rs-show"), function (b) {
+    b.addEventListener("click", function () {
+      var inp = document.getElementById(b.getAttribute("data-for"));
+      var on = inp.type === "password";
+      inp.type = on ? "text" : "password";
+      b.textContent = on ? "esconder" : "mostrar";
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  });
+
+  st.form.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    errEl.textContent = "";
+    if (pass1.value.length < 6) { errEl.textContent = "A senha precisa ter pelo menos 6 caracteres."; pass1.focus(); return; }
+    if (pass1.value !== pass2.value) { errEl.textContent = "As duas senhas não são iguais."; pass2.focus(); return; }
+    submitBtn.disabled = true; submitBtn.textContent = "Salvando…";
+    firebase.auth().confirmPasswordReset(oobCode, pass1.value).then(function () {
+      show("done");
+    }).catch(function (e) {
+      submitBtn.disabled = false; submitBtn.textContent = "Salvar senha";
+      if (e && e.code === "auth/weak-password") errEl.textContent = "Essa senha é fraca demais. Tente uma mais longa.";
+      else if (e && (e.code === "auth/expired-action-code" || e.code === "auth/invalid-action-code")) show("bad");
+      else errEl.textContent = "Não consegui salvar agora. Confira a internet e tente de novo.";
+    });
+  });
 </script>
 </body>
 </html>
