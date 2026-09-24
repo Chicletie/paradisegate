@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow" />
+<title>tree</title>
+<!-- Endereço antigo do editor. Desde a fase 1 do plano de passagem (docs/plano-passagem.md no
+     arvore), o editor e o Ursprung moram em ursprung.paradisegate.com.br: outro endereço pro
+     navegador, então o login do dono não fica ao alcance de nada que rode no site público.
+     Aqui, no domínio público, esta página só encaminha pra lá; com ?limpar ela apaga o login e
+     a cópia local que ficaram guardados aqui antes da mudança. Só o script de guarda — não é
+     o editor. -->
+<script>
+(function () {
+  var h = location.hostname;
+  if (h !== "paradisegate.com.br" && h !== "www.paradisegate.com.br") return;
+  window.__treeMoved = true;
+  var CONSOLE = "https://ursprung.paradisegate.com.br";
+  if (!/[?&]limpar(=|&|$)/.test(location.search)) {
+    location.replace(CONSOLE + location.pathname + location.search + location.hash);
+    return;
+  }
+  function wipe() {
+    try { localStorage.clear(); } catch (e) {}
+    try { sessionStorage.clear(); } catch (e) {}
+    function del(name) {
+      return new Promise(function (r) {
+        try { var q = indexedDB.deleteDatabase(name); q.onsuccess = q.onerror = q.onblocked = function () { r(); }; } catch (e) { r(); }
+      });
+    }
+    var known = ["firebaseLocalStorageDb", "firebase-heartbeat-database", "firestore/[DEFAULT]/rotina-555dd/main"];
+    var jobs = [];
+    if (window.indexedDB) {
+      jobs.push(indexedDB.databases
+        ? indexedDB.databases().then(function (l) { return Promise.all(l.map(function (d) { return del(d.name); }).concat(known.map(del))); })
+        : Promise.all(known.map(del)));
+    }
+    if (window.caches) jobs.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }));
+    if (navigator.serviceWorker) jobs.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); }));
+    return Promise.all(jobs.map(function (p) { return p.catch(function () {}); }));
+  }
+  // Inventário do que o navegador guarda NESTE endereço, mostrado antes e depois da limpeza,
+  // pra conferir item por item que nada ficou (em vez de só confiar que deu certo).
+  function inventory() {
+    var inv = { copy: false, ls: 0, login: false, fsCache: false, dbs: null, caches: 0, sws: 0 };
+    try {
+      inv.ls = localStorage.length; inv.copy = !!localStorage.getItem("rotina.v1");
+      for (var i = 0; i < localStorage.length; i++) if (/^firebase:/.test(localStorage.key(i))) inv.login = true;
+    } catch (e) {}
+    var jobs = [];
+    if (window.indexedDB && indexedDB.databases) jobs.push(indexedDB.databases().then(function (l) {
+      inv.dbs = l.map(function (d) { return d.name; });
+      inv.dbs.forEach(function (n) { if (/firebaseLocalStorage/.test(n)) inv.login = true; if (n.indexOf("firestore/") === 0) inv.fsCache = true; });
+    }));
+    if (window.caches) jobs.push(caches.keys().then(function (k) { inv.caches = k.length; }));
+    if (navigator.serviceWorker) jobs.push(navigator.serviceWorker.getRegistrations().then(function (r) { inv.sws = r.length; }));
+    return Promise.all(jobs.map(function (p) { return p.catch(function () {}); })).then(function () { return inv; });
+  }
+  function invList(inv) {
+    var rows = [
+      ["Cópia dos dados do editor", inv.copy],
+      ["Login guardado", inv.login],
+      ["Cópia offline do banco de dados", inv.fsCache],
+      ["Outros dados salvos", inv.ls > 0, inv.ls],
+      ["Arquivos guardados pra usar offline", inv.caches > 0, inv.caches],
+      ["App rodando em segundo plano (service worker)", inv.sws > 0, inv.sws],
+      ["Outros bancos internos", otherDbs(inv) > 0, otherDbs(inv)]
+    ];
+    var html = '<ul style="list-style:none;padding:0;margin:0 0 6px">' + rows.map(function (r) {
+      return '<li style="padding:3px 0">' + (r[1] ? '<b style="color:#9a3b1c">● tem</b>' : '<b style="color:#3f6b2a">✓ vazio</b>') + ' · ' + r[0] + (r[1] && r[2] ? " (" + r[2] + ")" : "") + '</li>';
+    }).join("") + '</ul>';
+    if (inv.dbs === null) html += '<p style="color:#6a5940;font-size:15px">Este navegador não deixa listar os bancos internos; eles são apagados pelos nomes que o editor usa.</p>';
+    return html;
+  }
+  function otherDbs(inv) { return (inv.dbs || []).filter(function (n) { return !/firebaseLocalStorage|firebase-heartbeat/.test(n) && n.indexOf("firestore/") !== 0; }).length; }
+  function isEmpty(inv) { return !inv.copy && !inv.login && !inv.fsCache && !inv.ls && !inv.caches && !inv.sws && !(inv.dbs && inv.dbs.length); }
+  document.addEventListener("DOMContentLoaded", function () {
+    var local = null;
+    try { local = localStorage.getItem("rotina.v1"); } catch (e) {}
+    document.title = "tree · limpar o endereço antigo";
+    document.body.innerHTML =
+      '<main style="max-width:560px;margin:8vh auto;padding:0 16px;font:17px/1.6 Spectral,Georgia,serif;color:#2e2416">' +
+      '<h1 style="font:500 30px/1.2 Cormorant,Georgia,serif;margin:0 0 12px">O editor mudou de endereço</h1>' +
+      '<p>Agora ele mora em <a href="' + CONSOLE + '/tree/">ursprung.paradisegate.com.br/tree</a>. Esta página apaga o que ficou guardado <b>neste aparelho</b> no endereço antigo: o seu login e a cópia dos dados.</p>' +
+      '<p><b>Antes de apagar:</b> abra o editor novo neste mesmo aparelho, entre na sua conta e confira se está tudo lá. Feche outras abas de paradisegate.com.br.</p>' +
+      '<h2 id="ht" style="font:600 19px/1.3 Cormorant,Georgia,serif;margin:18px 0 6px">O que está guardado aqui agora</h2>' +
+      '<div id="inv">conferindo…</div>' +
+      '<p id="st" style="font-weight:600"></p>' +
+      '<p style="display:flex;gap:10px;flex-wrap:wrap">' +
+      (local ? '<button id="dl" type="button" style="min-height:44px;padding:0 16px">Baixar a cópia local (por segurança)</button>' : '') +
+      '<button id="go" type="button" style="min-height:44px;padding:0 16px">Apagar tudo deste endereço</button></p></main>';
+    var dl = document.getElementById("dl");
+    var go = document.getElementById("go");
+    function show(inv, after) {
+      document.getElementById("inv").innerHTML = invList(inv);
+      var st = document.getElementById("st");
+      if (isEmpty(inv)) {
+        st.style.color = "#3f6b2a";
+        st.textContent = after ? "Conferido: nada do editor ficou guardado neste endereço." : "Nada guardado aqui: este aparelho já está limpo.";
+        go.textContent = after ? "Apagado" : "Apagar de novo (não precisa)";
+      } else if (after) {
+        st.style.color = "#9a3b1c";
+        st.textContent = "Ainda sobrou algo. Feche as outras abas de paradisegate.com.br, recarregue esta página e apague de novo.";
+        go.disabled = false;
+      }
+    }
+    inventory().then(function (inv) { show(inv, false); });
+    if (dl) dl.onclick = function () {
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([local], { type: "application/json" }));
+      a.download = "tree-copia-endereco-antigo-" + new Date().toISOString().slice(0, 10) + ".json";
+      document.body.appendChild(a); a.click(); a.remove();
+    };
+    go.onclick = function () {
+      if (!window.confirm("Apagar o login e a cópia local deste endereço antigo? Os dados na nuvem e no editor novo não são tocados.")) return;
+      go.disabled = true;
+      document.getElementById("ht").textContent = "Conferência depois de apagar";
+      wipe().then(inventory).then(function (inv) { show(inv, true); if (dl && !inv.copy) dl.remove(); });
+    };
+  });
+})();
+</script>
+</head>
+<body></body>
+</html>

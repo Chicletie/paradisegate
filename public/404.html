@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Paradise Gate</title>
+<!-- GitHub Pages serve isto (com status HTTP 404 de verdade) pra todo caminho que não é um
+     arquivo físico — é assim que uma SPA responde por rotas "bonitas" (/wiki/<slug>) aqui.
+     /ursprung/* e /tree/* são o editor e a wiki restrita: moram num subdomínio à parte
+     (docs/plano-passagem.md), então encaminham pra lá com o mesmo caminho. O resto vira
+     /?p=<caminho original>; o app restaura a URL bonita com history.replaceState antes de
+     montar (ver restorePrettyUrl em src/lib), então ninguém vê o redirecionamento. -->
+<script>
+(function () {
+  var path = location.pathname;
+  if (/^\/(ursprung|tree)(\/|$)/.test(path)) {
+    location.replace("https://ursprung.paradisegate.com.br" + path + location.search + location.hash);
+    return;
+  }
+  var full = path + location.search + location.hash;
+  location.replace("/?p=" + encodeURIComponent(full));
+})();
+</script>
+</head>
+<body></body>
+</html>
