@@ -1,0 +1,75 @@
+// Páginas prontas: roda depois do `vite build` (no deploy). Lê o índice público da wiki pela
+// API REST do Firestore e grava em dist/ um HTML por página, com título, resumo e retrato certos
+// (prévia de link no WhatsApp/Discord e busca do Google) e resposta 200 em vez do 404.html.
+// O app React continua montando a página normalmente por cima. Se a leitura falhar, não quebra
+// o deploy: o site sai como antes (tudo pelo 404.html).
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import path from "node:path";
+import {
+  fieldsToObject, mergeEntries, describeEntry, headTags, injectHead, safeSlug, sitemap, SITE_NAME,
+} from "./seo.mjs";
+
+const DIST = path.resolve(process.argv[2] || "dist");
+const API = "https://firestore.googleapis.com/v1/projects/rotina-555dd/databases/(default)/documents";
+const HOME_DESC = "Wiki oficial de Paradise Gate: personagens, facções, lugares e a história do mundo.";
+
+async function getDoc(p) {
+  const r = await fetch(`${API}/${p}`);
+  if (r.status === 404) return null;
+  if (!r.ok) throw new Error(`${p}: HTTP ${r.status}`);
+  return fieldsToObject((await r.json()).fields);
+}
+
+async function loadEntries() {
+  const base = await getDoc("wikiIndex/lotus");
+  if (!base) throw new Error("índice vazio");
+  const parts = [base.entries || {}];
+  const n = base.shardCount | 0;
+  const shards = await Promise.all(Array.from({ length: n }, (_, i) => getDoc(`wikiIndex/lotus/shards/${i + 1}`)));
+  shards.forEach((s) => parts.push((s && s.entries) || {}));
+  return mergeEntries(parts);
+}
+
+function write(rel, html) {
+  const file = path.join(DIST, rel);
+  mkdirSync(path.dirname(file), { recursive: true });
+  writeFileSync(file, html);
+}
+
+const template = readFileSync(path.join(DIST, "index.html"), "utf8");
+let entries;
+try {
+  entries = await loadEntries();
+} catch (err) {
+  console.warn(`Páginas prontas puladas (${err.message}); o site sai só com o 404.html.`);
+  process.exit(0);
+}
+
+const page = (title, tags) => injectHead(template, title, tags);
+const homeTitle = `${SITE_NAME} · Wiki`;
+const home = page(homeTitle, headTags({ title: homeTitle, description: HOME_DESC, path: "/wiki" }));
+// /wiki pode ser servido como wiki.html ou wiki/index.html, conforme o GitHub Pages resolver a
+// pasta wiki/ ao lado; os dois existem e são iguais.
+write("wiki.html", home);
+write("wiki/index.html", home);
+write("index.html", page(SITE_NAME, headTags({ title: SITE_NAME, description: HOME_DESC, path: "/" })));
+const tl = `Linha do tempo · ${SITE_NAME}`;
+write("wiki/_timeline.html", page(tl, headTags({ title: tl, description: "Os acontecimentos de Paradise Gate, ano a ano.", path: "/wiki/_timeline" })));
+const pf = `Seu perfil · ${SITE_NAME}`;
+write("wiki/_perfil.html", page(pf, headTags({ title: pf, description: HOME_DESC, path: "/wiki/_perfil", noindex: true })));
+
+const urls = [{ path: "/wiki" }, { path: "/wiki/_timeline" }];
+let count = 0;
+for (const id of Object.keys(entries).sort()) {
+  const e = entries[id] || {};
+  const slug = safeSlug(id);
+  if (!slug || !e.title) continue;
+  const title = `${e.title} · ${SITE_NAME}`;
+  write(`wiki/${slug}.html`, page(title, headTags({
+    title, description: describeEntry(e), path: `/wiki/${slug}`, image: e.cover || null, type: "article",
+  })));
+  urls.push({ path: `/wiki/${slug}`, lastmod: /^\d{4}-\d{2}-\d{2}$/.test(e.updatedAt || "") ? e.updatedAt : null });
+  count++;
+}
+write("sitemap.xml", sitemap(urls));
+console.log(`Páginas prontas: ${count} páginas da wiki + home, linha do tempo, perfil e sitemap.xml.`);

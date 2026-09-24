@@ -37,6 +37,9 @@ npm test           # vitest
 
 ## Deploy
 
-`.github/workflows/deploy.yml` publica `dist/` no GitHub Pages, só por gatilho manual
-(`workflow_dispatch`) por enquanto — a virada de domínio é um passo à parte, combinado com o
-autor. `.github/workflows/ci.yml` roda build, checagem de tipos, lint e testes em todo PR.
+`.github/workflows/deploy.yml` publica no GitHub Pages (`paradisegate.com.br`) a cada mudança no
+`main` e a cada 3 horas. Depois do `vite build`, `npm run prerender` (`scripts/prerender.mjs`) lê o
+índice público da wiki e grava uma página pronta pra cada entrada (título, resumo sem spoiler e
+retrato pra prévia de link e pro Google), mais `sitemap.xml`. Página publicada entre dois
+deploys continua abrindo pelo `404.html`. `.github/workflows/ci.yml` roda build, checagem de
+tipos, lint e testes em todo PR.

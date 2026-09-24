@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /tree/
+Disallow: /wiki/_perfil
+
+Sitemap: https://paradisegate.com.br/sitemap.xml
