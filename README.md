@@ -1,7 +1,8 @@
 # paradisegate
 
-Site público do mundo **Paradise Gate** (`paradisegate.com.br`), com a wiki (`/wiki`) em React.
-Em construção — ver `CLAUDE.md` pras regras e `docs/` (a caminho) pro roteiro completo.
+Site da marca e franquia **Paradise Gate** (`paradisegate.com.br`). A wiki (`/wiki`) está pronta;
+o resto do site é construído aqui. Comece por `CONTRIBUTING.md`; as regras estão em `CLAUDE.md`,
+a marca em `PRODUCT.md`, o visual em `DESIGN.md` e os dados em `docs/dados-da-wiki.md`.
 
 ## Rodando local
 
@@ -26,14 +27,14 @@ npm test           # vitest
   as leituras e gravações); `wikiIndex.tsx` compartilha o índice (`wikiIndex/lotus` +
   `shards/`) via contexto; `account.tsx` cuida do login, do perfil do leitor e do modal
   "Entrar"; `markdown.tsx`, `quotes.tsx`, `relations.tsx`, `home.ts`, `timeline.ts` e
-  `profile.ts` portam o comportamento de `wiki-core.js` (arvore) pro React.
+  `profile.ts` têm a lógica das páginas, testada sem navegador.
 - `src/styles/tokens.css` — tokens de design (`--pg-*`) para as páginas novas do site, e o
   bloco `@theme` que os expõe como classes utilitárias do Tailwind.
-- `src/styles/wiki.css` — o CSS da wiki Paradise Gate, herdado do repositório `chicletie/arvore`
-  como está (paridade visual).
+- `src/styles/wiki.css` — o CSS da wiki (não mexer pra estilizar página nova; ver `DESIGN.md`).
 - `public/` — arquivos estáticos servidos como estão: `404.html` (rotas de SPA no GitHub
   Pages), `tree/index.html` (guarda de um endereço antigo que mudou de lugar), `sw.js` (desliga o service
-  worker antigo), `reset-senha.html`, `selo-whitmore.png`, `icon.svg`.
+  worker antigo), `reset-senha.html`, `selo-whitmore.png`, `icon.svg`, `og-padrao.png` (prévia de link padrão),
+  `robots.txt`.
 
 ## Deploy
 

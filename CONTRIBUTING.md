@@ -23,7 +23,11 @@ npm run build      # produção, em dist/
 3. Abra um PR com um resumo em português simples e **capturas** (computador e celular, claro e
    escuro) de tudo que muda na tela. O CI roda build, tipos, lint e testes em todo PR e precisa
    passar.
-4. Ao mesclar no `main`, o site é publicado sozinho pelo GitHub Actions.
+4. O autor revisa e mescla. Ao entrar no `main`, o site é publicado sozinho pelo GitHub Actions
+   (e de novo a cada 3 horas, pra pegar o que ele publicou na wiki).
+
+As mudanças do próprio autor podem entrar direto no `main`, com os testes rodados antes; o
+histórico de commits mostra o que mudou e por quê.
 
 ## O que é livre e o que se combina antes
 
