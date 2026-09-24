@@ -36,3 +36,18 @@ describe("affinitiesOf", () => {
     expect(groups.map((g) => g.label)).toEqual(["Pratica", "Afeta"]);
   });
 });
+
+describe("relações com termo, spoiler e disfarce", () => {
+  it("parentesco em spoiler ou disfarce não entra na árvore genealógica", () => {
+    expect(hasFamilyData([{ label: "é filho(a) de", targetTitle: "X", spoiler: true }])).toBe(false);
+    expect(hasFamilyData([{ label: "irmão/irmã de", targetTitle: "X", spoiler: "disfarce", cover: "amigo(a) de" }])).toBe(false);
+  });
+  it("adotivos, de criação e gêmeos entram na árvore", () => {
+    expect(hasFamilyData([{ label: "é filho(a) adotivo(a) de", targetTitle: "X" }])).toBe(true);
+    expect(hasFamilyData([{ label: "é pai/mãe de criação de", targetTitle: "X" }])).toBe(true);
+    expect(hasFamilyData([{ label: "gêmeo(a) de", targetTitle: "X" }])).toBe(true);
+  });
+  it("afinidade em spoiler não aparece", () => {
+    expect(affinitiesOf([{ label: "pratica", targetTitle: "Magia", spoiler: true }])).toEqual([]);
+  });
+});

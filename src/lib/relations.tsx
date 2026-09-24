@@ -23,8 +23,13 @@ export const EDGE_STYLE: Record<LinkStyle, string> = {
 
 const FAMILY_LABEL_BUCKET: Record<string, keyof FamilyBuckets> = {
   "é filho(a) de": "parents",
+  "é filho(a) adotivo(a) de": "parents",
+  "é filho(a) de criação de": "parents",
   "é pai/mãe de": "children",
+  "é pai/mãe adotivo(a) de": "children",
+  "é pai/mãe de criação de": "children",
   "irmão/irmã de": "siblings",
+  "gêmeo(a) de": "siblings",
   "meio-irmão/meia-irmã de": "halfSiblings",
   "casado(a) com": "spouses",
   "avô/avó de": "grandchildren",
@@ -52,6 +57,8 @@ function familyOf(links: WikiLink[] = []): FamilyBuckets {
     grandchildren: [],
   };
   links.forEach((lk) => {
+    // Parentesco escondido (spoiler ou disfarce) nunca entra na árvore: ela revelaria o segredo.
+    if (lk.spoiler) return;
     const bucket = lk.label && FAMILY_LABEL_BUCKET[lk.label];
     if (bucket) fam[bucket].push(lk);
   });
@@ -206,10 +213,16 @@ export function RelationGroups({ title, links = [], backlinks = [] }: { title: s
     ...links.map((lk) => ({ lk, back: false })),
     ...backlinks.filter((lk) => !(lk.targetId && outIds.has(lk.targetId))).map((lk) => ({ lk, back: true })),
   ];
-  const byStyle: Record<string, { lk: WikiLink; back: boolean }[]> = {};
+  // Disfarce entra no grupo da relação de fachada (um irmão disfarçado de amigo fica em
+  // Amizades); a mesma pessoa com várias relações no mesmo grupo vira um cartão só.
+  const byStyle: Record<string, { links: WikiLink[]; back: boolean }[]> = {};
   items.forEach((it) => {
-    const st = it.lk.style && known.has(it.lk.style) ? it.lk.style : "other";
-    (byStyle[st] = byStyle[st] || []).push(it);
+    const s0 = it.lk.spoiler === "disfarce" && it.lk.coverStyle ? it.lk.coverStyle : it.lk.style;
+    const st = s0 && known.has(s0) ? s0 : "other";
+    const list = (byStyle[st] = byStyle[st] || []);
+    const same = it.lk.targetId ? list.find((x) => x.back === it.back && x.links[0].targetId === it.lk.targetId) : undefined;
+    if (same) same.links.push(it.lk);
+    else list.push({ links: [it.lk], back: it.back });
   });
   return (
     <div className="pg-rel-groups">
@@ -225,7 +238,7 @@ export function RelationGroups({ title, links = [], backlinks = [] }: { title: s
             </h3>
             <div className="links-grid">
               {list.map((it, i) => (
-                <LinkCard key={i} link={it.lk} back={it.back} pageTitle={title} />
+                <LinkCard key={i} link={it.links[0]} more={it.links.slice(1)} back={it.back} pageTitle={title} />
               ))}
             </div>
           </div>
@@ -255,6 +268,7 @@ function cap1(s: string) {
 export function affinitiesOf(links: WikiLink[] = []): { label: string; items: WikiLink[] }[] {
   const byLabel: Record<string, WikiLink[]> = {};
   links.forEach((lk) => {
+    if (lk.spoiler) return;
     if (lk.label && AFFINITY_LABELS.indexOf(lk.label) !== -1) {
       (byLabel[lk.label] = byLabel[lk.label] || []).push(lk);
     }
