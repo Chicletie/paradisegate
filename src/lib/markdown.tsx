@@ -1,11 +1,38 @@
-import { useState, type ReactNode } from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 
 // Porta literal do markdown da casa de wiki-core.js (mdInline/renderMarkdown/fieldValue,
 // arvore; contrato em docs/formato-wiki.md, "Texto dentro da página") — mesmo regex de
 // tokens, mesmo comportamento por token, só trocando construção de DOM por elementos React.
 // [[link]] continua como texto simples (.wl-plain): a página não está publicada ou o link
-// não foi resolvido na publicação.
+// não foi resolvido na publicação — exceto dentro de um WikiLinkUpgrade (abaixo).
+
+/** Título (minúsculo) → wikiId das ligações reais e publicadas da própria entrada. */
+const LiveTitlesContext = createContext<Record<string, string> | null>(null);
+
+/**
+ * Porta de wbUpgradeWikiLinks: dentro da descrição de um evento já se sabe quais páginas a
+ * entrada liga de verdade, então um [[Nome]] cujo texto bate com o título de uma ligação
+ * publicada (links ou backlinks) vira link de verdade (.wl-live) em vez de negrito solto.
+ */
+export function WikiLinkUpgrade({ links, children }: { links: { targetId?: string; targetTitle?: string }[]; children: ReactNode }) {
+  const byTitle: Record<string, string> = {};
+  links.forEach((lk) => {
+    if (lk.targetId) byTitle[(lk.targetTitle || "").toLowerCase()] = lk.targetId;
+  });
+  return <LiveTitlesContext.Provider value={byTitle}>{children}</LiveTitlesContext.Provider>;
+}
+
+function PlainWikiLink({ text }: { text: string }) {
+  const id = useContext(LiveTitlesContext)?.[text.toLowerCase()];
+  if (id)
+    return (
+      <Link className="wl-live" to={`/wiki/${encodeURIComponent(id)}`}>
+        {text}
+      </Link>
+    );
+  return <span className="wl-plain">{text}</span>;
+}
 
 const INLINE_TOKEN_SOURCE =
   "(!\\[[^\\]]*\\]\\([^)\\s]+\\)|`[^`]+`|\\[\\[[^\\]\\[]+\\]\\]|\\[[^\\]]+\\]\\((?:https?:|mailto:|wiki:)[^)\\s]+\\)|\\|\\|(?:\\[\\[[^\\]\\[]+\\]\\]|[^|])+\\|\\||\\*\\*[^*]+\\*\\*|__[^_]+__|~~[^~]+~~|\\*[^*\\n]+\\*|(?:^|\\s)_[^_\\n]+_(?=\\s|$))";
@@ -161,11 +188,7 @@ export function mdInline(s: string | undefined): ReactNode[] {
     } else if (tok.slice(0, 2) === "[[") {
       const raw = tok.slice(2, -2);
       const disp = raw.indexOf("|") !== -1 ? raw.split("|")[1].trim() : raw.trim();
-      nodes.push(
-        <span key={k} className="wl-plain">
-          {disp}
-        </span>,
-      );
+      nodes.push(<PlainWikiLink key={k} text={disp} />);
     } else if (tok.charAt(0) === "[") {
       const lm = tok.match(/^\[([^\]]+)\]\(([^)\s]+)\)$/);
       // wiki:<id> = página da própria wiki (o editor só gera pra página publicada): mesma aba.

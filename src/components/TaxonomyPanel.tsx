@@ -1,5 +1,7 @@
+import { Fragment } from "react";
 import { fieldValue, RenderMarkdown, SpoilerBlock } from "../lib/markdown";
 import type { WikiField } from "../types";
+import { SwapBody, SwapCell } from "./EntryActions";
 
 /**
  * Porta de buildTaxonomyPanel em wiki-core.js (arvore) — só pro tipo Criatura: fatos curtos
@@ -23,7 +25,7 @@ export function TaxonomyPanel({ taxonomy }: { taxonomy: WikiField[] }) {
                   <th>
                     {f.key}
                   </th>
-                  <td>
+                  <SwapCell slot={"ts:" + i} fieldKey={"tax:" + f.key}>
                     {f.vis === "spoiler" ? (
                       <SpoilerBlock>
                         <span>{fieldValue(f.value)}</span>
@@ -31,7 +33,7 @@ export function TaxonomyPanel({ taxonomy }: { taxonomy: WikiField[] }) {
                     ) : (
                       fieldValue(f.value)
                     )}
-                  </td>
+                  </SwapCell>
                 </tr>
               ),
             )}
@@ -39,18 +41,20 @@ export function TaxonomyPanel({ taxonomy }: { taxonomy: WikiField[] }) {
         </table>
       )}
       {long.map((f, i) => (
-        <div key={i}>
+        <Fragment key={i}>
           <h2 className="cathead">
             {f.key}
           </h2>
-          {f.vis === "spoiler" ? (
-            <SpoilerBlock>
+          <SwapBody slot={"tl:" + i} fieldKey={"tax:" + f.key}>
+            {f.vis === "spoiler" ? (
+              <SpoilerBlock>
+                <RenderMarkdown text={f.value} />
+              </SpoilerBlock>
+            ) : (
               <RenderMarkdown text={f.value} />
-            </SpoilerBlock>
-          ) : (
-            <RenderMarkdown text={f.value} />
-          )}
-        </div>
+            )}
+          </SwapBody>
+        </Fragment>
       ))}
     </div>
   );

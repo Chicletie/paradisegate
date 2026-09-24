@@ -63,14 +63,23 @@ Vite + React 19 + TypeScript + Tailwind v4 + react-router. `npm test` roda os te
     react-router (mesmo com `display:contents`) dentro de `<svg>` não pinta os filhos em todo
     navegador — use `onClick` + `useNavigate()` no próprio elemento SVG (ver `TreeNode` em
     `src/lib/relations.tsx`), igual ao clique direto que `wiki-core.js` já usa ali.
+18. **Firebase só por `src/lib/api.ts`.** Nenhuma tela importa `firebase/*` direto: toda leitura
+    e gravação (índice, página, login, perfil, sugestões, restrito) é uma função de lá. É a
+    lista fechada de coleções da regra 6 num arquivo só, e é o que permite comparar com a wiki
+    de hoje sem rede (ver abaixo).
+19. **Login só acrescenta; nunca muda o que o visitante vê.** Favoritar, sugerir e o conteúdo
+    restrito aparecem só pra quem entrou e não está "vendo como convidado" (`wb_guest_mode` em
+    `sessionStorage`, mesma chave de hoje; trocar recarrega a página, como hoje). A versão
+    confidencial de um campo troca o conteúdo no próprio lugar (`SwapCell`/`SwapBody` em
+    `EntryActions.tsx`) e volta ao público ao sair.
 
 ## Estrutura
 
 | Caminho | O que é |
 |---|---|
 | `src/pages/` | Páginas da wiki: home, entrada, temporada, linha do tempo, perfil, erro. |
-| `src/components/` | Cabeçalho e rodapé PG, compartilhados. |
-| `src/lib/` | Firebase (`firebase.ts`), índice da wiki com suporte a `shards/` (`wikiIndex.tsx`), markdown/spoilers (`markdown.tsx`), citações (`quotes.tsx`), relações/família/linha do tempo (`relations.tsx`) — lógica pura testável sem DOM onde dá. |
+| `src/components/` | Cabeçalho (com "Entrar"/menu da conta, `AccountMenu.tsx`) e rodapé PG, peças da entrada, e o que depende de login numa página (`EntryActions.tsx`: favoritar, sugerir, restrito). |
+| `src/lib/` | Acesso ao Firebase (`api.ts`, o único que importa `firebase.ts`), índice da wiki com suporte a `shards/` (`wikiIndex.tsx`), conta do leitor e modal "Entrar" (`account.tsx`), markdown/spoilers (`markdown.tsx`), citações (`quotes.tsx`), relações/família/linha do tempo da entrada (`relations.tsx`), home (`home.ts`, `daily.ts`), linha do tempo geral (`timeline.ts`), perfil (`profile.ts`) — lógica pura testável sem DOM onde dá. |
 | `src/styles/tokens.css` | Tokens `--pg-*` + `@theme` do Tailwind, pras páginas novas. |
 | `src/styles/wiki.css` | CSS da wiki, herdado do arvore como está. |
 | `public/404.html` | Rotas de SPA no GitHub Pages: `/ursprung`\*/`/tree`\* vão pro subdomínio do console; o resto reconstrói a URL bonita via `?p=`. |
@@ -92,6 +101,11 @@ commit. Pra home (e o que mais usar o índice): `window.wikiCoreBoot()` com um `
 de mentira cuja `firestore().collection("wikiIndex").doc("lotus").get()` devolve o índice de
 exemplo (sem `firebase.auth`, login sai cedo), e no app o `fetchWikiIndex` devolvendo o mesmo
 JSON só em `import.meta.env.DEV`, temporariamente. Compare também `document.title` e `scrollY`.
+Com login (etapa 4 em diante), sem tocar no repositório: um armazém de mentira com índice,
+páginas, perfil, sugestões e restrito, servido às duas versões — pro `wiki-core.js`, um
+`window.firebase` compat de mentira em cima dele (auth + firestore + `FieldValue`); pro app, um
+`vite --config` fora do repositório com um plugin que troca `src/lib/api.ts` por uma versão de
+mentira com as mesmas funções. "Logado" = uma chave no `localStorage` lida pelo armazém.
 
 ## Ramos e PRs
 
@@ -99,6 +113,6 @@ Sem `docs/` neste repositório ainda — o roteiro completo mora em `docs/fase4-
 arvore. Etapas (um PR cada, com capturas antes/depois): 1) esqueleto ✔; 2) entrada, temporada e
 erro ✔ (login, favoritar, sugerir e conteúdo restrito de `wikiRestrito` ficaram pra etapa 4 de
 propósito — a entrada já busca e mostra tudo que não depende de login); 3) home com destaques
-do dia, busca e filtros ✔; 4) linha do tempo, perfil, login, sugestões, restrito (o botão
-"Entrar"/menu da conta no cabeçalho entra aqui). Se uma sessão
+do dia, busca e filtros ✔; 4) linha do tempo, perfil, login, sugestões, restrito ✔. Com isso a
+wiki de hoje está toda portada; o resto do site é da colaboradora. Se uma sessão
 não terminar uma etapa, para num PR completo e descreve no fim o que falta.

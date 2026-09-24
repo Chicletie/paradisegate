@@ -1,6 +1,7 @@
 import { Fragment, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { fieldValue, RevealSpoiler, SpoilerBlock } from "../lib/markdown";
+import { SwapCell } from "./EntryActions";
 import { objPos } from "../lib/format";
 import type { InfoboxImage, WikiAlias, WikiCrumb, WikiEntryDoc, WikiField } from "../types";
 
@@ -143,7 +144,7 @@ export function Infobox({ data }: { data: WikiEntryDoc }) {
         <th>
           {f.key}
         </th>
-        <td>
+        <SwapCell slot={"ib:" + i} fieldKey={f.key}>
           {f.vis === "spoiler" ? (
             <RevealSpoiler preview="spoiler · toque">
               <span>{fieldValue(f.value)}</span>
@@ -151,7 +152,7 @@ export function Infobox({ data }: { data: WikiEntryDoc }) {
           ) : (
             fieldValue(f.value)
           )}
-        </td>
+        </SwapCell>
       </tr>,
     );
   });

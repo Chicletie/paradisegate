@@ -16,7 +16,7 @@ import type { WikiEntryDoc } from "../types";
 /**
  * Porta do bloco "Relações + Genealogia + Linha do tempo" de renderEntry (wiki-core.js,
  * arvore): dividem uma seção, em abas quando há mais de uma — Relações primeiro quando
- * existe (no Paradise Gate, sempre agrupada por tipo, nunca o grafo em estrela do Ursprung);
+ * existe (sempre agrupada por tipo);
  * Genealogia só existe junto de Relações; Linha do tempo é independente das outras duas.
  */
 export function RelationsSection({ data }: { data: WikiEntryDoc }) {
@@ -30,7 +30,7 @@ export function RelationsSection({ data }: { data: WikiEntryDoc }) {
   const panels: { label: string; content: ReactNode }[] = [];
   if (hasRel) panels.push({ label: "Relações", content: <RelationGroups title={data.title} links={links} backlinks={backlinks} /> });
   if (hasFamilyData(links)) panels.push({ label: "Genealogia", content: <FamilyTree title={data.title} links={links} /> });
-  if (eventsSorted.length) panels.push({ label: "Linha do tempo", content: <EntryTimeline events={eventsSorted} /> });
+  if (eventsSorted.length) panels.push({ label: "Linha do tempo", content: <EntryTimeline events={eventsSorted} links={[...links, ...backlinks]} /> });
 
   return (
     <>

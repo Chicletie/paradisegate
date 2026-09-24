@@ -225,3 +225,61 @@ export interface WikiSeasonDoc {
 
 // wikiPublic/{slug} guarda ou uma entry ou uma temporada — discriminado por `kind`.
 export type WikiPublicDoc = WikiEntryDoc | WikiSeasonDoc;
+
+// --- Conta do leitor (etapa 4) — mesmas formas que wiki-core.js lê e grava hoje. ---
+
+export interface AuthUser {
+  uid: string;
+  email: string;
+}
+
+/** wikiProfiles/{uid}. `photo` é um data URL JPEG 256×256 reduzido no navegador. */
+export interface WikiProfile {
+  email?: string;
+  nickname?: string;
+  photo?: string | null;
+  favorites?: string[];
+  /** Última visita do leitor às próprias sugestões (ISO). */
+  seenAt?: string;
+  updatedAt?: string;
+}
+
+/** O que uma gravação do perfil muda; o resto do documento fica como está (merge). */
+export interface WikiProfilePatch {
+  nickname?: string;
+  /** `null` apaga a foto. */
+  photo?: string | null;
+  seenAt?: string;
+  favorite?: { id: string; on: boolean };
+}
+
+/** wikiSuggestions/{id}. */
+export interface WikiSuggestion {
+  wikiId?: string;
+  pageTitle?: string;
+  tab?: string;
+  text?: string;
+  authorEmail?: string;
+  authorName?: string | null;
+  status?: "pendente" | "aceita" | "rejeitada" | string;
+  createdAt?: string;
+  reply?: string;
+  repliedAt?: string;
+  statusAt?: string;
+}
+
+/** wikiRestrito/{wikiId}/itens/{id} — o Firestore só devolve os itens liberados pro e-mail. */
+export interface WikiRestritoItem {
+  kind: "campo" | "campo-confidencial" | "secao" | "tag" | "alias" | "galeria" | "sessao" | "post" | string;
+  key?: string;
+  value?: string;
+  title?: string;
+  body?: string;
+  text?: string;
+  variant?: string;
+  url?: string;
+  caption?: string;
+  date?: string;
+  recap?: string;
+  permitidos?: string[];
+}

@@ -1,6 +1,8 @@
+import { Fragment } from "react";
 import { mdInline, RenderMarkdown, SpoilerBlock } from "../lib/markdown";
 import { QuoteEpigraph } from "../lib/quotes";
 import type { WikiArticleBundle, WikiCitation } from "../types";
+import { SwapBody } from "./EntryActions";
 
 function slugifyAnchor(s: string | undefined, i: string): string {
   return (
@@ -68,18 +70,21 @@ export function ArticleBundle({
       {longFields.map((f, i) => {
         const id = slugifyAnchor(f.key, anchorPrefix + "lf" + i);
         return (
-          <div key={id}>
+          <Fragment key={id}>
             <h2 className="cathead" id={id}>
               {f.key}
             </h2>
-            {f.vis === "spoiler" ? (
-              <SpoilerBlock>
+            {/* Troca confidencial só na aba Geral: variantes de obra não têm versão confidencial. */}
+            <SwapBody slot={anchorPrefix === "geral-" ? "lf:" + i : undefined} fieldKey={f.key}>
+              {f.vis === "spoiler" ? (
+                <SpoilerBlock>
+                  <RenderMarkdown text={f.value} />
+                </SpoilerBlock>
+              ) : (
                 <RenderMarkdown text={f.value} />
-              </SpoilerBlock>
-            ) : (
-              <RenderMarkdown text={f.value} />
-            )}
-          </div>
+              )}
+            </SwapBody>
+          </Fragment>
         );
       })}
       {sections.map((s, i) => {
