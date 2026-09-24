@@ -44,7 +44,7 @@ export function AliasLine({ alias }: { alias: WikiAlias }) {
   );
   return (
     <div className="infobox-alias-line">
-      • {alias.vis === "spoiler" ? <RevealSpoiler preview="spoiler · toque">{content}</RevealSpoiler> : content}
+      • {alias.vis === "spoiler" ? <RevealSpoiler preview="spoiler · toque" at={alias.at}>{content}</RevealSpoiler> : content}
     </div>
   );
 }
@@ -76,7 +76,7 @@ function Portrait({ images, title }: { images: InfoboxImage[]; title: string }) 
           ))}
         </div>
       )}
-      <div className="infobox-portrait">{opt.vis === "spoiler" ? <SpoilerBlock key={active}>{img}</SpoilerBlock> : img}</div>
+      <div className="infobox-portrait">{opt.vis === "spoiler" ? <SpoilerBlock key={active} at={opt.at}>{img}</SpoilerBlock> : img}</div>
     </>
   );
 }
@@ -154,7 +154,7 @@ export function Infobox({ data }: { data: WikiEntryDoc }) {
         </th>
         <SwapCell slot={"ib:" + i} fieldKey={f.key}>
           {f.vis === "spoiler" ? (
-            <RevealSpoiler preview="spoiler · toque">
+            <RevealSpoiler preview="spoiler · toque" at={f.at}>
               <span>{fieldValue(f.value)}</span>
             </RevealSpoiler>
           ) : (

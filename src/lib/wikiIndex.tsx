@@ -1,10 +1,11 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { fetchWikiIndex } from "./api";
-import type { WikiIndex } from "../types";
+import { fetchWikiIndex, wikiObras } from "./api";
+import type { SpoilerObra, WikiIndex } from "../types";
 
 interface IndexState {
   index: WikiIndex | null;
   failed: boolean;
+  obras?: SpoilerObra[];
 }
 
 const WikiIndexContext = createContext<IndexState>({ index: null, failed: false });
@@ -18,7 +19,7 @@ export function WikiIndexProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     fetchWikiIndex()
       .then((idx) => {
-        if (!cancelled) setState({ index: idx, failed: false });
+        if (!cancelled) setState({ index: idx, failed: false, obras: wikiObras() });
       })
       .catch(() => {
         if (!cancelled) setState({ index: {}, failed: true });
@@ -33,6 +34,11 @@ export function WikiIndexProvider({ children }: { children: ReactNode }) {
 /** `null` enquanto carrega. */
 export function useWikiIndex(): WikiIndex | null {
   return useContext(WikiIndexContext).index;
+}
+
+/** Catálogo de obras (spoiler por obra); vazio enquanto carrega ou se não houver. */
+export function useWikiObras(): SpoilerObra[] {
+  return useContext(WikiIndexContext).obras || [];
 }
 
 /** A leitura do índice falhou (rede, regra do Firestore). */

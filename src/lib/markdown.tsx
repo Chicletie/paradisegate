@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { useSpoilerAt } from "./spoilerProgress";
 
 // Porta literal do markdown da casa de wiki-core.js (mdInline/renderMarkdown/fieldValue,
 // wiki original; contrato em docs/dados-da-wiki.md, "Texto dentro da página") — mesmo regex de
@@ -74,14 +75,16 @@ function InlineSpoiler({ children }: { children: ReactNode }) {
 }
 
 /** Porta de spoilerSpan (tag spoiler): texto puro atrás da tarja, cada toque alterna. */
-export function SpoilerSpan({ text }: { text: string }) {
+export function SpoilerSpan({ text, at }: { text: string; at?: string }) {
   const [on, setOn] = useState(false);
+  const sp = useSpoilerAt(at);
+  if (sp.open) return <span className="md-unlocked">{text}</span>;
   return (
     <span
       className={"md-spoiler" + (on ? " on" : "")}
       tabIndex={0}
       role="button"
-      title="Spoiler — toque pra revelar"
+      title={sp.label ? "Spoiler de " + sp.label + " — toque pra revelar" : "Spoiler — toque pra revelar"}
       onClick={() => setOn((v) => !v)}
     >
       {text}
@@ -91,8 +94,10 @@ export function SpoilerSpan({ text }: { text: string }) {
 
 /** Porta de spoilerInline (campo curto/alcunha da infobox): revela uma vez, não esconde de
  * novo. */
-export function RevealSpoiler({ children, preview }: { children: ReactNode; preview?: string }) {
+export function RevealSpoiler({ children, preview, at }: { children: ReactNode; preview?: string; at?: string }) {
   const [revealed, setRevealed] = useState(false);
+  const sp = useSpoilerAt(at);
+  if (sp.open) return <>{children}</>;
   if (revealed) return <span className="md-spoiler on">{children}</span>;
   function reveal(ev: { preventDefault?: () => void }) {
     ev.preventDefault?.();
@@ -103,7 +108,7 @@ export function RevealSpoiler({ children, preview }: { children: ReactNode; prev
       className="md-spoiler"
       tabIndex={0}
       role="button"
-      title="Spoiler — toque pra revelar"
+      title={sp.label ? "Spoiler de " + sp.label + " — toque pra revelar" : "Spoiler — toque pra revelar"}
       onClick={reveal}
       onKeyDown={(ev) => {
         if (ev.key === "Enter" || ev.key === " ") reveal(ev);
@@ -116,15 +121,17 @@ export function RevealSpoiler({ children, preview }: { children: ReactNode; prev
 
 /** Porta de spoilerCover: cobre um BLOCO inteiro (campo longo, seção, imagem de galeria) atrás
  * de um botão — revela uma vez. */
-export function SpoilerBlock({ children }: { children: ReactNode }) {
+export function SpoilerBlock({ children, at }: { children: ReactNode; at?: string }) {
   const [revealed, setRevealed] = useState(false);
+  const sp = useSpoilerAt(at);
+  if (sp.open) return <>{children}</>;
   return (
     <div className={"spoiler-block" + (revealed ? " revealed" : "")}>
       {revealed ? (
         children
       ) : (
         <button type="button" className="spoiler-reveal" onClick={() => setRevealed(true)}>
-          spoiler, toque para revelar
+          {sp.label ? "spoiler de " + sp.label + ", toque para revelar" : "spoiler, toque para revelar"}
         </button>
       )}
     </div>

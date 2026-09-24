@@ -54,6 +54,8 @@ export interface WikiField {
   value: string;
   type?: "nota" | "cabecalho" | string;
   vis?: FieldVisibility;
+  /** Spoiler por obra: id da temporada em que o trecho é revelado (ver `spoilerObras`). */
+  at?: string;
   master?: string;
 }
 
@@ -61,6 +63,8 @@ export interface InfoboxImage {
   name?: string;
   url: string;
   vis?: FieldVisibility;
+  /** Spoiler por obra: id da temporada em que o trecho é revelado (ver `spoilerObras`). */
+  at?: string;
   focus?: { x: number; y: number } | null;
 }
 
@@ -76,6 +80,8 @@ export interface WikiAlias {
   note?: WikiAliasNote;
   selfLink?: string;
   vis?: FieldVisibility;
+  /** Spoiler por obra: id da temporada em que o trecho é revelado (ver `spoilerObras`). */
+  at?: string;
 }
 
 export interface WikiCrumb {
@@ -87,6 +93,8 @@ export interface WikiSection {
   title?: string;
   body: string;
   vis?: FieldVisibility;
+  /** Spoiler por obra: id da temporada em que o trecho é revelado (ver `spoilerObras`). */
+  at?: string;
 }
 
 export type QuoteKind = "fala" | "dialogo" | "trecho";
@@ -124,6 +132,8 @@ export interface WikiCitation {
   contextTitle?: string;
   note?: string;
   vis?: FieldVisibility;
+  /** Spoiler por obra: id da temporada em que o trecho é revelado (ver `spoilerObras`). */
+  at?: string;
 }
 
 export interface WikiPost {
@@ -131,11 +141,15 @@ export interface WikiPost {
   date?: string;
   body: string;
   vis?: FieldVisibility;
+  /** Spoiler por obra: id da temporada em que o trecho é revelado (ver `spoilerObras`). */
+  at?: string;
 }
 
 export interface WikiTag {
   text: string;
   vis?: FieldVisibility;
+  /** Spoiler por obra: id da temporada em que o trecho é revelado (ver `spoilerObras`). */
+  at?: string;
 }
 
 export type LinkStyle =
@@ -161,6 +175,8 @@ export interface WikiLink {
   spoiler?: boolean | "disfarce";
   cover?: string;
   coverStyle?: LinkStyle;
+  /** Spoiler por obra: id da temporada em que a relação é revelada. */
+  at?: string;
 }
 
 export interface WikiGalleryItem {
@@ -168,6 +184,8 @@ export interface WikiGalleryItem {
   caption?: string;
   group?: string;
   vis?: FieldVisibility;
+  /** Spoiler por obra: id da temporada em que o trecho é revelado (ver `spoilerObras`). */
+  at?: string;
 }
 
 // Forma comum de "Geral" e de cada variante de obra (data.variants[i]) — mesmos campos,
@@ -184,6 +202,8 @@ export interface WikiVariant extends WikiArticleBundle {
 }
 
 export interface WikiEntryDoc extends WikiArticleBundle {
+  /** As obras que os spoilers desta página usam (`at`), com as temporadas em ordem. */
+  spoilerObras?: SpoilerObra[];
   kind?: undefined;
   title: string;
   type?: string;
@@ -214,6 +234,8 @@ export interface WikiSeasonSession {
   date?: string;
   recap: string;
   vis?: FieldVisibility;
+  /** Spoiler por obra: id da temporada em que o trecho é revelado (ver `spoilerObras`). */
+  at?: string;
 }
 
 export interface WikiSeasonDoc {
@@ -241,6 +263,16 @@ export interface AuthUser {
 }
 
 /** wikiProfiles/{uid}. `photo` é um data URL JPEG 256×256 reduzido no navegador. */
+/** Uma obra (livro/série ou campanha) com as temporadas em ordem — spoiler por obra. */
+export interface SpoilerObra {
+  id: string;
+  name: string;
+  seasons: { id: string; name: string }[];
+}
+
+/** Até onde o leitor já viu: obraId → id da última temporada vista ("*" = tudo, "" = nada). */
+export type SpoilerProgress = Record<string, string>;
+
 export interface WikiProfile {
   email?: string;
   nickname?: string;
@@ -248,6 +280,8 @@ export interface WikiProfile {
   favorites?: string[];
   /** Última visita do leitor às próprias sugestões (ISO). */
   seenAt?: string;
+  /** Spoiler por obra: até onde o leitor já viu cada obra. */
+  progress?: SpoilerProgress;
   updatedAt?: string;
 }
 
@@ -258,6 +292,8 @@ export interface WikiProfilePatch {
   photo?: string | null;
   seenAt?: string;
   favorite?: { id: string; on: boolean };
+  /** Troca o valor de uma obra só (as outras ficam). */
+  progress?: { obraId: string; seasonId: string };
 }
 
 /** wikiSuggestions/{id}. */

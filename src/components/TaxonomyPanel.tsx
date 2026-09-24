@@ -32,7 +32,7 @@ export function TaxonomyPanel({ taxonomy }: { taxonomy: WikiField[] }) {
                   </th>
                   <SwapCell slot={"ts:" + i} fieldKey={"tax:" + f.key}>
                     {f.vis === "spoiler" ? (
-                      <SpoilerBlock>
+                      <SpoilerBlock at={f.at}>
                         <span>{fieldValue(f.value)}</span>
                       </SpoilerBlock>
                     ) : (
@@ -55,7 +55,7 @@ export function TaxonomyPanel({ taxonomy }: { taxonomy: WikiField[] }) {
           </h2>
           <SwapBody slot={"tl:" + i} fieldKey={"tax:" + f.key}>
             {f.vis === "spoiler" ? (
-              <SpoilerBlock>
+              <SpoilerBlock at={f.at}>
                 <RenderMarkdown text={f.value} />
               </SpoilerBlock>
             ) : (

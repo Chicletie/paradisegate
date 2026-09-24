@@ -22,6 +22,7 @@ import {
   useMineToggle,
   useRestrito,
 } from "../components/EntryActions";
+import { PageObrasProvider, SpoilerProgressBar } from "../components/SpoilerProgress";
 import type { WikiEntryDoc } from "../types";
 
 /**
@@ -54,6 +55,7 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
   if (data.taxonomy?.length) tabPanels.push({ label: "Taxonomia", content: <TaxonomyPanel taxonomy={data.taxonomy} /> });
 
   return (
+    <PageObrasProvider obras={data.spoilerObras}>
     <RestritoPlaceProvider value={place}>
     <SwapProvider items={restrito} winner={swapWinners(data.fields, data.taxonomy)}>
       <article className="card">
@@ -80,6 +82,8 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
             <SuggestButtons wikiId={wikiId} pageTitle={data.title} tab={tabPanels[activeTab]?.label || "Geral"} onToggleMine={toggleMine} />
           </div>
         </div>
+
+        <SpoilerProgressBar />
 
         {tabPanels.length > 1 && (
           <div className="work-tabs" role="tablist" aria-label="Seções da página">
@@ -118,7 +122,7 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
               <details className="wiki-section post" open>
                 <summary className="post-summary">{(p.date ? `${p.date} · ` : "") + (p.title || "(sem título)")}</summary>
                 {p.vis === "spoiler" ? (
-                  <SpoilerBlock>
+                  <SpoilerBlock at={p.at}>
                     <RenderMarkdown text={p.body} />
                   </SpoilerBlock>
                 ) : (
@@ -142,7 +146,7 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
                 {t.vis === "spoiler" ? (
                   // Tag spoiler: tarja no texto, sem link pra busca (chip + spoilerSpan no original).
                   <span className="tag">
-                    <SpoilerSpan text={"#" + t.text} />
+                    <SpoilerSpan text={"#" + t.text} at={t.at} />
                   </span>
                 ) : (
                   <Link className="tag" to={`/wiki?q=${encodeURIComponent(t.text)}`}>
@@ -159,5 +163,6 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
       </article>
     </SwapProvider>
     </RestritoPlaceProvider>
+    </PageObrasProvider>
   );
 }
