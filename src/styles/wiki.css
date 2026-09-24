@@ -899,3 +899,24 @@ body.pg-site:not(.pg-home) .wb-epi-attr a, body.pg-site:not(.pg-home) .wb-dl-who
   .wb-epigraph { padding-left: 34px; }
   .wb-epigraph::before { font-size: 56px; top: -8px; }
 }
+
+/* ---- Conteúdo restrito no lugar certo (desbloqueado pra quem tem acesso) ---- */
+.pg-unlocked-badge { display: inline-block; margin-left: 8px; padding: 1px 7px; border: 1px solid var(--pg-gold-soft); border-radius: 3px; font-family: var(--pg-f-ui); font-size: 11px; font-weight: 500; letter-spacing: 0.02em; color: var(--pg-muted); vertical-align: 2px; white-space: nowrap; text-transform: none; }
+.pg-unlocked, .pg-unlocked-row td, .pg-unlocked-row th { background: color-mix(in srgb, var(--pg-gold) 7%, transparent); }
+.pg-unlocked { border-left: 2px solid var(--pg-gold-soft); padding-left: 12px; margin: 10px 0; }
+.pg-unlocked-row th { font-weight: 600; }
+.pg-unlocked-row th .pg-unlocked-badge { display: block; margin: 4px 0 0; width: fit-content; }
+.pg-unlocked-switch, .pg-swap-ctl .linklike { display: inline-block; margin-top: 6px; font-size: 12.5px; }
+.pg-swap-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 6px; }
+.pg-swap-ctl .pg-unlocked-badge { margin-left: 0; }
+.pg-unlocked-guest { color: var(--pg-muted); font-style: italic; }
+.pg-unlocked-tag { border-style: dashed; }
+.pg-unlocked-alias { color: var(--pg-ink); }
+.pg-unlocked-switch, .pg-swap-ctl button { display: inline; padding: 0; margin: 0; background: none; border: 0; cursor: pointer; font-family: var(--pg-f-ui); font-size: 12.5px; color: var(--pg-link); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--pg-link) 40%, transparent); text-underline-offset: 3px; }
+.pg-unlocked-switch:hover, .pg-swap-ctl button:hover { color: var(--pg-link-hover); text-decoration-color: currentColor; }
+.pg-unlocked-switch:focus-visible, .pg-swap-ctl button:focus-visible { outline: 2px solid var(--pg-link); outline-offset: 2px; border-radius: 2px; }
+.pg-unlocked-body .pg-unlocked-switch, .pg-unlocked-row .pg-unlocked-switch { display: block; margin-top: 8px; }
+.pg-swap-note { font-family: var(--pg-f-ui); font-size: 11.5px; color: var(--pg-muted); }
+.infobox-facts .pg-unlocked-badge { white-space: normal; }
+.infobox-facts .pg-swap-ctl { flex-direction: column; align-items: flex-start; gap: 4px; }
+@media (max-width: 560px) { .pg-unlocked-switch, .pg-swap-ctl button { min-height: 44px; display: inline-flex; align-items: center; } .pg-unlocked-body .pg-unlocked-switch, .pg-unlocked-row .pg-unlocked-switch { display: flex; margin-top: 2px; } }

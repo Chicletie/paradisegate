@@ -2,6 +2,8 @@ import { Fragment, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { fieldValue, RevealSpoiler, SpoilerBlock } from "../lib/markdown";
 import { SwapCell } from "./EntryActions";
+import { RestritoInline, RestritoRows } from "./RestritoPlace";
+import { useRestritoCount } from "../lib/restritoPlace";
 import { objPos } from "../lib/format";
 import type { InfoboxImage, WikiAlias, WikiCrumb, WikiEntryDoc, WikiField } from "../types";
 
@@ -91,7 +93,8 @@ export function Infobox({ data }: { data: WikiEntryDoc }) {
   const children = data.children || [];
   const infoboxImages = data.infoboxImages || [];
   const hasBirth = !!(data.birth || data.lunarBirth);
-  if (!shortFields.length && !infoboxImages.length && !aliases.length && !children.length && !hasBirth) return null;
+  const nFichaR = useRestritoCount("ficha"), nAliasR = useRestritoCount("aliases");
+  if (!shortFields.length && !infoboxImages.length && !aliases.length && !children.length && !hasBirth && !nFichaR && !nAliasR) return null;
 
   const isBasicsHead = (f: WikiField) => f.type === "cabecalho" && /^dados b[áa]sicos$/i.test((f.key || "").trim());
   const hasBasicsHead = shortFields.some(isBasicsHead);
@@ -113,20 +116,25 @@ export function Infobox({ data }: { data: WikiEntryDoc }) {
   let birthInBasics = hasBasicsHead;
 
   const rows: ReactNode[] = [];
-  if (aliases.length) {
+  if (aliases.length || nAliasR) {
     rows.push(
       <tr key="aliases">
         <th>Alcunhas</th>
         <td>
           {aliases.map((a, i) => (
-            <AliasLine key={i} alias={a} />
+            <Fragment key={i}>
+              <RestritoInline area="aliases" index={i} />
+              <AliasLine alias={a} />
+            </Fragment>
           ))}
+          <RestritoInline area="aliases" index={aliases.length} />
         </td>
       </tr>,
     );
   }
   if (!birthInBasics) rows.push(...birthRows);
   shortFields.forEach((f, i) => {
+    rows.push(<RestritoRows key={"r" + i} area="ficha" index={i} />);
     if (f.type === "cabecalho") {
       rows.push(
         <tr key={"h" + i} className="infobox-header-row">
@@ -156,6 +164,7 @@ export function Infobox({ data }: { data: WikiEntryDoc }) {
       </tr>,
     );
   });
+  rows.push(<RestritoRows key="r-end" area="ficha" index={shortFields.length} />);
   if (children.length) {
     rows.push(
       <tr key="children">

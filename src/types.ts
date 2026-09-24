@@ -200,6 +200,7 @@ export interface WikiEntryDoc extends WikiArticleBundle {
   taxonomy?: WikiField[];
   variants?: WikiVariant[];
   events?: WikiIndexEvent[];
+  restritoSlots?: RestritoSlotMark[];
 }
 
 export interface WikiSeasonSession {
@@ -219,6 +220,7 @@ export interface WikiSeasonDoc {
   sessionCount?: number;
   cast?: string[];
   sessions?: WikiSeasonSession[];
+  restritoSlots?: RestritoSlotMark[];
   publishedAt?: string;
 }
 
@@ -280,5 +282,14 @@ export interface WikiRestritoItem {
   caption?: string;
   date?: string;
   recap?: string;
+  /** Código de posição: casa com uma marca em `restritoSlots` da página. */
+  slot?: string;
   permitidos?: string[];
+}
+
+/** Onde um trecho restrito entra na página: área + quantos itens públicos vêm antes dele. */
+export interface RestritoSlotMark {
+  slot: string;
+  area: string;
+  before: number;
 }

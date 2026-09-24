@@ -1,4 +1,6 @@
-import { useState, type ReactNode } from "react";
+import { Fragment, useState, type ReactNode } from "react";
+import { RestritoBlocks, RestritoInline, RestritoPlaceProvider } from "../components/RestritoPlace";
+import { countIn, placeRestrito } from "../lib/restritoPlace";
 import { Link } from "react-router-dom";
 import { pgShortDate } from "../lib/format";
 import { quoteNorm } from "../lib/quotes";
@@ -30,6 +32,8 @@ import type { WikiEntryDoc } from "../types";
 export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string }) {
   const [activeTab, setActiveTab] = useState(0);
   const restrito = useRestrito(wikiId);
+  const place = placeRestrito(restrito, data.restritoSlots);
+  const nPostsR = countIn(place, "posts"), nTagsR = countIn(place, "tags");
   const [mine, toggleMine] = useMineToggle();
   const epigraph = quoteNorm(data.featuredQuote, data.title);
   // Itens do índice que valem pra página toda (só entram na aba Geral), na ordem do original.
@@ -50,6 +54,7 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
   if (data.taxonomy?.length) tabPanels.push({ label: "Taxonomia", content: <TaxonomyPanel taxonomy={data.taxonomy} /> });
 
   return (
+    <RestritoPlaceProvider value={place}>
     <SwapProvider items={restrito} winner={swapWinners(data.fields, data.taxonomy)}>
       <article className="card">
         {data.ancestors && data.ancestors.length > 0 && (
@@ -102,13 +107,15 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
           </div>
         ))}
 
-        {data.posts && data.posts.length > 0 && (
+        {((data.posts && data.posts.length > 0) || nPostsR > 0) && (
           <div className="posts-wrap">
             <h2 className="cathead" id="posts">
               Posts
             </h2>
-            {data.posts.map((p, i) => (
-              <details key={i} className="wiki-section post" open>
+            {(data.posts || []).map((p, i) => (
+              <Fragment key={i}>
+              <RestritoBlocks area="posts" index={i} />
+              <details className="wiki-section post" open>
                 <summary className="post-summary">{(p.date ? `${p.date} · ` : "") + (p.title || "(sem título)")}</summary>
                 {p.vis === "spoiler" ? (
                   <SpoilerBlock>
@@ -118,32 +125,39 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
                   <RenderMarkdown text={p.body} />
                 )}
               </details>
+              </Fragment>
             ))}
+            <RestritoBlocks area="posts" index={(data.posts || []).length} />
           </div>
         )}
 
         <RelationsSection data={data} />
         <AffinitiesSection data={data} />
 
-        {data.tags && data.tags.length > 0 && (
+        {((data.tags && data.tags.length > 0) || nTagsR > 0) && (
           <div className="tags">
-            {data.tags.map((t, i) =>
-              t.vis === "spoiler" ? (
-                // Tag spoiler: tarja no texto, sem link pra busca (chip + spoilerSpan no original).
-                <span key={i} className="tag">
-                  <SpoilerSpan text={"#" + t.text} />
-                </span>
-              ) : (
-                <Link key={i} className="tag" to={`/wiki?q=${encodeURIComponent(t.text)}`}>
-                  {"#" + t.text}
-                </Link>
-              ),
-            )}
+            {(data.tags || []).map((t, i) => (
+              <Fragment key={i}>
+                <RestritoInline area="tags" index={i} />
+                {t.vis === "spoiler" ? (
+                  // Tag spoiler: tarja no texto, sem link pra busca (chip + spoilerSpan no original).
+                  <span className="tag">
+                    <SpoilerSpan text={"#" + t.text} />
+                  </span>
+                ) : (
+                  <Link className="tag" to={`/wiki?q=${encodeURIComponent(t.text)}`}>
+                    {"#" + t.text}
+                  </Link>
+                )}
+              </Fragment>
+            ))}
+            <RestritoInline area="tags" index={(data.tags || []).length} />
           </div>
         )}
         <RestritoSlot items={restrito} />
         <MySuggestionsHere wikiId={wikiId} open={mine} />
       </article>
     </SwapProvider>
+    </RestritoPlaceProvider>
   );
 }
