@@ -1,0 +1,126 @@
+import { useState, type ReactNode } from "react";
+import { Link } from "react-router-dom";
+import { pgShortDate } from "../lib/format";
+import { quoteNorm } from "../lib/quotes";
+import { Infobox } from "../components/Infobox";
+import { ArticleBundle } from "../components/ArticleBundle";
+import { GalleryPanel } from "../components/GalleryPanel";
+import { CitationsPanel } from "../components/CitationsPanel";
+import { TaxonomyPanel } from "../components/TaxonomyPanel";
+import { RelationsSection, AffinitiesSection } from "../components/RelationsSection";
+import { RenderMarkdown, SpoilerFlag, SpoilerBlock } from "../lib/markdown";
+import type { WikiEntryDoc } from "../types";
+
+/**
+ * Página de entrada (`/wiki/<slug>`) — porta de renderEntry em wiki-core.js (arvore). Login,
+ * favoritar, sugerir e conteúdo restrito (wikiRestrito) chegam numa próxima etapa
+ * (docs/fase4-site.md no arvore, etapa 4); esta cobre a paridade de leitura.
+ */
+export function EntryView({ data }: { data: WikiEntryDoc }) {
+  const [activeTab, setActiveTab] = useState(0);
+  const epigraph = quoteNorm(data.featuredQuote, data.title);
+  const sharedToc: { id: string; label: string }[] = [];
+  if (data.posts?.length) sharedToc.push({ id: "posts", label: "Posts" });
+
+  const tabPanels: { label: string; content: ReactNode }[] = [
+    { label: "Geral", content: <ArticleBundle bundle={data} anchorPrefix="geral-" epigraph={epigraph} extraToc={sharedToc} /> },
+  ];
+  (data.variants || []).forEach((variant, vi) => {
+    tabPanels.push({ label: variant.label || "Versão", content: <ArticleBundle bundle={variant} anchorPrefix={`v${vi}-`} epigraph={epigraph} /> });
+  });
+  if (data.gallery?.length) tabPanels.push({ label: "Galeria", content: <GalleryPanel gallery={data.gallery} title={data.title} /> });
+  if (data.citacoes?.length) tabPanels.push({ label: "Citações", content: <CitationsPanel citacoes={data.citacoes} title={data.title} /> });
+  if (data.taxonomy?.length) tabPanels.push({ label: "Taxonomia", content: <TaxonomyPanel taxonomy={data.taxonomy} /> });
+
+  return (
+    <article className="card">
+      {data.ancestors && data.ancestors.length > 0 && (
+        <div className="crumb">
+          {data.ancestors.map((c, i) => (
+            <span key={c.targetId}>
+              {i > 0 && " › "}
+              <Link to={`/wiki/${encodeURIComponent(c.targetId)}`}>{c.targetTitle}</Link>
+            </span>
+          ))}
+        </div>
+      )}
+      <h1>{data.title || "(sem título)"}</h1>
+      <div className="pg-entry-meta">
+        <span className="pg-entry-type">
+          {data.type && <Link to={`/wiki?tipo=${encodeURIComponent(data.type)}`}>{data.type}</Link>}
+          {data.publishedAt && (data.type ? " · " : "") + `atualizado em ${pgShortDate(data.publishedAt)}`}
+        </span>
+        <div className="pg-entry-actions" />
+      </div>
+
+      {tabPanels.length > 1 && (
+        <div className="work-tabs" role="tablist" aria-label="Seções da página">
+          {tabPanels.map((p, i) => (
+            <button
+              key={i}
+              type="button"
+              role="tab"
+              aria-selected={i === activeTab}
+              className={"work-tab" + (i === activeTab ? " on" : "")}
+              onClick={() => setActiveTab(i)}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Infobox entra só agora (depois das abas): ela flutua à direita a partir daqui, então
+          as abas ficam acima dela em vez de presas atrás/embaixo (mesma ordem de wiki-core.js). */}
+      <Infobox data={data} />
+      {tabPanels.map((p, i) => (
+        <div key={i} hidden={i !== activeTab}>
+          {p.content}
+        </div>
+      ))}
+
+      {data.posts && data.posts.length > 0 && (
+        <div className="posts-wrap">
+          <h2 className="cathead" id="posts">
+            Posts
+          </h2>
+          {data.posts.map((p, i) => (
+            <details key={i} className="wiki-section post" open>
+              <summary className="post-summary">
+                {p.date ? `${p.date} · ` : ""}
+                {p.title || "(sem título)"}
+                {p.vis === "spoiler" && <SpoilerFlag />}
+              </summary>
+              {p.vis === "spoiler" ? (
+                <SpoilerBlock>
+                  <RenderMarkdown text={p.body} />
+                </SpoilerBlock>
+              ) : (
+                <RenderMarkdown text={p.body} />
+              )}
+            </details>
+          ))}
+        </div>
+      )}
+
+      <RelationsSection data={data} />
+      <AffinitiesSection data={data} />
+
+      {data.tags && data.tags.length > 0 && (
+        <div className="tags">
+          {data.tags.map((t, i) =>
+            t.vis === "spoiler" ? (
+              <span key={i} className="tag">
+                #{t.text}
+              </span>
+            ) : (
+              <Link key={i} className="tag" to={`/wiki?q=${encodeURIComponent(t.text)}`}>
+                #{t.text}
+              </Link>
+            ),
+          )}
+        </div>
+      )}
+    </article>
+  );
+}

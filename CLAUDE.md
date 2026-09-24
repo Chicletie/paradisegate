@@ -20,9 +20,12 @@ Vite + React 19 + TypeScript + Tailwind v4 + react-router. `npm test` roda os te
 3. **Paridade de visual e de função com a wiki de hoje** (`https://paradisegate.com.br/wiki`),
    provada por capturas antes/depois — não por achismo. `wiki-core.js` (no arvore) é a
    referência de comportamento; `DESIGN.md` (raiz do arvore) é o sistema visual.
-4. **O CSS PG (`src/styles/wiki.css`) veio do arvore como está.** Não reescreva em Tailwind — a
+4. **O CSS PG (`src/styles/wiki.css`) veio do arvore, só com as regras usadas no modo PG** (sem
+   a base clara/escura genérica que só o Ursprung usava). Não reescreva em Tailwind — a
    paridade visual depende disso. `src/styles/tokens.css` tem os mesmos tokens `--pg-*` (e o
    bloco `@theme` que os expõe como classes Tailwind) pras páginas novas, fora da wiki.
+   `public/reset-senha.html` (fora do bundle) carrega esse mesmo CSS pelo nome fixo que
+   `vite.config.ts` dá ao build (`assets/wiki.css`) — uma cópia só, nunca duplique o arquivo.
 5. **URLs iguais às de hoje:** `/wiki`, `/wiki/<slug>`, `/wiki/_timeline` (`?ano=`),
    `/wiki/_perfil` (`#sugestoes`, `#favoritos`); na home, `?q=`, `?tipo=`, `?aleatoria=1`. `/`
    por enquanto redireciona pra `/wiki` — a home do site é trabalho da colaboradora.
@@ -36,6 +39,10 @@ Vite + React 19 + TypeScript + Tailwind v4 + react-router. `npm test` roda os te
 10. **Nada vai pro `main` sem o OK do autor.** Um PR por etapa, com capturas antes/depois e
     resumo em português simples; ele aprova a mesclagem.
 11. Commits em português, dizendo o que mudou; mantenha a linha `Co-Authored-By` de atribuição.
+12. **Nó de SVG clicável (árvore genealógica) nunca dentro de `<Link>`.** Um `<a>` do
+    react-router (mesmo com `display:contents`) dentro de `<svg>` não pinta os filhos em todo
+    navegador — use `onClick` + `useNavigate()` no próprio elemento SVG (ver `TreeNode` em
+    `src/lib/relations.tsx`), igual ao clique direto que `wiki-core.js` já usa ali.
 
 ## Estrutura
 
@@ -43,7 +50,7 @@ Vite + React 19 + TypeScript + Tailwind v4 + react-router. `npm test` roda os te
 |---|---|
 | `src/pages/` | Páginas da wiki: home, entrada, temporada, linha do tempo, perfil, erro. |
 | `src/components/` | Cabeçalho e rodapé PG, compartilhados. |
-| `src/lib/` | Lógica pura (Firebase, sorteio do dia, etc.) — testável sem DOM. |
+| `src/lib/` | Firebase (`firebase.ts`), índice da wiki com suporte a `shards/` (`wikiIndex.tsx`), markdown/spoilers (`markdown.tsx`), citações (`quotes.tsx`), relações/família/linha do tempo (`relations.tsx`) — lógica pura testável sem DOM onde dá. |
 | `src/styles/tokens.css` | Tokens `--pg-*` + `@theme` do Tailwind, pras páginas novas. |
 | `src/styles/wiki.css` | CSS da wiki, herdado do arvore como está. |
 | `public/404.html` | Rotas de SPA no GitHub Pages: `/ursprung`\*/`/tree`\* vão pro subdomínio do console; o resto reconstrói a URL bonita via `?p=`. |
@@ -54,7 +61,8 @@ Vite + React 19 + TypeScript + Tailwind v4 + react-router. `npm test` roda os te
 ## Ramos e PRs
 
 Sem `docs/` neste repositório ainda — o roteiro completo mora em `docs/fase4-site.md` do
-arvore. Etapas (um PR cada, com capturas antes/depois): 1) esqueleto (este PR); 2) entrada,
-temporada e erro; 3) home com destaques do dia, busca e filtros; 4) linha do tempo, perfil,
-login, sugestões, restrito. Se uma sessão não terminar uma etapa, para num PR completo e
-descreve no fim o que falta.
+arvore. Etapas (um PR cada, com capturas antes/depois): 1) esqueleto ✔; 2) entrada, temporada e
+erro ✔ (login, favoritar, sugerir e conteúdo restrito de `wikiRestrito` ficaram pra etapa 4 de
+propósito — a entrada já busca e mostra tudo que não depende de login); 3) home com destaques
+do dia, busca e filtros; 4) linha do tempo, perfil, login, sugestões, restrito. Se uma sessão
+não terminar uma etapa, para num PR completo e descreve no fim o que falta.
