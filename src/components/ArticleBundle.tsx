@@ -3,6 +3,7 @@ import { mdInline, RenderMarkdown, SpoilerBlock } from "../lib/markdown";
 import { QuoteEpigraph } from "../lib/quotes";
 import type { WikiArticleBundle, WikiCitation } from "../types";
 import { SwapBody } from "./EntryActions";
+import { RestritoBlocks } from "./RestritoPlace";
 
 function slugifyAnchor(s: string | undefined, i: string): string {
   return (
@@ -35,6 +36,8 @@ export function ArticleBundle({
 }) {
   const longFields = (bundle.fields || []).filter((f) => f.type === "nota");
   const sections = bundle.sections || [];
+  // Restrito no lugar só na aba Geral (as variantes de obra seguem com o restrito no fim).
+  const geral = anchorPrefix === "geral-";
   const tocEntries = [
     ...longFields.map((f, i) => ({ id: slugifyAnchor(f.key, anchorPrefix + "lf" + i), label: f.key })),
     ...sections.map((s, i) => ({ id: slugifyAnchor(s.title || "Seção", anchorPrefix + "sc" + i), label: s.title || "Seção" })),
@@ -71,6 +74,7 @@ export function ArticleBundle({
         const id = slugifyAnchor(f.key, anchorPrefix + "lf" + i);
         return (
           <Fragment key={id}>
+            {geral && <RestritoBlocks area="notas" index={i} />}
             <h2 className="cathead" id={id}>
               {f.key}
             </h2>
@@ -87,10 +91,13 @@ export function ArticleBundle({
           </Fragment>
         );
       })}
+      {geral && <RestritoBlocks area="notas" index={longFields.length} />}
       {sections.map((s, i) => {
         const id = slugifyAnchor(s.title || "Seção", anchorPrefix + "sc" + i);
         return (
-          <details key={id} className="wiki-section" id={id} open>
+          <Fragment key={id}>
+          {geral && <RestritoBlocks area="secoes" index={i} />}
+          <details className="wiki-section" id={id} open>
             <summary className="cathead">
               {s.title || "Seção"}
             </summary>
@@ -102,8 +109,10 @@ export function ArticleBundle({
               <RenderMarkdown text={s.body} />
             )}
           </details>
+          </Fragment>
         );
       })}
+      {geral && <RestritoBlocks area="secoes" index={sections.length} />}
     </div>
   );
 }

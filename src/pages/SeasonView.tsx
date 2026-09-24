@@ -2,11 +2,16 @@ import { pgShortDate } from "../lib/format";
 import { RenderMarkdown, SpoilerBlock } from "../lib/markdown";
 import { MySuggestionsHere, RestritoSlot, SuggestButtons, useMineToggle, useRestrito } from "../components/EntryActions";
 import type { WikiSeasonDoc } from "../types";
+import { Fragment } from "react";
+import { RestritoBlocks, RestritoPlaceProvider } from "../components/RestritoPlace";
+import { countIn, placeRestrito } from "../lib/restritoPlace";
 
 /** Recaps de sessão de uma temporada de campanha — porta de renderSeason da wiki
  * original. Mesma casca da entrada; o conteúdo é uma lista de sessões em vez de campos. */
 export function SeasonView({ data, wikiId }: { data: WikiSeasonDoc; wikiId: string }) {
   const restrito = useRestrito(wikiId);
+  const place = placeRestrito(restrito, data.restritoSlots);
+  const nSessR = countIn(place, "sessoes");
   const [mine, toggleMine] = useMineToggle();
   const sessions = data.sessions || [];
   const factRows: [string, string][] = [];
@@ -16,6 +21,7 @@ export function SeasonView({ data, wikiId }: { data: WikiSeasonDoc; wikiId: stri
   if (data.cast?.length) factRows.push(["Elenco", data.cast.join(", ")]);
 
   return (
+    <RestritoPlaceProvider value={place}>
     <article className="card">
       <h1>{data.title || "(sem título)"}</h1>
       <div className="pg-entry-meta">
@@ -43,11 +49,14 @@ export function SeasonView({ data, wikiId }: { data: WikiSeasonDoc; wikiId: stri
         </div>
       )}
 
-      {sessions.length === 0 ? (
+      {sessions.length === 0 && nSessR === 0 ? (
         <div className="empty">Nenhum recap público ainda.</div>
       ) : (
-        sessions.map((sx, i) => (
-          <div key={i}>
+        <>
+        {sessions.map((sx, i) => (
+          <Fragment key={i}>
+          <RestritoBlocks area="sessoes" index={i} />
+          <div>
             <h2 className="cathead" id={`s${i}`}>
               {(sx.title || `Sessão ${i + 1}`) + (sx.date ? ` · ${sx.date}` : "")}
             </h2>
@@ -59,10 +68,14 @@ export function SeasonView({ data, wikiId }: { data: WikiSeasonDoc; wikiId: stri
               <RenderMarkdown text={sx.recap} />
             )}
           </div>
-        ))
+          </Fragment>
+        ))}
+        <RestritoBlocks area="sessoes" index={sessions.length} />
+        </>
       )}
       <RestritoSlot items={restrito} />
       <MySuggestionsHere wikiId={wikiId} open={mine} />
     </article>
+    </RestritoPlaceProvider>
   );
 }

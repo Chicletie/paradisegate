@@ -4,6 +4,7 @@ import { addSuggestion, fetchMySuggestionsFor, fetchRestrito } from "../lib/api"
 import { fieldValue, RenderMarkdown } from "../lib/markdown";
 import type { WikiField, WikiRestritoItem, WikiSuggestion } from "../types";
 import { PgStar } from "./PgIcons";
+import { usePlacedSet } from "../lib/restritoPlace";
 
 /*
  * O que depende de login numa página da wiki — porta de mountFavoriteBtn, mountSuggestBox,
@@ -217,7 +218,8 @@ const SUB_HEAD = { fontSize: 11, marginTop: 14 };
 
 /** "🔐 Desbloqueado pra você": o que não é troca de campo vira uma lista no fim da página. */
 export function RestritoSlot({ items }: { items: WikiRestritoItem[] }) {
-  const extra = items.filter((it) => it.kind !== "campo-confidencial");
+  const placed = usePlacedSet();
+  const extra = items.filter((it) => it.kind !== "campo-confidencial" && !placed.has(it));
   return (
     <div className="restrito-wrap">
       {extra.length > 0 && <div className="cathead">🔐 Desbloqueado pra você</div>}
@@ -282,7 +284,8 @@ export function RestritoSlot({ items }: { items: WikiRestritoItem[] }) {
 // --- Versão confidencial de um campo, trocada no próprio lugar (data-field-swap) ---
 
 interface SwapState {
-  values: Record<string, string>;
+  /** Campo → versões confidenciais liberadas pro leitor (pode ter mais de uma). */
+  values: Record<string, string[]>;
   /** Campo → lugar que recebe a troca. Com o mesmo nome em dois lugares, vale o último da
    * página (o original percorre os `[data-field-swap]` e fica com o último que bate). */
   winner: Record<string, string>;
@@ -312,27 +315,52 @@ export function swapWinners(fields: WikiField[] = [], taxonomy: WikiField[] = []
 }
 
 export function SwapProvider({ items, winner, children }: { items: WikiRestritoItem[]; winner: Record<string, string>; children: ReactNode }) {
-  const values: Record<string, string> = {};
+  const values: Record<string, string[]> = {};
   items.forEach((it) => {
-    if (it.kind === "campo-confidencial" && it.key) values[it.key] = it.value || "";
+    if (it.kind === "campo-confidencial" && it.key) (values[it.key] = values[it.key] || []).push(it.value || "");
   });
   return <SwapContext.Provider value={{ values, winner }}>{children}</SwapContext.Provider>;
 }
 
-/** A versão confidencial deste campo neste lugar, se o leitor tiver acesso. */
-function useSwap(slot: string, key: string): string | undefined {
+/** As versões confidenciais deste campo neste lugar, se o leitor tiver acesso. */
+function useSwap(slot: string, key: string): string[] | undefined {
   const ctx = useContext(SwapContext);
   if (!ctx || ctx.winner[key] !== slot || !(key in ctx.values)) return undefined;
   return ctx.values[key];
 }
 
+/** Estado da troca: qual versão está à mostra, ou a pública ("ver como convidado"). */
+function useSwapView(n: number) {
+  const [idx, setIdx] = useState(0);
+  const [guest, setGuest] = useState(false);
+  const controls = (
+    <span className="pg-swap-ctl">
+      {guest ? <span className="pg-swap-note">versão pública</span> : n > 1 ? <span className="pg-swap-note">{"versão " + (idx + 1) + " de " + n}</span> : null}
+      {!guest && n > 1 && (
+        <button type="button" className="linklike" onClick={() => setIdx((idx + 1) % n)}>
+          ver outra versão
+        </button>
+      )}
+      <button type="button" className="linklike" aria-pressed={guest ? "true" : "false"} onClick={() => setGuest(!guest)}>
+        {guest ? "mostrar a desbloqueada" : "ver como convidado"}
+      </button>
+    </span>
+  );
+  return { idx: Math.min(idx, n - 1), guest, controls };
+}
+
 /** `<td>` de um fato curto (infobox ou taxonomia). */
 export function SwapCell({ slot, fieldKey, children }: { slot: string; fieldKey: string; children: ReactNode }) {
   const swapped = useSwap(slot, fieldKey);
-  if (swapped === undefined) return <td data-field-swap={fieldKey}>{children}</td>;
+  if (swapped === undefined || !swapped.length) return <td data-field-swap={fieldKey}>{children}</td>;
+  return <SwapCellOn fieldKey={fieldKey} versions={swapped}>{children}</SwapCellOn>;
+}
+function SwapCellOn({ fieldKey, versions, children }: { fieldKey: string; versions: string[]; children: ReactNode }) {
+  const v = useSwapView(versions.length);
   return (
-    <td data-field-swap={fieldKey} className="wb-conf-swapped">
-      <span>{fieldValue(swapped)}</span>
+    <td data-field-swap={fieldKey} className={v.guest ? undefined : "wb-conf-swapped"}>
+      {v.guest ? children : <span>{fieldValue(versions[v.idx])}</span>}
+      {v.controls}
     </td>
   );
 }
@@ -341,10 +369,15 @@ export function SwapCell({ slot, fieldKey, children }: { slot: string; fieldKey:
 export function SwapBody({ slot, fieldKey, children }: { slot?: string; fieldKey: string; children: ReactNode }) {
   const swapped = useSwap(slot || "", fieldKey);
   if (!slot) return <div>{children}</div>;
-  if (swapped === undefined) return <div data-field-swap={fieldKey}>{children}</div>;
+  if (swapped === undefined || !swapped.length) return <div data-field-swap={fieldKey}>{children}</div>;
+  return <SwapBodyOn fieldKey={fieldKey} versions={swapped}>{children}</SwapBodyOn>;
+}
+function SwapBodyOn({ fieldKey, versions, children }: { fieldKey: string; versions: string[]; children: ReactNode }) {
+  const v = useSwapView(versions.length);
   return (
-    <div data-field-swap={fieldKey} className="wb-conf-swapped">
-      <RenderMarkdown text={swapped} />
+    <div data-field-swap={fieldKey} className={v.guest ? undefined : "wb-conf-swapped"}>
+      {v.guest ? children : <RenderMarkdown text={versions[v.idx]} />}
+      {v.controls}
     </div>
   );
 }
