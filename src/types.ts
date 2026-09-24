@@ -155,6 +155,12 @@ export interface WikiLink {
   targetId?: string;
   targetTitle: string;
   style?: LinkStyle;
+  /** O que o outro é pra esta página ("mãe adotiva"), escolhido pelo autor. */
+  term?: string;
+  /** true = a relação inteira atrás da tarja; "disfarce" = mostra `cover` e esconde só o termo. */
+  spoiler?: boolean | "disfarce";
+  cover?: string;
+  coverStyle?: LinkStyle;
 }
 
 export interface WikiGalleryItem {
