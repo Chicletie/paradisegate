@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { usePgBody } from "../lib/usePgBody";
 import { useAccount } from "../lib/account";
 import { fetchMyAccesses, fetchMySuggestions } from "../lib/api";
-import { useWikiIndex } from "../lib/wikiIndex";
+import { useWikiIndex, useWikiObras } from "../lib/wikiIndex";
+import { ProgressPicker } from "../components/SpoilerProgress";
 import { objPos } from "../lib/format";
 import { resizePhoto } from "../lib/photo";
 import { accessLabel, groupAccesses, isNewSuggestion, newestFirst, suggestionStatus } from "../lib/profile";
@@ -18,6 +19,7 @@ const SECTIONS: [string, string][] = [
   ["sugestoes", "Suas sugestões"],
   ["favoritos", "Favoritos"],
   ["acessos", "Seus acessos"],
+  ["spoilers", "Spoilers"],
 ];
 
 /**
@@ -75,7 +77,30 @@ function ProfileSections({ user }: { user: AuthUser }) {
       <Suggestions user={user} />
       <Favorites />
       <Accesses user={user} />
+      <SpoilerSettings />
     </>
+  );
+}
+
+// Spoiler por obra: até onde o leitor já viu cada obra. O que ele já viu aparece aberto em
+// toda a wiki; o resto continua na tarja, dizendo de que temporada é.
+function SpoilerSettings() {
+  const obras = useWikiObras();
+  return (
+    <Panel id="spoilers" title="Até onde você já viu">
+      {obras.length ? (
+        <>
+          <p className="pg-profile-note">Os spoilers das temporadas que você já viu aparecem abertos em toda a wiki. Os outros continuam tampados.</p>
+          <div className="pg-prog-list">
+            {obras.map((o) => (
+              <ProgressPicker key={o.id} obra={o} />
+            ))}
+          </div>
+        </>
+      ) : (
+        <p className="pg-profile-note">Nenhuma página tem spoiler marcado por temporada ainda.</p>
+      )}
+    </Panel>
   );
 }
 

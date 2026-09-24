@@ -22,7 +22,7 @@ function RelLabel({ lk }: { lk: WikiLink }) {
     return (
       <>
         {relShort(lk.cover) + " "}
-        <SpoilerSpan text={"(" + (lk.term || relShort(lk.label || "")) + ")"} />
+        <SpoilerSpan text={"(" + (lk.term || relShort(lk.label || "")) + ")"} at={lk.at} />
       </>
     );
   }
@@ -62,7 +62,12 @@ export function LinkCard({
       {hidden.length > 0 && (
         <>
           {plain.length > 0 && " · "}
-          <SpoilerSpan text={hidden.map((l) => l.term || relShort(l.label || "")).join(" · ")} />
+          {hidden.map((l, i) => (
+            <Fragment key={i}>
+              {i > 0 && " · "}
+              <SpoilerSpan text={l.term || relShort(l.label || "")} at={l.at} />
+            </Fragment>
+          ))}
         </>
       )}
     </>
@@ -85,7 +90,7 @@ export function LinkCard({
   if (!plain.length && !titleOnly) {
     return (
       <div className={className + " is-spoiler"}>
-        <RevealSpoiler preview="relação em spoiler · toque">
+        <RevealSpoiler preview="relação em spoiler · toque" at={all.every((l) => l.at === all[0].at) ? all[0].at : undefined}>
           {link.targetId ? <Link to={`/wiki/${encodeURIComponent(link.targetId)}`}>{kids}</Link> : kids}
         </RevealSpoiler>
       </div>

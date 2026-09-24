@@ -22,7 +22,7 @@ export function GalleryPanel({ gallery, title }: { gallery: WikiGalleryItem[]; t
                 return (
                   <figure key={i} className="gal-item">
                     {item.vis === "spoiler" ? (
-                      <SpoilerBlock>
+                      <SpoilerBlock at={item.at}>
                         <img src={item.url} alt={alt} />
                       </SpoilerBlock>
                     ) : (

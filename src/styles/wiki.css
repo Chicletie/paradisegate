@@ -925,3 +925,12 @@ body.pg-site:not(.pg-home) .wb-epi-attr a, body.pg-site:not(.pg-home) .wb-dl-who
 .link-card.is-spoiler { display: block; }
 .link-card.is-spoiler .md-spoiler { display: inline-block; }
 .link-card.is-spoiler .md-spoiler.on a { display: flex; flex-direction: column; gap: 2px; color: inherit; text-decoration: none; }
+
+/* ---- Spoiler por obra: barrinha do convidado e seletor da conta ---- */
+.pg-prog-bar { margin: 12px 0 16px; padding: 10px 14px; border: 1px dashed var(--pg-line); font-family: var(--pg-f-ui); color: var(--pg-ink); border-radius: 10px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: 14px; }
+.pg-prog-lead { color: var(--pg-muted); }
+.pg-prog-list { font-family: var(--pg-f-ui); display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.pg-prog-pick { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pg-prog-name { font-weight: 600; }
+.pg-prog-pick select { min-height: 36px; font: inherit; padding: 4px 8px; border-radius: 8px; }
+@media (max-width: 600px) { .pg-prog-bar { flex-direction: column; align-items: stretch; } .pg-prog-pick { justify-content: space-between; } }

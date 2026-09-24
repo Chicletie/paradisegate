@@ -6,6 +6,7 @@ import App from "./App";
 import { restorePrettyUrl } from "./lib/restorePrettyUrl";
 import { WikiIndexProvider } from "./lib/wikiIndex";
 import { AccountProvider } from "./lib/account";
+import { SpoilerProgressProvider } from "./components/SpoilerProgress";
 
 restorePrettyUrl(location.search, (url) => history.replaceState(null, "", url));
 
@@ -18,7 +19,9 @@ createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       <WikiIndexProvider>
         <AccountProvider>
-          <App />
+          <SpoilerProgressProvider>
+            <App />
+          </SpoilerProgressProvider>
         </AccountProvider>
       </WikiIndexProvider>
     </BrowserRouter>

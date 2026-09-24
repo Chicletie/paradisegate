@@ -69,6 +69,7 @@ export function mergeProfile(d: WikiProfile, user: AuthUser, patch: WikiProfileP
   if (patch.nickname !== undefined) next.nickname = patch.nickname;
   if (patch.seenAt !== undefined) next.seenAt = patch.seenAt;
   if (patch.photo !== undefined) next.photo = patch.photo;
+  if (patch.progress) next.progress = { ...(d.progress || {}), [patch.progress.obraId]: patch.progress.seasonId };
   if (patch.favorite) {
     const list = (d.favorites || []).filter((x) => x !== patch.favorite!.id);
     if (patch.favorite.on) list.push(patch.favorite.id);

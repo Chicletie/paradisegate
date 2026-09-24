@@ -16,6 +16,7 @@ import { onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword,
 import { auth, db } from "./firebase";
 import { allOrOwn } from "./restrito";
 import type {
+  SpoilerObra,
   AuthUser,
   WikiIndex,
   WikiProfile,
@@ -36,9 +37,16 @@ import type {
  * fetchIndexEntries): sem `shardCount` é só o documento base; um mesmo `wikiId` em duas partes
  * vale o de `updatedAt` mais recente, e uma parte que falhar conta como vazia.
  */
+/** Catálogo de obras do índice (spoiler por obra), lido junto com o índice. */
+let indexObras: SpoilerObra[] = [];
+export function wikiObras(): SpoilerObra[] {
+  return indexObras;
+}
+
 export async function fetchWikiIndex(): Promise<WikiIndex> {
   const baseSnap = await getDoc(doc(db, "wikiIndex", "lotus"));
   const base = baseSnap.exists() ? baseSnap.data() : {};
+  indexObras = Array.isArray(base.obras) ? (base.obras as SpoilerObra[]) : [];
   const out: WikiIndex = {};
   const add = (entries: WikiIndex | undefined) => {
     Object.entries(entries || {}).forEach(([id, e]) => {
@@ -103,6 +111,7 @@ export function saveProfile(user: AuthUser, patch: WikiProfilePatch, updatedAt: 
   if (patch.nickname !== undefined) data.nickname = patch.nickname;
   if (patch.seenAt !== undefined) data.seenAt = patch.seenAt;
   if (patch.photo !== undefined) data.photo = patch.photo === null ? deleteField() : patch.photo;
+  if (patch.progress) data.progress = { [patch.progress.obraId]: patch.progress.seasonId };
   if (patch.favorite) data.favorites = patch.favorite.on ? arrayUnion(patch.favorite.id) : arrayRemove(patch.favorite.id);
   return setDoc(doc(db, "wikiProfiles", user.uid), data, { merge: true });
 }

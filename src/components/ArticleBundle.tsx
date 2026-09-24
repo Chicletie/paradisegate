@@ -81,7 +81,7 @@ export function ArticleBundle({
             {/* Troca confidencial só na aba Geral: variantes de obra não têm versão confidencial. */}
             <SwapBody slot={anchorPrefix === "geral-" ? "lf:" + i : undefined} fieldKey={f.key}>
               {f.vis === "spoiler" ? (
-                <SpoilerBlock>
+                <SpoilerBlock at={f.at}>
                   <RenderMarkdown text={f.value} />
                 </SpoilerBlock>
               ) : (
@@ -102,7 +102,7 @@ export function ArticleBundle({
               {s.title || "Seção"}
             </summary>
             {s.vis === "spoiler" ? (
-              <SpoilerBlock>
+              <SpoilerBlock at={s.at}>
                 <RenderMarkdown text={s.body} />
               </SpoilerBlock>
             ) : (
