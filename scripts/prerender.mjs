@@ -6,11 +6,13 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import {
-  fieldsToObject, mergeEntries, describeEntry, headTags, injectHead, safeSlug, sitemap, SITE_NAME,
+  fieldsToObject, mergeEntries, describeEntry, headTags, injectHead, safeSlug, sitemap, SITE, SITE_NAME,
 } from "./seo.mjs";
 
 const DIST = path.resolve(process.argv[2] || "dist");
 const API = "https://firestore.googleapis.com/v1/projects/rotina-555dd/databases/(default)/documents";
+// Imagem da prévia de link pra home e pra página sem retrato (public/og-padrao.png, 1200×630).
+const DEFAULT_IMAGE = SITE + "/og-padrao.png";
 const HOME_DESC = "Wiki oficial de Paradise Gate: personagens, facções, lugares e a história do mundo.";
 
 async function getDoc(p) {
@@ -47,14 +49,14 @@ try {
 
 const page = (title, tags) => injectHead(template, title, tags);
 const homeTitle = `${SITE_NAME} · Wiki`;
-const home = page(homeTitle, headTags({ title: homeTitle, description: HOME_DESC, path: "/wiki" }));
+const home = page(homeTitle, headTags({ title: homeTitle, description: HOME_DESC, path: "/wiki", image: DEFAULT_IMAGE }));
 // /wiki pode ser servido como wiki.html ou wiki/index.html, conforme o GitHub Pages resolver a
 // pasta wiki/ ao lado; os dois existem e são iguais.
 write("wiki.html", home);
 write("wiki/index.html", home);
-write("index.html", page(SITE_NAME, headTags({ title: SITE_NAME, description: HOME_DESC, path: "/" })));
+write("index.html", page(SITE_NAME, headTags({ title: SITE_NAME, description: HOME_DESC, path: "/", image: DEFAULT_IMAGE })));
 const tl = `Linha do tempo · ${SITE_NAME}`;
-write("wiki/_timeline.html", page(tl, headTags({ title: tl, description: "Os acontecimentos de Paradise Gate, ano a ano.", path: "/wiki/_timeline" })));
+write("wiki/_timeline.html", page(tl, headTags({ title: tl, description: "Os acontecimentos de Paradise Gate, ano a ano.", path: "/wiki/_timeline", image: DEFAULT_IMAGE })));
 const pf = `Seu perfil · ${SITE_NAME}`;
 write("wiki/_perfil.html", page(pf, headTags({ title: pf, description: HOME_DESC, path: "/wiki/_perfil", noindex: true })));
 
@@ -66,7 +68,7 @@ for (const id of Object.keys(entries).sort()) {
   if (!slug || !e.title) continue;
   const title = `${e.title} · ${SITE_NAME}`;
   write(`wiki/${slug}.html`, page(title, headTags({
-    title, description: describeEntry(e), path: `/wiki/${slug}`, image: e.cover || null, type: "article",
+    title, description: describeEntry(e), path: `/wiki/${slug}`, image: e.cover || DEFAULT_IMAGE, type: "article",
   })));
   urls.push({ path: `/wiki/${slug}`, lastmod: /^\d{4}-\d{2}-\d{2}$/.test(e.updatedAt || "") ? e.updatedAt : null });
   count++;
