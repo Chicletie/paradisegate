@@ -3,6 +3,7 @@ import { WikiHomePage } from "./pages/WikiHomePage";
 import { EntryPage } from "./pages/EntryPage";
 import { TimelinePage } from "./pages/TimelinePage";
 import { ProfilePage } from "./pages/ProfilePage";
+import { SearchPage } from "./pages/SearchPage";
 import { ErrorPage } from "./pages/ErrorPage";
 import { ScrollToTop } from "./components/ScrollToTop";
 
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/wiki" element={<HomeRoute />} />
         <Route path="/wiki/_timeline" element={<TimelinePage />} />
         <Route path="/wiki/_perfil" element={<ProfilePage />} />
+        <Route path="/wiki/_busca" element={<SearchPage />} />
         <Route path="/wiki/:slug" element={<EntryPage />} />
         <Route path="*" element={<ErrorPage />} />
       </Routes>

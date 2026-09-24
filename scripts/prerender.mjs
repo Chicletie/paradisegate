@@ -61,6 +61,9 @@ write("wiki/_timeline.html", page(tl, headTags({ title: tl, description: "Os aco
 const pf = `Seu perfil · ${SITE_NAME}`;
 write("wiki/_perfil.html", page(pf, headTags({ title: pf, description: HOME_DESC, path: "/wiki/_perfil", noindex: true })));
 
+const bs = `Busca · ${SITE_NAME}`;
+write("wiki/_busca.html", page(bs, headTags({ title: bs, description: HOME_DESC, path: "/wiki/_busca", noindex: true })));
+
 const urls = [{ path: "/wiki" }, { path: "/wiki/_timeline" }];
 let count = 0;
 for (const id of Object.keys(entries).sort()) {

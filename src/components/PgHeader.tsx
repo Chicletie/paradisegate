@@ -2,10 +2,11 @@ import { useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useWikiIndex, hasEvents } from "../lib/wikiIndex";
 import { pgPlural } from "../lib/format";
+import { searchHref } from "../lib/search";
 import { PgSearchIcon, PgStar } from "./PgIcons";
 import { LoginBar } from "./AccountMenu";
 
-/** Busca controlada por quem chama (a home: filtra a lista a cada letra, sem Enter). */
+/** Busca controlada por quem chama (a home: filtra a lista a cada letra; Enter abre a busca). */
 export interface HeaderSearch {
   value: string;
   onChange: (value: string) => void;
@@ -29,7 +30,7 @@ export function PgHeader({ search }: { search?: HeaderSearch }) {
             <span className="pg-wordmark">Paradise Gate</span>
           </Link>
         </div>
-        {search ? <SearchInput value={search.value} onChange={search.onChange} /> : <SearchBox />}
+        {search ? <HomeSearch search={search} /> : <SearchBox />}
         <LoginBar />
       </div>
       <PgNavBar />
@@ -37,8 +38,24 @@ export function PgHeader({ search }: { search?: HeaderSearch }) {
   );
 }
 
-// Fora da home: Enter leva pra home com ?q= (é lá que a lista filtra).
+// Na home a lista filtra a cada letra; Enter abre a página de busca com a mesma palavra.
+function HomeSearch({ search }: { search: HeaderSearch }) {
+  const navigate = useNavigate();
+  return (
+    <SearchInput
+      value={search.value}
+      onChange={search.onChange}
+      onEnter={() => {
+        if (search.value.trim()) navigate(searchHref(search.value));
+      }}
+    />
+  );
+}
+
+// Fora da home: Enter abre a página de busca.
 function SearchBox() {
+  const location = useLocation();
+  const onSearchPage = location.pathname === "/wiki/_busca";
   const [value, setValue] = useState("");
   const navigate = useNavigate();
   return (
@@ -46,7 +63,10 @@ function SearchBox() {
       value={value}
       onChange={setValue}
       onEnter={() => {
-        if (value.trim()) navigate(`/wiki?q=${encodeURIComponent(value.trim())}`);
+        if (value.trim()) {
+          navigate(searchHref(value));
+          if (onSearchPage) setValue("");
+        }
       }}
     />
   );
