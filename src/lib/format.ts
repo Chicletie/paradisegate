@@ -9,7 +9,16 @@ export function pgShortDate(d: string | undefined): string {
   return `${Number(d.slice(8, 10))} ${mes} ${d.slice(0, 4)}`;
 }
 
-const PG_PLURALS: Record<string, string> = {};
+const PG_PLURALS: Record<string, string> = {
+  Personagem: "Personagens",
+  Lupino: "Lupinos",
+  Divindade: "Divindades",
+  Facção: "Facções",
+  Local: "Locais",
+  Criatura: "Criaturas",
+  Item: "Itens",
+  Evento: "Eventos",
+};
 
 /** Plural em português pra rótulos de tipo na navegação (ex: "Personagem" → "Personagens"). */
 export function pgPlural(t: string): string {

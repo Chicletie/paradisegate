@@ -6,6 +6,7 @@
 export type FieldVisibility = "publico" | "spoiler" | "restrito" | "mestre";
 
 export interface WikiIndexEvent {
+  id?: string;
   familyId?: string;
   label?: string;
   y: number;
@@ -104,6 +105,10 @@ export interface QuoteDialogueLine {
 }
 
 export interface WikiCitation {
+  /** Só nas citações do índice (wbQuotesForIndex): conta uma vez só na Citação do dia. */
+  id?: string;
+  /** `false` = o autor tirou essa citação dos sorteios do dia. */
+  daily?: boolean;
   kind?: QuoteKind;
   role?: QuoteRole;
   text?: string;

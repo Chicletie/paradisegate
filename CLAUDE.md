@@ -51,7 +51,15 @@ Vite + React 19 + TypeScript + Tailwind v4 + react-router. `npm test` roda os te
     `||trecho||` lido como markdown por dentro, 1º toque só revela; `[texto](wiki:<id>)` é
     link interno (`wl-live`); campo curto com várias linhas vira uma por "•"; tarja lisa; e
     nada de 🙈 na wiki (nem no rótulo, nem no botão).
-15. **Nó de SVG clicável (árvore genealógica) nunca dentro de `<Link>`.** Um `<a>` do
+15. **Sorteio do dia (`src/lib/daily.ts`) é o mesmo do `wiki-core.js`, bit a bit.** O teste
+    `daily.test.ts` compara com respostas geradas rodando as funções originais
+    (`daily.golden.json`); se o arvore mudar o sorteio, gere de novo em vez de ajustar à mão.
+    Reset às 00h GMT-3 pra todo mundo; quem foi publicado hoje não concorre até o próximo dia.
+16. **Navegar numa SPA não recarrega a página**: `ScrollToTop` volta ao topo (ou à âncora, ex.
+    `#posts`) a cada navegação nova, e a home remonta quando `?q=`/`?tipo=`/`?aleatoria=` muda
+    — é o que um link faz no site de hoje. `usePgBody` é efeito de layout: as classes do
+    `<body>` valem antes de qualquer medida (a home rola até a lista com `?tipo=`).
+17. **Nó de SVG clicável (árvore genealógica) nunca dentro de `<Link>`.** Um `<a>` do
     react-router (mesmo com `display:contents`) dentro de `<svg>` não pinta os filhos em todo
     navegador — use `onClick` + `useNavigate()` no próprio elemento SVG (ver `TreeNode` em
     `src/lib/relations.tsx`), igual ao clique direto que `wiki-core.js` já usa ali.
@@ -80,7 +88,10 @@ arvore + um JSON de exemplo (servida num caminho `/wiki.html`, pra cair no modo 
 ponha `pg-theme` no `<body>`), e uma rota temporária no app lendo o mesmo JSON. Compare o
 `innerText` do `.card` e a diferença de pixels (canvas no próprio Chromium) em 1280/390,
 claro/escuro, e depois de cada clique (abas, spoilers). Remova a rota temporária antes do
-commit.
+commit. Pra home (e o que mais usar o índice): `window.wikiCoreBoot()` com um `window.firebase`
+de mentira cuja `firestore().collection("wikiIndex").doc("lotus").get()` devolve o índice de
+exemplo (sem `firebase.auth`, login sai cedo), e no app o `fetchWikiIndex` devolvendo o mesmo
+JSON só em `import.meta.env.DEV`, temporariamente. Compare também `document.title` e `scrollY`.
 
 ## Ramos e PRs
 
@@ -88,5 +99,6 @@ Sem `docs/` neste repositório ainda — o roteiro completo mora em `docs/fase4-
 arvore. Etapas (um PR cada, com capturas antes/depois): 1) esqueleto ✔; 2) entrada, temporada e
 erro ✔ (login, favoritar, sugerir e conteúdo restrito de `wikiRestrito` ficaram pra etapa 4 de
 propósito — a entrada já busca e mostra tudo que não depende de login); 3) home com destaques
-do dia, busca e filtros; 4) linha do tempo, perfil, login, sugestões, restrito. Se uma sessão
+do dia, busca e filtros ✔; 4) linha do tempo, perfil, login, sugestões, restrito (o botão
+"Entrar"/menu da conta no cabeçalho entra aqui). Se uma sessão
 não terminar uma etapa, para num PR completo e descreve no fim o que falta.

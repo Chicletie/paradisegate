@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { usePgBody } from "../lib/usePgBody";
 import { PgHeader } from "../components/PgHeader";
@@ -8,6 +9,9 @@ import { PgFooter } from "../components/PgFooter";
  * existe mais. */
 export function ErrorPage({ message = "Esta página não existe ou ainda não foi publicada." }: { message?: string }) {
   usePgBody();
+  useEffect(() => {
+    document.title = "Paradise Gate";
+  }, []);
   return (
     <>
       <PgHeader />
