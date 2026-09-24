@@ -59,10 +59,13 @@ export function clip(s, max = 160) {
   return (sp > max * 0.6 ? cut.slice(0, sp) : cut).replace(/[\s,;:.–—-]+$/, "") + "…";
 }
 
+export const FICHA_INCOMPLETA = "Ficha incompleta. Os arquivistas da Academia Whitmore estão trabalhando para reunir essas informações.";
+
 export function describeEntry(e) {
   const text = clip(cleanText(e.excerpt));
   if (text) return text;
-  return e.type ? `${e.type} de Paradise Gate. Leia na wiki.` : "Leia na wiki de Paradise Gate.";
+  // Página sem resumo: texto coringa na voz da Academia Whitmore, escrito pelo autor.
+  return FICHA_INCOMPLETA;
 }
 
 const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanText, clip, describeEntry, fromFirestore, headTags, injectHead, mergeEntries, safeSlug, sitemap } from "./seo.mjs";
+import { FICHA_INCOMPLETA, cleanText, clip, describeEntry, fromFirestore, headTags, injectHead, mergeEntries, safeSlug, sitemap } from "./seo.mjs";
 
 describe("cleanText", () => {
   it("tira o spoiler inteiro, inclusive com link dentro", () => {
@@ -19,9 +19,10 @@ describe("clip e describeEntry", () => {
     expect(s.length).toBeLessThanOrEqual(50);
     expect(s.endsWith("palavra…")).toBe(true);
   });
-  it("sem trecho, usa o tipo", () => {
-    expect(describeEntry({ type: "Personagem" })).toBe("Personagem de Paradise Gate. Leia na wiki.");
-    expect(describeEntry({ excerpt: "||tudo spoiler||" })).toBe("Leia na wiki de Paradise Gate.");
+  it("sem trecho (ou só spoiler), usa a ficha incompleta", () => {
+    expect(describeEntry({ type: "Personagem" })).toBe(FICHA_INCOMPLETA);
+    expect(describeEntry({ excerpt: "||tudo spoiler||" })).toBe(FICHA_INCOMPLETA);
+    expect(describeEntry({ excerpt: "Filha caçula dos Hagan." })).toBe("Filha caçula dos Hagan.");
   });
 });
 
