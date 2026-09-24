@@ -6,7 +6,10 @@
 <meta name="robots" content="noindex, nofollow" />
 <title>Redefinir senha · Paradise Gate</title>
 <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="./wiki-style.css" />
+<!-- Mesmo arquivo de CSS que o app usa (src/styles/wiki.css, ver vite.config.ts): o build dá
+     um nome fixo só pra esse CSS, sem hash, exatamente pra esta página fora do bundle poder
+     apontar pra ele sem ter uma cópia própria. -->
+<link rel="stylesheet" href="/assets/wiki.css" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500;1,600&family=Cinzel:wght@600;700&display=swap" />

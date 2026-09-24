@@ -1,37 +1,18 @@
-/* CSS da wiki Paradise Gate, trazido do arvore (wiki-style.css) como está, pra manter a
-   paridade visual conferida por captura (docs/fase4-site.md). Base clara/escura da página
-   (`:root`) e do tema de página (`body.pg-theme`, ainda em uso nas páginas de entrada, ver
-   DESIGN.md); a identidade nova (`body.pg-site`/`.pg-*`) vem depois no arquivo. Existe uma
-   cópia estática deste arquivo em public/wiki-style.css só pra public/reset-senha.html, que
-   fica fora do bundle — mudou uma, muda a outra. */
+/* CSS da wiki Paradise Gate, trazido do arvore (wiki-style.css) só com as regras usadas no
+   modo PG (docs/fase4-site.md): sem a base clara/escura genérica do `:root` (era a paleta de
+   outro tema, sem uso aqui — todo body desta wiki carrega `pg-theme`+`pg-site` sempre, então
+   os valores abaixo é que realmente aparecem). `body.pg-theme` é o tema de pergaminho ainda em
+   uso nas páginas de entrada (ver DESIGN.md); a identidade nova (`body.pg-site`/`.pg-*`) vem
+   depois no arquivo, remapeando quase tudo daqui pra baixo. */
 :root { color-scheme: light dark; }
-:root {
-  --bg: #e8dcbf; --paper: #f5ecd6; --surface: #f6eeda; --surface-2: #ece0c3; --border: #d2bf98; --border-strong: #a98f61;
-  --ink: #2e2416; --muted: #6a5940; --faint: #9a8763; --gold: #9c7b3c; --gold-ink: #785a28;
-  --accent-wash: #ecdfbe; --warn: #b07d24; --shadow: 0 1px 2px rgba(74,52,20,0.06), 0 14px 34px -18px rgba(74,52,20,0.26);
-  --shadow-lift: 0 2px 6px rgba(74,52,20,0.10), 0 26px 56px -24px rgba(74,52,20,0.34);
-  --radius: 6px; --font-body: "Spectral", Georgia, "Times New Roman", serif; --font-display: "Cormorant", Georgia, serif; --font-wb: "Cormorant Garamond", Georgia, serif;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #14100a; --paper: #211a10; --surface: #221b11; --surface-2: #2b2216; --border: #3a2f1d; --border-strong: #55442b;
-    /* --faint bumped #7c6e55 → #a89478 2026-09-22: mesmo problema medido no tema Paradise
-       Gate (ver a nota ao lado de body.pg-theme) também acontecia aqui, e pior (~3.4:1). */
-    --ink: #e9dcbd; --muted: #ac9e80; --faint: #a89478; --gold: #d8b878; --gold-ink: #ecd3a2;
-    --accent-wash: #2a2114; --warn: #d6a24a; --shadow: 0 2px 10px rgba(0,0,0,0.45), 0 26px 60px -24px rgba(0,0,0,0.7);
-    --shadow-lift: 0 4px 16px rgba(0,0,0,0.5), 0 40px 80px -30px rgba(0,0,0,0.82);
-  }
-}
-/* Paradise Gate ("pg-theme", ativada em toda página da wiki) — expande a identidade do e-mail
-   de convite pra própria wiki: um "envelope" azul-royal atrás de painéis "carta", o mesmo
-   contraste que já funcionava no e-mail, em vez de um azul-marinho liso. PG continua seguindo a
-   preferência de claro/escuro do sistema do visitante — só que com seu próprio par de
-   pergaminhos em vez de herdar o do tema base, então --bg fica azul-marinho nos dois, mas
-   --paper/--surface/etc são reafirmados nos dois ramos (não ficam por conta da herança).
-   Ramo claro = pergaminho creme (os mesmos valores claros do tema base) + tinta azul-aço,
-   ecoando o papel-sobre-azul-marinho do e-mail. Ramo escuro = um vitela escura e azulada (mais
-   clara que --bg, pra continuar lendo como um cartão à parte, não preto sobre azul-marinho) +
-   tinta prateada, pra quem lê no escuro ter um pergaminho que pertence a esta paleta. */
+/* "pg-theme" expande a identidade do e-mail de convite pra própria wiki: um "envelope"
+   azul-royal atrás de painéis "carta", o mesmo contraste que já funcionava no e-mail, em vez
+   de um azul-marinho liso. Segue a preferência de claro/escuro do sistema do visitante — com
+   seu próprio par de pergaminhos, então --bg fica azul-marinho nos dois, mas --paper/--surface/
+   etc são reafirmados nos dois ramos (não ficam por conta da herança). Ramo claro = pergaminho
+   creme + tinta azul-aço, ecoando o papel-sobre-azul-marinho do e-mail. Ramo escuro = um vitela
+   escura e azulada (mais clara que --bg, pra continuar lendo como um cartão à parte, não
+   preto sobre azul-marinho) + tinta prateada. */
 body.pg-theme {
   --bg: #0a1730;
   --paper: #f5ecd6; --surface: #f6eeda; --surface-2: #ece0c3; --border: #d2bf98; --border-strong: #a98f61;
@@ -39,7 +20,7 @@ body.pg-theme {
   --gold: #6b7a94; --gold-ink: #3d4c68; --accent-wash: #eef1f4; --warn: #b07d24;
   --shadow: 0 2px 10px rgba(2,6,20,0.35), 0 24px 55px -22px rgba(2,6,20,0.65);
   --shadow-lift: 0 4px 18px rgba(2,6,20,0.4), 0 40px 80px -28px rgba(2,6,20,0.75);
-  --font-display: "Cinzel", Georgia, serif;
+  --radius: 6px; --font-body: "Spectral", Georgia, "Times New Roman", serif; --font-display: "Cinzel", Georgia, serif; --font-wb: "Cormorant Garamond", Georgia, serif;
 }
 @media (prefers-color-scheme: dark) {
   body.pg-theme {
@@ -330,8 +311,8 @@ a.tag:hover { border-color: var(--gold); }
    detalhes: poeira de estrelas estática, estrela de quatro pontas como marcador, a carta de
    tarô do Personagem do dia (numeral romano do dia, borda dourada fina) e um lugar reservado
    pro selo da marca (.pg-seal — trocar o conteúdo por um <img> quando o selo existir).
-   Identidade (tokens, cabeçalho, menu, foco, rodapé) em body.pg-site, posta por buildPgMast em
-   toda página PG; layout só da home em body.pg-home. O Ursprung não muda. Ouro (--pg-gold) só em bordas finas e foco. */
+   Identidade (tokens, cabeçalho, menu, foco, rodapé) em body.pg-site, em toda página PG; layout
+   só da home em body.pg-home. Ouro (--pg-gold) só em bordas finas e foco. */
 body.pg-site {
   --pg-night: #0b1a3f; --pg-band: #132c6e; --pg-card-back: #0d1f4f;
   --pg-page: #f2f4f9; --pg-panel: #ffffff; --pg-line: #dce2ee; --pg-line-strong: #b7c2d9;
@@ -661,7 +642,7 @@ html { scroll-behavior: smooth; }
    (escura no tema escuro), artigo num painel com fio fino, Castoro/Hanken. Os componentes
    antigos (infobox, abas, seções, galeria, árvore, grafo, linha do tempo, sugestões) leem os
    tokens antigos — aqui eles são remapeados pros --pg-*, e só o que muda de forma ganha regra
-   própria. Escopo body.pg-site:not(.pg-home): a home e o Ursprung não mudam. */
+   própria. Escopo body.pg-site:not(.pg-home): a home não muda. */
 body.pg-site:not(.pg-home) {
   --bg: var(--pg-page); --bg-deep: var(--pg-night);
   --paper: var(--pg-panel); --surface: var(--pg-panel); --surface-2: var(--pg-page);
