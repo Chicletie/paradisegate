@@ -21,29 +21,60 @@ Vite + React 19 + TypeScript + Tailwind v4 + react-router. `npm test` (Vitest), 
    está publicado na wiki ou do que o autor passar. Arte da obra e o selo da marca: nunca gerar,
    desenhar ou "completar" (o círculo com estrela no cabeçalho é um lugar reservado).
 3. **Função acima de estética.** Um redesenho nunca remove nem piora uma função que já existia.
-4. **A wiki não muda sem o autor.** `src/pages/`, os componentes da página de entrada, `src/lib/`,
-   `src/styles/wiki.css` e `scripts/` só mudam num PR revisado por ele. Os testes existem pra a
-   wiki nunca mudar sem querer; se um teste da wiki quebrar, o problema é a mudança, não o teste.
+4. **A wiki não muda sem revisão.** `src/pages/`, os componentes da página de entrada, `src/lib/`,
+   `src/styles/wiki.css` e `scripts/` só mudam num PR revisado pela outra pessoa (o autor revisa
+   o da colaboradora e vice-versa). Os testes existem pra a wiki nunca mudar sem querer; se um
+   teste da wiki quebrar, o problema é a mudança, não o teste.
 5. **Páginas novas usam os tokens.** Cores, fontes e raios de `src/styles/tokens.css` (em
    `var(--pg-*)` ou pelas classes Tailwind do `@theme`), nunca hex solto; `PgHeader`/`PgFooter`
    sempre. Não estilize página nova mexendo em `src/styles/wiki.css`: ele existe pra wiki ficar
    como é. Detalhes em `DESIGN.md`, "O site além da wiki".
-6. **Firebase só por `src/lib/api.ts`**, só leitura dos dados da wiki, e só estas coleções:
-   `wikiIndex/lotus` (+ `shards/`), `wikiPublic`, `wikiRestrito`, `wikiProfiles`,
+6. **Firebase só por `src/lib/api.ts`.** No Firestore, só leitura dos dados da wiki, e só estas
+   coleções: `wikiIndex/lotus` (+ `shards/`), `wikiPublic`, `wikiRestrito`, `wikiProfiles`,
    `wikiSuggestions` (`docs/dados-da-wiki.md`). A configuração do Firebase no código é pública
    por natureza; quem protege são as regras do banco, que ficam com o autor. Nada de coleção
-   nova. Loja, cadastro de fãs, newsletter e o que mais precisar de servidor vão num serviço
-   pronto ou num projeto Firebase separado, da marca, combinado com o autor.
+   nova. O **Firebase Auth é o login único do site**: wiki e páginas do jogo (fichas, loja,
+   biblioteca) usam a mesma conta, pelas funções de login de `api.ts`. As páginas do jogo mandam
+   o token do Firebase pro backend do jogo (a API no Render), que guarda fichas, loja e
+   catálogo no banco dele — nada disso vai pro Firestore.
 7. **Domínio, GitHub Pages e workflows** (`.github/`) só mudam com o autor. Nunca publique em
    outro endereço.
 8. **Sem analytics nem scripts de terceiros** sem combinar; dependências mínimas.
 9. Nunca digite senhas, tokens ou credenciais, nem crie contas; nunca commite segredo (`.env`).
-10. **Como as mudanças entram no `main`:** as da colaboradora, por PR com capturas
-    (computador e celular, claro e escuro) e resumo em português simples, aprovado pelo
-    autor. As do próprio autor (feitas com o Claude dele) podem entrar direto no `main` depois
-    do OK dele no chat, com os testes rodados antes. O CI roda build, tipos, lint e testes em
-    todo PR, e o deploy sai sozinho a cada mudança no `main`.
-11. Commits em português, dizendo o que mudou; mantenha a linha `Co-Authored-By` de atribuição.
+10. **Como as mudanças entram no `main`:** autor e colaboradora têm o mesmo privilégio. Toda
+    mudança, de qualquer um dos dois, entra por PR a partir de um ramo próprio (ver "Ramos,
+    PRs e segurança"), com capturas (computador e celular, claro e escuro) do que muda na tela
+    e resumo em português simples, e é aprovada pela outra pessoa. Nada de commit direto no
+    `main`. O CI roda build, tipos, lint e testes em todo PR e precisa passar; o deploy sai
+    sozinho a cada mudança no `main`. Lore, nomes e arte continuam vindo só do autor (regra 2).
+11. **Commits semânticos em português**: começam com o tipo (`feat:`, `fix:`, `docs:`,
+    `refactor:`, `test:`, `chore:`) e dizem o que mudou, ex. `feat: página da loja`. Mantenha a
+    linha `Co-Authored-By` de atribuição.
+
+## Ramos, PRs e segurança
+
+Valem pros dois (e pro Claude de cada um), em toda mudança:
+
+- **Um ramo por assunto**, criado a partir do `main` atualizado (`git pull` antes):
+  `site/<assunto>`, ex. `site/loja`. Uma feature ou correção por ramo.
+- **Antes de abrir o PR, e de novo antes de mesclar**: traga o `main` mais recente pro ramo
+  (`git pull origin main`), resolva conflitos no ramo e rode os testes de novo. Quem descobre a
+  incompatibilidade é você, não o CI nem o site no ar.
+- **Checklist de segurança**, conferido em todo PR:
+  - Nenhum segredo no repositório: senha, token, chave de conta de serviço, `.env`. Confira o
+    `git diff` antes do commit. (A configuração pública do Firebase em `src/lib/firebase.ts`
+    não é segredo — ver regra 6.)
+  - Nada sensível no console do navegador ou nos logs: nada de `console.log` com token, senha,
+    e-mail de outra pessoa ou resposta inteira da API. Erro pro visitante é uma frase simples;
+    o detalhe técnico não aparece na tela.
+  - Endereço com id (`/fichas/<id>`, `?usuario=<id>`) nunca basta pra ver ou mudar algo: quem
+    decide se a pessoa pode é o backend, conferindo que ela é dona ou administradora. A página
+    não esconde nada "porque o id é difícil de adivinhar".
+  - Toda chamada à API ou ao Firebase trata erro (rede fora, sem permissão, sessão expirada) com
+    uma mensagem e um caminho de volta, nunca tela em branco.
+  - Nada do que o visitante digita vai pro HTML sem passar pelo React (nada de
+    `dangerouslySetInnerHTML` com texto de usuário) nem direto pra uma URL sem
+    `encodeURIComponent`.
 
 ## Detalhes técnicos que já custaram caro
 
@@ -91,7 +122,8 @@ Vite + React 19 + TypeScript + Tailwind v4 + react-router. `npm test` (Vitest), 
 
 ## Como testar
 
-`npm test`, `npm run typecheck`, `npm run lint` e `npm run build` limpos. Pra ver as páginas
-prontas: `npm run build && npm run prerender && npm run preview`. Toda mudança visível: capturas
-em 1280 e 390 de largura, claro e escuro, sem erros no console. Mudança que toca a wiki: compare
+`npm test`, `npm run typecheck`, `npm run lint` e `npm run build` limpos, com o `main` mais
+recente já trazido pro ramo. Pra ver as páginas prontas: `npm run build && npm run prerender &&
+npm run preview`. Toda mudança visível: capturas em 1280 e 390 de largura, claro e escuro, sem
+erros no console. O checklist de segurança ("Ramos, PRs e segurança") passa antes do PR. Mudança que toca a wiki: compare
 com `https://paradisegate.com.br/wiki` (mesmo texto, mesmas funções).
