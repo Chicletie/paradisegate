@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { fetchMySuggestions, fetchProfile, saveProfile, sendPasswordReset, signIn, watchAuth } from "./api";
+import { claimUsername, fetchMySuggestions, fetchProfile, LoginError, saveProfile, sendPasswordReset, signIn, watchAuth } from "./api";
 import { mergeProfile, unreadCount } from "./profile";
+import { isEmailLogin } from "./username";
 import type { AuthUser, WikiProfile, WikiProfilePatch } from "../types";
 
 /*
@@ -43,6 +44,8 @@ interface AccountState {
   /** O perfil (uma leitura por visita), pra quem precisa esperar por ele. */
   loadProfile: () => Promise<WikiProfile>;
   save: (patch: WikiProfilePatch) => Promise<void>;
+  /** Escolhe ou troca o username (a regra do banco confere se está livre e os 30 dias). */
+  setUsername: (name: string) => Promise<void>;
   clearUnread: () => void;
   openLogin: () => void;
 }
@@ -56,6 +59,7 @@ const LOGGED_OUT: AccountState = {
   profile: null,
   unread: 0,
   loadProfile: async () => ({}),
+  setUsername: async () => {},
   save: async () => {},
   clearUnread: () => {},
   openLogin: () => {},
@@ -123,6 +127,16 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     [user, loadProfile, setProfile],
   );
 
+  const setUsername = useCallback(
+    async (name: string) => {
+      if (!user) return;
+      const d = await loadProfile(user);
+      await claimUsername(user, name, d.username);
+      setProfile(user.uid, { ...d, email: user.email, username: name, usernameChangedAt: new Date() });
+    },
+    [user, loadProfile, setProfile],
+  );
+
   const value = useMemo<AccountState>(
     () => ({
       user,
@@ -132,12 +146,13 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       unread: user ? unreadByUid[user.uid] || 0 : 0,
       loadProfile: () => (user ? loadProfile(user) : Promise.resolve({})),
       save,
+      setUsername,
       clearUnread: () => {
         if (user) setUnreadByUid((m) => ({ ...m, [user.uid]: 0 }));
       },
       openLogin: () => setLoginOpen(true),
     }),
-    [user, ready, guest, profiles, unreadByUid, loadProfile, save],
+    [user, ready, guest, profiles, unreadByUid, loadProfile, save, setUsername],
   );
 
   return (
@@ -168,7 +183,7 @@ export function Modal({ onClose, children }: { onClose: () => void; children: Re
   );
 }
 
-/** Porta de openLoginModal: e-mail, senha, "esqueci minha senha" e cancelar. */
+/** Porta de openLoginModal: e-mail ou username, senha, "esqueci minha senha" e cancelar. */
 function LoginModal({ onClose }: { onClose: () => void }) {
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
@@ -179,9 +194,9 @@ function LoginModal({ onClose }: { onClose: () => void }) {
   function doSubmit() {
     setErr("");
     setBusy(true);
-    signIn(email.trim(), pass).then(onClose, () => {
+    signIn(email.trim(), pass).then(onClose, (e) => {
       setBusy(false);
-      setErr("Não consegui entrar. Confira email e senha.");
+      setErr(e instanceof LoginError ? e.message : isEmailLogin(email) ? "Não consegui entrar. Confira email e senha." : "Não consegui entrar. Confira username e senha.");
     });
   }
 
@@ -189,6 +204,10 @@ function LoginModal({ onClose }: { onClose: () => void }) {
     const addr = email.trim();
     if (!addr) {
       setErr("Digite seu email ali em cima primeiro.");
+      return;
+    }
+    if (!isEmailLogin(addr)) {
+      setErr("Pra recuperar a senha, digite o email da conta (não o username).");
       return;
     }
     setErr("");
@@ -206,12 +225,16 @@ function LoginModal({ onClose }: { onClose: () => void }) {
     <Modal onClose={onClose}>
       <h3>Entrar</h3>
       <label className="field-label" htmlFor="wiki-login-email">
-        Email
+        Email ou username
       </label>
       <input
         id="wiki-login-email"
-        type="email"
-        placeholder="voce@email.com"
+        type="text"
+        inputMode="email"
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
+        placeholder="voce@email.com ou @seunome"
         autoComplete="username"
         autoFocus
         value={email}

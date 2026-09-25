@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Criar sua conta · Paradise Gate</title>
+<link rel="icon" href="./icon.svg" type="image/svg+xml" />
+<!-- Mesmo CSS do site (nome fixo no build, ver vite.config.ts) e mesmas fontes. -->
+<link rel="stylesheet" href="/assets/wiki.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Castoro:ital@0;1&family=Castoro+Titling&family=Hanken+Grotesk:wght@400;500;600&display=swap" />
+<style>
+  /* Mesmo cartão da página de senha (reset-senha.html); cores e fontes vêm dos tokens do site. */
+  body.pg-reset { margin: 0; padding: 0; min-height: 100dvh; display: flex; flex-direction: column; background: var(--pg-page); color: var(--pg-ink); font-family: var(--pg-f-ui); }
+  .pg-reset .pg-mast-inner { justify-content: center; }
+  .pg-reset .brand a { display: flex; align-items: center; gap: 12px; color: var(--pg-on-dark); text-decoration: none; }
+  .rs-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 16px 56px; }
+  .rs-card { width: 100%; max-width: 420px; box-sizing: border-box; background: var(--pg-panel); border: 1px solid var(--pg-line); border-radius: 14px; box-shadow: var(--pg-card-shadow); padding: 32px 32px 28px; }
+  .rs-card h1 { font-family: var(--pg-f-title); font-weight: 400; font-size: 30px; line-height: 1.15; letter-spacing: 0.02em; margin: 0 0 8px; color: var(--pg-ink); }
+  .rs-lead { margin: 0 0 22px; font-size: 15px; line-height: 1.5; color: var(--pg-muted); overflow-wrap: anywhere; }
+  .rs-lead strong { color: var(--pg-ink); font-weight: 600; }
+  .rs-field { display: block; margin: 0 0 14px; }
+  .rs-label { display: block; font-size: 14px; font-weight: 600; margin: 0 0 6px; color: var(--pg-ink); }
+  .rs-input-wrap { position: relative; display: block; }
+  .rs-input { width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 84px 12px 14px; border: 1px solid var(--pg-line-strong); border-radius: 10px; background: var(--pg-panel); color: var(--pg-ink); font: inherit; font-size: 16px; }
+  .rs-input:focus { outline: none; border-color: var(--pg-link); box-shadow: 0 0 0 3px var(--pg-link-wash); }
+  .rs-input.has-at { padding-left: 32px; padding-right: 14px; }
+  .rs-at { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--pg-muted); font-size: 16px; pointer-events: none; }
+  .rs-show { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); min-height: 36px; padding: 6px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--pg-link); font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; }
+  .rs-show:hover, .rs-show:focus-visible { background: var(--pg-link-wash); outline: none; }
+  .rs-hint { display: block; font-size: 13px; color: var(--pg-muted); margin: 6px 0 0; }
+  .rs-hint.is-ok { color: #1e7a3a; }
+  .rs-hint.is-bad { color: #b3261e; }
+  .rs-err { min-height: 20px; font-size: 14px; color: #b3261e; margin: 2px 0 10px; }
+  .rs-btn { display: block; width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 20px; border: 0; border-radius: 999px; background: var(--pg-link); color: var(--pg-panel); font: inherit; font-size: 16px; font-weight: 600; text-align: center; text-decoration: none; cursor: pointer; transition: background-color .15s ease-out; }
+  .rs-btn:hover { background: var(--pg-link-hover); }
+  .rs-btn:focus-visible { outline: 3px solid var(--pg-gold); outline-offset: 2px; }
+  .rs-btn:disabled { opacity: .6; cursor: default; }
+  .rs-foot { text-align: center; margin: 18px 0 0; font-size: 14px; }
+  .rs-foot a { color: var(--pg-link); }
+  .rs-mark { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; margin: 0 0 16px; background: var(--pg-link-wash); color: var(--pg-link); }
+  .rs-mark svg { width: 26px; height: 26px; }
+  .rs-loading { display: flex; align-items: center; gap: 10px; color: var(--pg-muted); font-size: 15px; }
+  .rs-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pg-gold); animation: rs-pulse 1s ease-in-out infinite; }
+  @keyframes rs-pulse { 50% { opacity: .25; } }
+  @media (prefers-reduced-motion: reduce) { .rs-dot { animation: none; } }
+  .rs-page-foot { text-align: center; padding: 0 16px 28px; font-family: var(--pg-f-title); font-size: 13px; letter-spacing: 0.12em; color: var(--pg-muted); }
+  .rs-page-foot .pg-star { width: 10px; height: 10px; color: var(--pg-gold); vertical-align: -1px; margin-right: 6px; }
+  @media (prefers-color-scheme: dark) { .rs-err, .rs-hint.is-bad { color: #f2b8b5; } .rs-hint.is-ok { color: #8fd6a4; } }
+  @media (max-width: 480px) { .rs-card { padding: 26px 20px 22px; } .rs-card h1 { font-size: 26px; } .rs-main { padding-top: 28px; align-items: flex-start; } }
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+</head>
+<!-- Página de destino do link do e-mail de CONVITE (conta nova): a pessoa escolhe a senha e o
+     username (@nome único da conta) e já sai logada. O "esqueci minha senha" tem a página dele
+     (reset-senha.html). Fica fora do bundle React de propósito: o e-mail aponta pra ela num
+     caminho fixo. As regras do Firestore conferem que o username está livre. -->
+<body class="pg-theme pg-site pg-reset">
+<header class="site-header pg-mast">
+  <div class="pg-mast-inner">
+    <div class="brand">
+      <a href="/wiki">
+        <span class="pg-seal" aria-hidden="true"><svg class="pg-seal-star" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 1.5c.9 6.1 3.4 8.6 10.5 10.5-7.1 1.9-9.6 4.4-10.5 10.5-.9-6.1-3.4-8.6-10.5-10.5C8.6 10.1 11.1 7.6 12 1.5z" fill="currentColor" /></svg></span>
+        <span class="pg-wordmark">Paradise Gate</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="rs-main">
+  <section class="rs-card" aria-labelledby="rs-title">
+    <div id="stLoading">
+      <h1 id="rs-title">Criar sua conta</h1>
+      <p class="rs-loading" role="status"><span class="rs-dot" aria-hidden="true"></span>Conferindo o convite…</p>
+    </div>
+
+    <form id="stForm" hidden novalidate>
+      <h1>Criar sua conta</h1>
+      <p class="rs-lead">Bem-vindo à wiki de Paradise Gate. Sua conta é <strong id="emailOut"></strong>.</p>
+      <input type="email" id="user" autocomplete="username" hidden />
+      <label class="rs-field">
+        <span class="rs-label">Username</span>
+        <span class="rs-input-wrap">
+          <span class="rs-at" aria-hidden="true">@</span>
+          <input class="rs-input has-at" type="text" id="uname" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="21" required aria-describedby="unHint" />
+        </span>
+        <span class="rs-hint" id="unHint" aria-live="polite">Seu nome único na wiki: 3 a 20 caracteres, letras sem acento, números e _. Dá pra trocar depois, uma vez a cada 30 dias.</span>
+      </label>
+      <div id="passFields">
+        <label class="rs-field">
+          <span class="rs-label">Senha</span>
+          <span class="rs-input-wrap">
+            <input class="rs-input" type="password" id="pass1" autocomplete="new-password" minlength="6" required aria-describedby="passHint" />
+            <button class="rs-show" type="button" data-for="pass1" aria-pressed="false">mostrar</button>
+          </span>
+          <span class="rs-hint" id="passHint">Pelo menos 6 caracteres.</span>
+        </label>
+        <label class="rs-field">
+          <span class="rs-label">Repita a senha</span>
+          <span class="rs-input-wrap">
+            <input class="rs-input" type="password" id="pass2" autocomplete="new-password" required />
+            <button class="rs-show" type="button" data-for="pass2" aria-pressed="false">mostrar</button>
+          </span>
+        </label>
+      </div>
+      <p class="rs-err" id="err" role="alert"></p>
+      <button class="rs-btn" type="submit" id="submitBtn">Criar conta</button>
+    </form>
+
+    <div id="stDone" hidden>
+      <span class="rs-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
+      <h1 tabindex="-1" id="doneTitle">Conta criada</h1>
+      <p class="rs-lead">Você já está dentro como <strong id="doneName"></strong>. Da próxima vez, dá pra entrar com esse nome ou com o email. Foto e apelido você escolhe no seu perfil.</p>
+      <a class="rs-btn" href="/wiki">Ir pra wiki</a>
+      <p class="rs-foot"><a href="/wiki/_perfil">Abrir meu perfil</a></p>
+    </div>
+
+    <div id="stBad" hidden>
+      <h1 tabindex="-1" id="badTitle">Esse convite não vale mais</h1>
+      <p class="rs-lead" id="badMsg">O link expirou ou já foi usado. Se você já criou a conta, é só entrar na wiki. Se não, peça um convite novo a quem te convidou, ou use <strong>esqueci minha senha</strong> na tela de entrar.</p>
+      <a class="rs-btn" href="/wiki">Ir pra wiki</a>
+    </div>
+  </section>
+</main>
+<footer class="rs-page-foot"><svg class="pg-star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.9 6.1 3.4 8.6 10.5 10.5-7.1 1.9-9.6 4.4-10.5 10.5-.9-6.1-3.4-8.6-10.5-10.5C8.6 10.1 11.1 7.6 12 1.5z" fill="currentColor" /></svg>PARADISE GATE · WIKI</footer>
+
+<script>
+  var firebaseConfig = {
+    apiKey: "AIzaSyC2nVLv97V6D1S6rZ7nwhhyQXgWeFxQLd0",
+    authDomain: "rotina-555dd.firebaseapp.com",
+    projectId: "rotina-555dd",
+    storageBucket: "rotina-555dd.firebasestorage.app",
+    messagingSenderId: "979165283716",
+    appId: "1:979165283716:web:258160eb92ead2353e89d1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  var auth = firebase.auth(), db = firebase.firestore();
+  // Só no computador de quem desenvolve (localhost + chave ligada): simulador com dados de mentira.
+  try {
+    if (location.hostname === "localhost" && localStorage.getItem("pg.emulators") === "1") {
+      auth.useEmulator("http://127.0.0.1:9099");
+      db.useEmulator("127.0.0.1", 8080);
+    }
+  } catch (e) {}
+
+  // Mesmas regras de src/lib/username.ts (a palavra final é da regra do Firestore).
+  var RESERVED = ["admin", "adm", "autor", "mestre", "paradisegate", "paradise_gate", "suporte", "moderador", "moderacao", "wiki", "perfil", "busca", "null", "undefined"];
+  function norm(raw) { return String(raw || "").trim().replace(/^@+/, "").normalize("NFD").replace(/\p{M}/gu, "").toLowerCase(); }
+  function problem(n) {
+    if (!n) return "Escolha um username.";
+    if (n.length < 3) return "Pelo menos 3 caracteres.";
+    if (n.length > 20) return "No máximo 20 caracteres.";
+    if (!/^[a-z0-9_]+$/.test(n)) return "Só letras sem acento, números e _ (sem espaço).";
+    if (n[0] === "_") return "Comece com uma letra ou um número.";
+    if (RESERVED.indexOf(n) !== -1) return "Esse nome é reservado.";
+    if (blocked(n)) return "Esse nome não é permitido.";
+    return "";
+  }
+  // Nomes proibidos: mesma lista de src/lib/username.ts (explicação lá).
+  var BLOCK_ANY = ["hitler", "nazi", "nazis", "nazismo", "neonazi", "fascis", "siegheil", "heilhitler", "whitepower", "holocaust", "kukluxklan", "reichsfuhrer", "gestapo",
+    "nigger", "nigga", "pedofil", "pedophil", "estupr",
+    "buceta", "boceta", "bucetinha", "xoxota", "xereca", "piroca", "caralho", "porra", "punheta", "siririca", "boquete", "arrombad", "cuzao", "cusao", "foder", "fuder", "fodase", "fodido",
+    "merda", "bosta", "vagabunda", "putaria", "putinha", "filhodaputa", "viadinho",
+    "pussy", "fuck", "shit", "bitch", "cunt", "whore", "slut", "blowjob", "handjob", "dildo", "porn", "hentai", "penis", "vagina", "boobs", "motherfuck", "asshole"];
+  var BLOCK_PART = ["puta", "puto", "xana", "tits", "cu", "cus", "pau", "rola", "pinto", "pica", "foda", "fode", "viado", "bicha", "traveco", "crioulo", "anal", "sexo", "sex", "xxx", "rape", "cum", "dick", "cock", "ass", "fag", "retard",
+    "vsf", "pqp", "fdp", "tnc", "krl", "crl", "vtnc", "kct"];
+  var LEET = { "0": "o", "1": "i", "3": "e", "4": "a", "5": "s", "7": "t", "8": "b", "9": "g" };
+  function blocked(n) {
+    var collapsed = n.replace(/[0-9]/g, function (d) { return LEET[d] || ""; }).replace(/_/g, "");
+    if (BLOCK_ANY.some(function (w) { return collapsed.indexOf(w) !== -1; })) return true;
+    var parts = n.split(/[_0-9]+/).concat(n.replace(/[0-9]/g, function (d) { return LEET[d] || "_"; }).split("_"));
+    return parts.some(function (p) { return p && BLOCK_PART.indexOf(p) !== -1; });
+  }
+
+  var params = new URLSearchParams(location.search);
+  var mode = params.get("mode"), oobCode = params.get("oobCode");
+  var st = { loading: document.getElementById("stLoading"), form: document.getElementById("stForm"), done: document.getElementById("stDone"), bad: document.getElementById("stBad") };
+  var errEl = document.getElementById("err"), submitBtn = document.getElementById("submitBtn");
+  var pass1 = document.getElementById("pass1"), pass2 = document.getElementById("pass2");
+  var unameEl = document.getElementById("uname"), unHint = document.getElementById("unHint");
+  var email = "", passwordSaved = false, unFree = false, unTimer = null, unSeq = 0;
+  var unHintDefault = unHint.textContent;
+
+  function show(name) {
+    Object.keys(st).forEach(function (k) { st[k].hidden = k !== name; });
+    var f = name === "form" ? unameEl : name === "done" ? document.getElementById("doneTitle") : name === "bad" ? document.getElementById("badTitle") : null;
+    if (f) f.focus();
+  }
+  function hint(msg, kind) { unHint.textContent = msg; unHint.className = "rs-hint" + (kind ? " is-" + kind : ""); }
+
+  if (mode !== "resetPassword" || !oobCode) {
+    document.getElementById("badTitle").textContent = "Link incompleto";
+    document.getElementById("badMsg").textContent = "Abra o link direto do e-mail de convite, sem cortar nada. Se não der, peça um convite novo a quem te convidou.";
+    show("bad");
+  } else {
+    auth.verifyPasswordResetCode(oobCode).then(function (em) {
+      email = em;
+      document.getElementById("emailOut").textContent = em;
+      document.getElementById("user").value = em;
+      show("form");
+    }).catch(function () { show("bad"); });
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll(".rs-show"), function (b) {
+    b.addEventListener("click", function () {
+      var inp = document.getElementById(b.getAttribute("data-for"));
+      var on = inp.type === "password";
+      inp.type = on ? "text" : "password";
+      b.textContent = on ? "esconder" : "mostrar";
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  });
+
+  // Confere se o username está livre um instante depois de parar de digitar.
+  unameEl.addEventListener("input", function () {
+    unFree = false; clearTimeout(unTimer);
+    var n = norm(unameEl.value);
+    if (!unameEl.value) { hint(unHintDefault); return; }
+    var p = problem(n);
+    if (p) { hint(p, "bad"); return; }
+    hint("Conferindo…");
+    var my = ++unSeq;
+    unTimer = setTimeout(function () {
+      db.collection("wikiUsernames").doc(n).get().then(function (d) {
+        if (my !== unSeq) return;
+        unFree = !d.exists;
+        hint(d.exists ? "@" + n + " já está em uso." : "@" + n + " está livre.", d.exists ? "bad" : "ok");
+      }).catch(function () { if (my === unSeq) hint("Não consegui conferir agora. Tente de novo.", "bad"); });
+    }, 350);
+  });
+
+  function claim(n) {
+    var u = auth.currentUser;
+    var b = db.batch(), ts = firebase.firestore.FieldValue.serverTimestamp();
+    b.set(db.collection("wikiUsernames").doc(n), { uid: u.uid, at: ts });
+    b.set(db.collection("wikiProfiles").doc(u.uid), { email: u.email, username: n, usernameChangedAt: ts, updatedAt: new Date().toISOString() }, { merge: true });
+    return b.commit();
+  }
+
+  st.form.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    errEl.textContent = "";
+    var n = norm(unameEl.value);
+    var p = problem(n);
+    if (p) { errEl.textContent = p; unameEl.focus(); return; }
+    if (!unFree) { errEl.textContent = "Escolha um username livre."; unameEl.focus(); return; }
+    if (!passwordSaved) {
+      if (pass1.value.length < 6) { errEl.textContent = "A senha precisa ter pelo menos 6 caracteres."; pass1.focus(); return; }
+      if (pass1.value !== pass2.value) { errEl.textContent = "As duas senhas não são iguais."; pass2.focus(); return; }
+    }
+    submitBtn.disabled = true; submitBtn.textContent = "Criando…";
+    var step = passwordSaved ? Promise.resolve() : auth.confirmPasswordReset(oobCode, pass1.value).then(function () {
+      passwordSaved = true;
+      return auth.signInWithEmailAndPassword(email, pass1.value);
+    });
+    step.then(function () { return claim(n); }).then(function () {
+      document.getElementById("doneName").textContent = "@" + n;
+      show("done");
+    }).catch(function (e) {
+      submitBtn.disabled = false; submitBtn.textContent = passwordSaved ? "Salvar username" : "Criar conta";
+      if (!passwordSaved) {
+        if (e && e.code === "auth/weak-password") errEl.textContent = "Essa senha é fraca demais. Tente uma mais longa.";
+        else if (e && (e.code === "auth/expired-action-code" || e.code === "auth/invalid-action-code")) show("bad");
+        else errEl.textContent = "Não consegui criar a conta agora. Confira a internet e tente de novo.";
+        return;
+      }
+      // Senha já salva e login feito: só o username falhou (provavelmente pego agora mesmo).
+      document.getElementById("passFields").hidden = true;
+      unFree = false;
+      hint("Esse nome acabou de ser pego. Escolha outro.", "bad");
+      errEl.textContent = "Sua senha já foi salva. Falta só o username.";
+      unameEl.focus();
+    });
+  });
+</script>
+</body>
+</html>

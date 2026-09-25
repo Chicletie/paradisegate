@@ -5,6 +5,8 @@ import { useAccount } from "../lib/account";
 import { fetchMyAccesses, fetchMySuggestions } from "../lib/api";
 import { useWikiIndex, useWikiObras } from "../lib/wikiIndex";
 import { ProgressPicker } from "../components/SpoilerProgress";
+import { UsernameDialog } from "../components/UsernameDialog";
+import { fmtDay, isBlockedNickname, nextChangeAt } from "../lib/username";
 import { objPos } from "../lib/format";
 import { resizePhoto } from "../lib/photo";
 import { accessLabel, groupAccesses, isNewSuggestion, newestFirst, suggestionStatus } from "../lib/profile";
@@ -112,11 +114,23 @@ function Identity({ user }: { user: AuthUser }) {
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<{ msg: string; bad: boolean }>({ msg: "", bad: false });
   const say = (msg: string, bad = false) => setStatus({ msg, bad });
+  // Janela do username: abre sozinha pelo link do e-mail de convocação (#username) se a conta
+  // ainda não tem um.
+  const [unOpen, setUnOpen] = useState(false);
+  const [unDismissed, setUnDismissed] = useState(false);
+  const [fromLink] = useState(() => typeof location !== "undefined" && location.hash === "#username");
+  const showUn = unOpen || (fromLink && !unDismissed && !!profile && !profile.username);
+  const lockedUntil = nextChangeAt(profile?.usernameChangedAt);
 
   function saveNick() {
+    const value = (nick ?? profile?.nickname ?? "").trim().slice(0, 32);
+    if (value !== (profile?.nickname || "") && isBlockedNickname(value)) {
+      say("Esse apelido não é permitido. Escolha outro.", true);
+      return;
+    }
     setBusy(true);
     say("Salvando…");
-    save({ nickname: (nick ?? profile?.nickname ?? "").trim().slice(0, 32) })
+    save({ nickname: value })
       .then(
         () => say("Apelido salvo."),
         () => say("Não consegui salvar agora. Tenta de novo daqui a pouco.", true),
@@ -188,6 +202,34 @@ function Identity({ user }: { user: AuthUser }) {
               </button>
             </div>
           </div>
+          <div className="pg-field" id="username">
+            <span className="pg-field-label">Username</span>
+            <div className="pg-field-row pg-un-row">
+              {profile?.username ? (
+                <span className="pg-field-value pg-un-name">@{profile.username}</span>
+              ) : (
+                <span className="pg-field-value pg-un-none">{profile ? "Você ainda não escolheu." : "…"}</span>
+              )}
+              <button className="pg-btn" type="button" disabled={!profile} onClick={() => setUnOpen(true)}>
+                {profile?.username ? "Trocar" : "Escolher"}
+              </button>
+            </div>
+            <span className="pg-un-hint">
+              {profile?.username
+                ? lockedUntil
+                  ? "Dá pra trocar de novo a partir de " + fmtDay(lockedUntil) + "."
+                  : "Nome único da sua conta. Dá pra trocar uma vez a cada 30 dias."
+                : "Nome único da sua conta (o apelido pode repetir, o username não)."}
+            </span>
+          </div>
+          {showUn && (
+            <UsernameDialog
+              onClose={() => {
+                setUnOpen(false);
+                setUnDismissed(true);
+              }}
+            />
+          )}
           <div className="pg-field">
             <span className="pg-field-label">E-mail</span>
             <span className="pg-field-value">{user.email}</span>

@@ -33,7 +33,7 @@ npm test           # vitest
 - `src/styles/wiki.css` — o CSS da wiki (não mexer pra estilizar página nova; ver `DESIGN.md`).
 - `public/` — arquivos estáticos servidos como estão: `404.html` (rotas de SPA no GitHub
   Pages), `tree/index.html` (guarda de um endereço antigo que mudou de lugar), `sw.js` (desliga o service
-  worker antigo), `reset-senha.html`, `selo-whitmore.png`, `icon.svg`, `og-padrao.png` (prévia de link padrão),
+  worker antigo), `reset-senha.html`, `cadastro.html`, `selo-whitmore.png`, `icon.svg`, `og-padrao.png` (prévia de link padrão),
   `robots.txt`.
 
 ## Deploy

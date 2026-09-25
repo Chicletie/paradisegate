@@ -9,12 +9,15 @@ import {
   getDoc,
   getDocs,
   query,
+  serverTimestamp,
   setDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import { onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { auth, db } from "./firebase";
+import { auth, db, functionUrl } from "./firebase";
 import { allOrOwn } from "./restrito";
+import { isEmailLogin } from "./username";
 import type {
   SpoilerObra,
   AuthUser,
@@ -81,8 +84,34 @@ export function watchAuth(cb: (user: AuthUser | null) => void): () => void {
   return onAuthStateChanged(auth, (u) => cb(u ? { uid: u.uid, email: u.email || "" } : null));
 }
 
-export async function signIn(email: string, password: string): Promise<void> {
+/**
+ * Entra com e-mail ou com o @username. Com username, quem acha o e-mail é a função
+ * `usernameSignIn` (confere a senha no servidor e só então devolve o e-mail; o e-mail de
+ * ninguém fica legível no banco), e o login segue pelo e-mail como sempre.
+ */
+export async function signIn(identifier: string, password: string): Promise<void> {
+  const id = identifier.trim();
+  const email = isEmailLogin(id) ? id : await emailForUsername(id, password);
   await signInWithEmailAndPassword(auth, email, password);
+}
+
+/** Erro do login por username, com o texto pro leitor. */
+export class LoginError extends Error {}
+
+async function emailForUsername(username: string, password: string): Promise<string> {
+  let res: Response;
+  try {
+    res = await fetch(functionUrl("usernameSignIn"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data: { username, password } }),
+    });
+  } catch {
+    throw new LoginError("Não consegui conferir agora. Tente de novo ou entre com o e-mail.");
+  }
+  const body = (await res.json().catch(() => ({}))) as { result?: { email?: string }; error?: { message?: string } };
+  if (res.ok && body.result?.email) return body.result.email;
+  throw new LoginError(body.error?.message || "Username ou senha incorretos.");
 }
 
 export function signOutUser(): Promise<void> {
@@ -114,6 +143,28 @@ export function saveProfile(user: AuthUser, patch: WikiProfilePatch, updatedAt: 
   if (patch.progress) data.progress = { [patch.progress.obraId]: patch.progress.seasonId };
   if (patch.favorite) data.favorites = patch.favorite.on ? arrayUnion(patch.favorite.id) : arrayRemove(patch.favorite.id);
   return setDoc(doc(db, "wikiProfiles", user.uid), data, { merge: true });
+}
+
+// --- Username: wikiUsernames/{nome} = { uid } (um documento por nome tomado) ---
+
+/** O nome está livre? (a regra deixa conferir um de cada vez, sem login). */
+export async function usernameTaken(name: string): Promise<boolean> {
+  const snap = await getDoc(doc(db, "wikiUsernames", name));
+  return snap.exists();
+}
+
+/** Toma o nome novo, solta o antigo e grava no perfil, tudo numa gravação só (a regra do banco
+ * confere que o nome está livre e o limite de 30 dias). */
+export function claimUsername(user: AuthUser, name: string, old: string | undefined): Promise<void> {
+  const b = writeBatch(db);
+  b.set(doc(db, "wikiUsernames", name), { uid: user.uid, at: serverTimestamp() });
+  if (old && old !== name) b.delete(doc(db, "wikiUsernames", old));
+  b.set(
+    doc(db, "wikiProfiles", user.uid),
+    { email: user.email, username: name, usernameChangedAt: serverTimestamp(), updatedAt: new Date().toISOString() },
+    { merge: true },
+  );
+  return b.commit();
 }
 
 // --- Sugestões: wikiSuggestions ---

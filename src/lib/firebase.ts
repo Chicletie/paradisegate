@@ -16,6 +16,11 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+let functionsBase = "https://us-central1-rotina-555dd.cloudfunctions.net/";
+/** Endereço de uma função do Firebase (chamada por fetch, sem o pacote de funções). */
+export function functionUrl(name: string): string {
+  return functionsBase + name;
+}
 
 // Só em desenvolvimento (npm run dev), em localhost e com a chave ligada no navegador
 // (localStorage "pg.emulators" = "1"): usa o simulador do Firebase, com dados de mentira. O
@@ -23,4 +28,5 @@ export const auth = getAuth(app);
 if (import.meta.env.DEV && typeof location !== "undefined" && location.hostname === "localhost" && localStorage.getItem("pg.emulators") === "1") {
   connectFirestoreEmulator(db, "127.0.0.1", 8080);
   connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+  functionsBase = "http://127.0.0.1:5001/rotina-555dd/us-central1/";
 }
