@@ -102,7 +102,7 @@ export function mountSyncUi(doc: Document, options: { onRefresh?: () => void } =
 
   const back = doc.createElement("a");
   back.className = "toolbar-btn pg-back";
-  back.href = "/jogo/fichas";
+  back.href = "/wiki/_perfil#fichas";
   back.textContent = "‹ Minhas fichas";
 
   if (toolbar && local) {
@@ -120,7 +120,12 @@ export function mountSyncUi(doc: Document, options: { onRefresh?: () => void } =
     cloud.className = `save-status pg-cloud is-${TONE[s.kind]}`;
     let text = TEXT[s.kind];
     if (s.kind === "saved" && s.at) text += " às " + clock(s.at);
-    if (s.kind === "read_only" || s.kind === "read_only_stale") text = "Ficha de " + (s.owner || "outro jogador") + ": " + text;
+    if (s.kind === "read_only" || s.kind === "read_only_stale") {
+      text = "Ficha de " + (s.owner || "outro jogador") + ": " + text;
+      // O mestre veio da página da mesa: volta pra lá.
+      back.href = "/jogo/mesa";
+      back.textContent = "‹ Fichas da mesa";
+    }
     cloud.replaceChildren();
     if (s.kind === "read_only_stale" && options.onRefresh) {
       const refresh = doc.createElement("button");

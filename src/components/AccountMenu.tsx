@@ -4,6 +4,8 @@ import { setGuestMode, useAccount } from "../lib/account";
 import { signOutUser } from "../lib/api";
 import type { AuthUser, WikiProfile } from "../types";
 import { PgUserIcon } from "./PgIcons";
+import { useJogoAccess } from "../jogo/access";
+import { showsFichas } from "../jogo/flags";
 
 /**
  * Canto direito do cabeçalho — porta de mountLoginBar no modo Paradise Gate: "Entrar" pra quem
@@ -49,11 +51,10 @@ export function Avatar({ user, profile, className = "pg-avatar" }: { user: AuthU
 }
 
 const MENU_ID = "pg-account-menu";
-/** Link pra Minhas Fichas: só aparece quando o build liga a chave (teste com a mesa primeiro). */
-const FICHAS_ON = import.meta.env.VITE_FEATURE_FICHAS === "1";
 
 function AccountMenu({ user }: { user: AuthUser }) {
   const { profile, unread, guest } = useAccount();
+  const fichas = showsFichas(useJogoAccess().kind);
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
@@ -115,8 +116,8 @@ function AccountMenu({ user }: { user: AuthUser }) {
           <Link className="pg-menu-item" to="/wiki/_perfil" onClick={close}>
             Meu perfil
           </Link>
-          {FICHAS_ON && (
-            <Link className="pg-menu-item" to="/jogo/fichas" onClick={close}>
+          {fichas && (
+            <Link className="pg-menu-item" to="/wiki/_perfil#fichas" onClick={close}>
               Minhas fichas
             </Link>
           )}

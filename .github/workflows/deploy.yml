@@ -33,7 +33,8 @@ jobs:
         env:
           # API do jogo (fichas), no Render. Endereço público, não é segredo.
           VITE_API_URL: https://pg-backend-jfnn.onrender.com
-          # "1" mostra "Minhas fichas" no menu da conta; vazio deixa só a rota /jogo/fichas no ar.
+          # "1" mostra o painel "Suas fichas" no perfil (e no menu da conta) pros jogadores; vazio,
+          # só o mestre vê as fichas (perfil e "Fichas da mesa" na barra de navegação).
           VITE_FEATURE_FICHAS: ""
       - run: npm run prerender
       - uses: actions/upload-pages-artifact@v3

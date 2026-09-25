@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Link } from "react-router-dom";
 import { PgHeader } from "../components/PgHeader";
 import { PgFooter } from "../components/PgFooter";
 import { PgSectionHead } from "../components/PgIcons";
 import { SignInButton } from "../components/AccountMenu";
 import { useAccount } from "../lib/account";
 import { usePgBody } from "../lib/usePgBody";
+import { useJogoAccess, type JogoAccess } from "./access";
 import { jogoApi } from "./api";
-import type { ApiClient, Invite, Me, SheetSummary, TableSheet } from "./apiClient";
+import { OfflineError, type ApiClient, type Invite, type SheetSummary, type TableSheet } from "./apiClient";
 import {
   drawerKeys,
   errorText,
@@ -26,8 +28,11 @@ import {
 } from "./fichasState";
 
 /*
- * Minhas Fichas (/jogo/fichas): as fichas do jogador na conta, criar, importar o .json e apagar.
- * Pra quem é admin, o painel Jogadores da mesa (convites). Mesma casca da página "Seu perfil".
+ * As fichas no site:
+ * - "Suas fichas" é um painel do perfil (/wiki/_perfil#fichas): criar, importar o .json, abrir e
+ *   apagar. `/jogo/fichas` leva pra lá.
+ * - A página da mesa (/jogo/mesa, link na barra de navegação só pro mestre): Fichas da mesa (as
+ *   dos jogadores, em só leitura) e Jogadores da mesa (convites).
  * A ficha abre em /fichas.html (outra página, fora do React): sempre <a>, nunca <Link>.
  */
 
@@ -55,31 +60,6 @@ const store = {
   },
 };
 
-export function FichasPage() {
-  usePgBody();
-  const { user, ready } = useAccount();
-  useEffect(() => {
-    document.title = "Minhas fichas · Paradise Gate";
-  }, []);
-  return (
-    <>
-      <PgHeader />
-      <main className="pg-profile pg-jogo">
-        <h1 className="pg-profile-title">Minhas fichas</h1>
-        {!ready && <p className="pg-empty">Carregando…</p>}
-        {ready && !user && (
-          <section className="pg-panel pg-profile-empty">
-            <p>Entre com a conta que você recebeu por convite pra ver e guardar as fichas dos seus personagens.</p>
-            <SignInButton className="pg-signin pg-signin-light" />
-          </section>
-        )}
-        {ready && user && <FichasLoaded key={user.uid} />}
-      </main>
-      <PgFooter />
-    </>
-  );
-}
-
 function Panel({ id, title, count, children }: { id: string; title: string; count?: string; children: ReactNode }) {
   return (
     <section className="pg-panel pg-profile-sec" id={id} aria-labelledby={"pg-jogo-" + id}>
@@ -89,69 +69,120 @@ function Panel({ id, title, count, children }: { id: string; title: string; coun
   );
 }
 
-function FichasLoaded() {
+const SHEETS_TITLE = "Suas fichas";
+
+/** Painel "Suas fichas" do perfil (âncora #fichas). Quem decide se aparece é o perfil (showsFichas). */
+export function FichasSection({ access }: { access: JogoAccess }) {
   const [waking, setWaking] = useState(false);
   const api = useMemo(() => jogoApi(() => setWaking(true)), []);
-  const [me, setMe] = useState<Me | null>(null);
   const [sheets, setSheets] = useState<SheetSummary[] | null>(null);
   const [error, setError] = useState<unknown>(null);
+  const me = access.kind === "admin" || access.kind === "player" ? access.me : null;
 
-  const fetchAll = useCallback(() => {
-    Promise.all([api.me(), api.listSheets()]).then(
-      ([m, list]) => {
-        setMe(m);
-        setSheets(list);
-      },
-      (e) => setError(e),
-    );
+  const fetchSheets = useCallback(() => {
+    api.listSheets().then(setSheets, setError);
   }, [api]);
 
   useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
+    if (me) fetchSheets();
+  }, [me, fetchSheets]);
 
-  function load() {
+  function retry() {
+    // A conta nem respondeu quem é: a página pergunta de novo do zero.
+    if (!me) return location.reload();
     setError(null);
     setWaking(false);
-    fetchAll();
+    fetchSheets();
   }
 
-  const view = fichasView({ ready: true, signedIn: true, waking, error, me, sheets });
+  const accessError = access.kind === "error" ? new OfflineError(0, { code: "offline" }, null) : null;
+  const view = fichasView({ ready: true, signedIn: true, waking, error: error ?? accessError, me, sheets });
 
+  if (view.kind === "empty" || view.kind === "list") {
+    return <SheetsPanel api={api} sheets={view.kind === "list" ? view.sheets : []} onChange={setSheets} />;
+  }
   if (view.kind === "connecting") {
     return (
-      <section className="pg-panel pg-profile-empty" aria-live="polite">
-        <p>{view.waking ? "Conectando à conta… o servidor pode levar até um minuto pra acordar." : "Carregando suas fichas…"}</p>
-      </section>
-    );
-  }
-  if (view.kind === "not_invited") {
-    return (
-      <section className="pg-panel pg-profile-empty">
-        <p>Sua conta ainda não foi liberada pra mesa. Peça pro mestre te convidar com este e-mail; depois é só voltar aqui.</p>
-      </section>
+      <Panel id="fichas" title={SHEETS_TITLE}>
+        <p className="pg-empty" aria-live="polite">
+          {view.waking ? "Conectando à conta… o servidor pode levar até um minuto pra acordar." : "Carregando suas fichas…"}
+        </p>
+      </Panel>
     );
   }
   if (view.kind === "error") {
     return (
+      <Panel id="fichas" title={SHEETS_TITLE}>
+        <div role="alert">
+          <p className="pg-empty">{view.message}</p>
+          {view.retry && (
+            <button type="button" className="pg-btn-line pg-jogo-retry" onClick={retry}>
+              Tentar de novo
+            </button>
+          )}
+          {view.signIn && <SignInButton className="pg-signin pg-signin-light" />}
+        </div>
+      </Panel>
+    );
+  }
+  return null;
+}
+
+/** A página da mesa (/jogo/mesa): só do mestre. */
+export function MesaPage() {
+  usePgBody();
+  const { user, ready } = useAccount();
+  const access = useJogoAccess();
+  const api = useMemo(() => jogoApi(), []);
+  useEffect(() => {
+    document.title = "Fichas da mesa · Paradise Gate";
+  }, []);
+
+  let body: ReactNode;
+  if (!ready || access.kind === "loading") {
+    body = <p className="pg-empty">Carregando…</p>;
+  } else if (!user) {
+    body = (
+      <section className="pg-panel pg-profile-empty">
+        <p>Entre com a conta do mestre pra ver as fichas da mesa.</p>
+        <SignInButton className="pg-signin pg-signin-light" />
+      </section>
+    );
+  } else if (access.kind === "admin") {
+    body = (
+      <>
+        <TablePanel api={api} />
+        <InvitesPanel api={api} />
+      </>
+    );
+  } else if (access.kind === "error") {
+    body = (
       <section className="pg-panel pg-profile-empty" role="alert">
-        <p>{view.message}</p>
-        {view.retry && (
-          <button type="button" className="pg-btn-line pg-jogo-retry" onClick={load}>
-            Tentar de novo
-          </button>
-        )}
-        {view.signIn && <SignInButton className="pg-signin pg-signin-light" />}
+        <p>{errorText(new OfflineError(0, { code: "offline" }, null))}</p>
+        <button type="button" className="pg-btn-line pg-jogo-retry" onClick={() => location.reload()}>
+          Tentar de novo
+        </button>
+      </section>
+    );
+  } else {
+    body = (
+      <section className="pg-panel pg-profile-empty">
+        <p>Esta página é do mestre da mesa. As suas fichas ficam no seu perfil.</p>
+        <Link className="pg-btn-line pg-jogo-retry" to="/wiki/_perfil#fichas">
+          Ir pro seu perfil
+        </Link>
       </section>
     );
   }
-  if (view.kind === "signed_out") return null;
 
   return (
     <>
-      <SheetsPanel api={api} sheets={view.kind === "list" ? view.sheets : []} onChange={setSheets} />
-      {view.me.role === "admin" && <TablePanel api={api} />}
-      {view.me.role === "admin" && <InvitesPanel api={api} />}
+      <PgHeader />
+      <main className="pg-profile pg-jogo">
+        <h1 className="pg-profile-title">Fichas da mesa</h1>
+        {body}
+      </main>
+      <PgFooter />
     </>
   );
 }
@@ -399,7 +430,7 @@ function TablePanel({ api }: { api: ApiClient }) {
   }
 
   return (
-    <Panel id="mesa-fichas" title="Fichas da mesa" count={rows?.length ? String(rows.length) : undefined}>
+    <Panel id="mesa-fichas" title="Fichas dos jogadores" count={rows?.length ? String(rows.length) : undefined}>
       <p className="pg-profile-note">As fichas dos jogadores, pra consultar durante a sessão. Abrem só pra leitura: quem muda é o jogador.</p>
       {body}
     </Panel>
