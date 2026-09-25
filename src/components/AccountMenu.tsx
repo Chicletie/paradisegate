@@ -49,6 +49,8 @@ export function Avatar({ user, profile, className = "pg-avatar" }: { user: AuthU
 }
 
 const MENU_ID = "pg-account-menu";
+/** Link pra Minhas Fichas: só aparece quando o build liga a chave (teste com a mesa primeiro). */
+const FICHAS_ON = import.meta.env.VITE_FEATURE_FICHAS === "1";
 
 function AccountMenu({ user }: { user: AuthUser }) {
   const { profile, unread, guest } = useAccount();
@@ -113,6 +115,11 @@ function AccountMenu({ user }: { user: AuthUser }) {
           <Link className="pg-menu-item" to="/wiki/_perfil" onClick={close}>
             Meu perfil
           </Link>
+          {FICHAS_ON && (
+            <Link className="pg-menu-item" to="/jogo/fichas" onClick={close}>
+              Minhas fichas
+            </Link>
+          )}
           {profile?.username && (
             <Link className="pg-menu-item" to={"/@" + profile.username} onClick={close}>
               Meu perfil público

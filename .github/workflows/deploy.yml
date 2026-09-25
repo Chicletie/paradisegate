@@ -30,6 +30,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+        env:
+          # API do jogo (fichas), no Render. Endereço público, não é segredo.
+          VITE_API_URL: https://pg-backend-jfnn.onrender.com
+          # "1" mostra "Minhas fichas" no menu da conta; vazio deixa só a rota /jogo/fichas no ar.
+          VITE_FEATURE_FICHAS: ""
       - run: npm run prerender
       - uses: actions/upload-pages-artifact@v3
         with:

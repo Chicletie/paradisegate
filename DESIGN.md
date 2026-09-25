@@ -281,6 +281,12 @@ Logado, o "entrar" vira um avatar circular de 40px (foto do perfil quando existe
 - **Favoritos:** linhas com miniatura de 44px (ou a inicial dourada sobre o azul estrelado), nome em Castoro e tipo; "Tirar" em texto sublinhado. Marca-se com o botão "Favoritar" (estrela da marca, `aria-pressed`) na fileira de ações de cada página; favoritado, a pílula ganha `link-wash` e a estrela fica dourada.
 - **Seus acessos:** trechos restritos liberados pro e-mail do leitor, agrupados por página (nome em Castoro `link`, lista com marcador azul: "Seção “…”", "Versão confidencial de “…”", "Nota “…”"…). Só páginas do Paradise Gate.
 
+### Minhas Fichas
+`/jogo/fichas`, a mesma casca do perfil (coluna de 820px, título em Castoro Titling, um painel por seção). Link "Minhas fichas" no menu da conta só com `VITE_FEATURE_FICHAS=1`. Estilos em `src/styles/jogo.css`.
+- **Suas fichas:** "Nova ficha" (botão cheio `link`, cria e abre a ficha) e "Importar ficha (.json)" (pílula de contorno) no topo; linha de estado embaixo. Linhas iguais às dos Favoritos: inicial dourada sobre o azul estrelado (44px), nome em Castoro e "atualizada em 25 de set., 14:32" em `muted`; a linha inteira abre a ficha (`<a>` pra `/fichas.html?sheet=<id>`). "Apagar" em texto sublinhado; confirma na própria linha ("Apagar de vez? Não tem volta." + pílula de contorno vermelha discreta, o mesmo vermelho do erro do perfil, + "Cancelar"), sem modal. Ficha achada só neste navegador: caixa `link-wash` de fio `line-strong` com "Trazer pra conta" e "Agora não".
+- **Jogadores da mesa** (só admin): nota em itálico `muted`, campo "E-mail do jogador" com "Convidar", e a lista (e-mail, ponto dourado "já entrou" ou vazio "ainda não entrou", quem convidou, "Remover").
+- **Estados:** sem login (painel com "Entrar", como o perfil), carregando / "Conectando à conta… o servidor pode levar até um minuto pra acordar", sem convite, erro com "Tentar de novo" (frase simples, nunca o detalhe técnico).
+
 ### Título de Seção
 Estrela de quatro pontas 13px em `link`, texto em Castoro Titling 17px, contagem opcional em Hanken 13px `muted` tabular, e uma régua de 1px `line` que preenche o resto da linha.
 

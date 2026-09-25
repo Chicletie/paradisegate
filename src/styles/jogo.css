@@ -1,0 +1,59 @@
+/* Páginas do jogo (Minhas Fichas, /jogo/fichas). Casca da página "Seu perfil" (.pg-profile,
+   .pg-panel, .pg-btn*, linhas dos Favoritos) + o que é só daqui. Só tokens (tokens.css) e as
+   variáveis que a casca do site já define; nada aqui mexe em wiki.css. */
+
+.pg-jogo-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.pg-jogo-actions label.pg-btn-line { min-height: 44px; padding: 10px 18px; font-size: 14px; }
+.pg-jogo-actions label.pg-btn-line[aria-disabled="true"] { opacity: 0.6; cursor: default; }
+.pg-jogo #pg-jogo-import:focus-visible + label { outline: 2px solid var(--pg-link); outline-offset: 3px; }
+.pg-jogo .pg-profile-status { margin: 10px 0 2px; }
+.pg-jogo .pg-profile-status:empty { margin: 0; min-height: 0; }
+.pg-jogo-retry { margin-top: 14px; }
+
+/* Ficha achada neste navegador (ainda fora da conta) */
+.pg-jogo-found {
+  margin: 12px 0 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--pg-line-strong);
+  border-radius: 12px;
+  background: var(--pg-link-wash);
+}
+.pg-jogo-found p { margin: 0 0 10px; font-size: 14.5px; line-height: 1.5; color: var(--pg-ink); }
+.pg-jogo-found strong { font-family: var(--pg-f-serif); font-weight: 400; font-size: 16px; }
+.pg-jogo-found-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+
+/* Linhas das fichas (mesmo desenho dos Favoritos) */
+.pg-jogo .pg-fav-list { margin-top: 8px; }
+.pg-sheet-row { min-height: 64px; }
+.pg-sheet-row .pg-fav-link { min-height: 44px; border-radius: 10px; }
+.pg-sheet-row .pg-fav-link:focus-visible { outline: 2px solid var(--pg-link); outline-offset: 3px; }
+.pg-sheet-row .pg-fav-thumb.is-empty { font-size: 19px; }
+.pg-sheet-confirm { flex: none; display: flex; align-items: center; justify-content: flex-end; gap: 4px 6px; }
+.pg-sheet-confirm-text { font-size: 13.5px; color: var(--pg-ink); }
+.pg-btn-danger { background: transparent; font-family: var(--pg-f-ui); color: #a3372b; border-color: rgba(163, 55, 43, 0.45); }
+.pg-btn-danger:hover { background: rgba(163, 55, 43, 0.08); border-color: #a3372b; }
+
+/* Convites */
+.pg-jogo-invite { margin-top: 14px; }
+.pg-jogo-invite input { min-height: 44px; box-sizing: border-box; }
+.pg-invite-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; }
+.pg-invite-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--pg-line); }
+.pg-invite-row:last-child { border-bottom: 0; }
+.pg-invite-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.pg-invite-email { font-size: 15px; color: var(--pg-ink); overflow-wrap: anywhere; }
+.pg-invite-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12.5px; color: var(--pg-muted); }
+.pg-invite-state { display: inline-flex; align-items: center; gap: 6px; }
+.pg-invite-state::before { content: ""; width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--pg-line-strong); }
+.pg-invite-state.is-in { color: var(--pg-ink); }
+.pg-invite-state.is-in::before { background: var(--pg-gold); border-color: var(--pg-gold); }
+
+@media (prefers-color-scheme: dark) {
+  .pg-btn-danger { color: #f0a497; border-color: rgba(240, 164, 151, 0.45); }
+  .pg-btn-danger:hover { background: rgba(240, 164, 151, 0.1); border-color: #f0a497; }
+}
+
+@media (max-width: 560px) {
+  .pg-jogo-actions > * { flex: 1 1 auto; }
+  .pg-sheet-row.is-confirming { flex-wrap: wrap; }
+  .pg-sheet-row.is-confirming .pg-sheet-confirm { flex: 1 1 100%; flex-wrap: wrap; justify-content: flex-start; padding-left: 56px; }
+}
