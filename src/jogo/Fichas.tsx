@@ -457,7 +457,7 @@ function TablePanel({ api }: { api: ApiClient }) {
   } else if (!rows) {
     body = <p className="pg-empty">Carregando as fichas da mesa…</p>;
   } else if (rows.length === 0) {
-    body = <p className="pg-empty">Nenhum jogador tem ficha na conta ainda.</p>;
+    body = <p className="pg-empty">Ninguém da mesa tem ficha na conta ainda.</p>;
   } else {
     body = (
       <div className="pg-fav-list">
@@ -472,7 +472,7 @@ function TablePanel({ api }: { api: ApiClient }) {
                 <span className="pg-fav-text">
                   <span className="pg-fav-title">{name}</span>
                   <span className="pg-fav-type">
-                    <span className="pg-table-owner">{ownerLabel(s.owner)}</span>
+                    <span className="pg-table-owner">{s.mine ? "sua" : ownerLabel(s.owner)}</span>
                     {" · " + updatedText(s.updated_at)}
                   </span>
                 </span>
@@ -485,8 +485,10 @@ function TablePanel({ api }: { api: ApiClient }) {
   }
 
   return (
-    <Panel id="mesa-fichas" title="Fichas dos jogadores" count={rows?.length ? String(rows.length) : undefined}>
-      <p className="pg-profile-note">As fichas dos jogadores, pra consultar durante a sessão. Abrem só pra leitura: quem muda é o jogador.</p>
+    <Panel id="mesa-fichas" title="Todas as fichas" count={rows?.length ? String(rows.length) : undefined}>
+      <p className="pg-profile-note">
+        Todas as fichas da mesa, as suas também, pra consultar durante a sessão. As dos outros abrem só pra leitura: quem muda é o jogador.
+      </p>
       {body}
     </Panel>
   );

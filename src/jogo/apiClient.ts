@@ -46,8 +46,8 @@ export type SheetSummary = { id: number; nome: string; prestigio_atual: number; 
 export type SheetOwner = { id: number; username: string | null; email: string };
 /** `mine: false` quando o mestre (admin) abre a ficha de um jogador: só leitura. */
 export type Sheet = SheetSummary & { data: Record<string, unknown>; mine?: boolean; owner?: SheetOwner | null };
-/** Uma linha de "Fichas da mesa" (só admin). */
-export type TableSheet = SheetSummary & { owner: SheetOwner };
+/** Uma linha de "Fichas da mesa" (só admin). `mine`: a ficha do próprio mestre (abre pra editar). */
+export type TableSheet = SheetSummary & { owner: SheetOwner; mine: boolean };
 /** Sugestão do mestre numa ficha. `seen_at` nulo = a dona ainda não viu. */
 export type SheetNote = { id: number; sheet_id: number; text: string; created_at: string; seen_at: string | null; author: string | null };
 /** No perfil da dona: de qual ficha é. */
