@@ -8,6 +8,7 @@ import { ErrorPage } from "./pages/ErrorPage";
 import { MemberPage } from "./pages/MemberPage";
 import { EscritosPage } from "./pages/EscritosPage";
 import { EscritoPage } from "./pages/EscritoPage";
+import { FichasPage } from "./jogo/Fichas";
 import { ScrollToTop } from "./components/ScrollToTop";
 
 // Cada ?q=/?tipo=/?aleatoria= novo é uma home nova, como um carregamento da página de hoje
@@ -32,6 +33,8 @@ export default function App() {
         <Route path="/wiki/_escritos" element={<EscritosPage />} />
         <Route path="/wiki/_escritos/:id" element={<EscritoPage />} />
         <Route path="/wiki/:slug" element={<EntryPage />} />
+        {/* Páginas do jogo: a rota fica no ar; o link no menu da conta só com VITE_FEATURE_FICHAS=1. */}
+        <Route path="/jogo/fichas" element={<FichasPage />} />
         {/* Perfil público de um membro: /@nome (MemberPage confere o @). */}
         <Route path="/:handle" element={<MemberPage />} />
         <Route path="*" element={<ErrorPage />} />
