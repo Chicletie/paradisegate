@@ -69,7 +69,8 @@ export function dailyHighlights(entries: HomeEntry[], now = Date.now()): DailyHi
   eligible.forEach((e) =>
     (e.citacoes || []).forEach((raw) => {
       const q = quoteNorm({ speakerId: e.id, speakerTitle: e.title, ...raw }, "");
-      if (!q || seen[String(q.id)] || q.daily === false) return;
+      // narração (parágrafos, links) nunca vai pra Citação do dia
+      if (!q || seen[String(q.id)] || q.daily === false || q.kind === "narracao") return;
       seen[String(q.id)] = 1;
       quotePool.push(q);
     }),
