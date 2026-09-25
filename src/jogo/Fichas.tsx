@@ -8,12 +8,11 @@ import { useAccount } from "../lib/account";
 import { usePgBody } from "../lib/usePgBody";
 import { featuresOf, useJogoAccess } from "./access";
 import { jogoApi } from "./api";
-import { OfflineError, type ApiClient, type Invite, type Me, type MySheetNote, type SheetSummary, type TableSheet } from "./apiClient";
+import { OfflineError, type ApiClient, type Me, type MySheetNote, type SheetSummary, type TableSheet } from "./apiClient";
 import {
   drawerKeys,
   errorText,
   fichasView,
-  inviteErrorText,
   LEGACY_DONE,
   LEGACY_DRAWER,
   legacySheet,
@@ -28,8 +27,9 @@ import {
  * As fichas no site:
  * - "Suas fichas" é um painel do perfil (/wiki/_perfil#fichas): criar, importar o .json, abrir e
  *   apagar. `/jogo/fichas` leva pra lá.
- * - A página da mesa (/jogo/mesa, link na barra de navegação só pro mestre): Fichas da mesa (as
- *   dos jogadores, em só leitura) e Jogadores da mesa (convites).
+ * - A página da mesa (/jogo/mesa, link na barra de navegação só pro mestre): todas as fichas da
+ *   mesa (as dos outros em só leitura). Convidar e tirar da mesa é no editor do mestre (arvore),
+ *   que pergunta à API do jogo: aqui não tem convite.
  * A ficha abre em /fichas.html (outra página, fora do React): sempre <a>, nunca <Link>.
  */
 
@@ -196,12 +196,7 @@ export function MesaPage() {
       </section>
     );
   } else if (featuresOf(access).mesa) {
-    body = (
-      <>
-        <TablePanel api={api} />
-        <InvitesPanel api={api} />
-      </>
-    );
+    body = <TablePanel api={api} />;
   } else if (access.kind === "error") {
     body = (
       <section className="pg-panel pg-profile-empty" role="alert">
@@ -483,132 +478,6 @@ function TablePanel({ api }: { api: ApiClient }) {
         Todas as fichas da mesa, as suas também, pra consultar durante a sessão. As dos outros abrem só pra leitura: quem muda é o jogador.
       </p>
       {body}
-    </Panel>
-  );
-}
-
-function InvitesPanel({ api }: { api: ApiClient }) {
-  const [invites, setInvites] = useState<Invite[] | null>(null);
-  const [loadError, setLoadError] = useState<string>("");
-  const [email, setEmail] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [removing, setRemoving] = useState<number | null>(null);
-  const [status, setStatus] = useState<Status>({ msg: "" });
-
-  const fetchInvites = useCallback(() => {
-    api.listInvites().then(setInvites, (e) => setLoadError(errorText(e)));
-  }, [api]);
-  useEffect(() => {
-    fetchInvites();
-  }, [fetchInvites]);
-
-  function load() {
-    setLoadError("");
-    fetchInvites();
-  }
-
-  async function invite() {
-    // Quem confere e normaliza o e-mail é a API; aqui só se manda o que foi digitado.
-    setBusy(true);
-    setStatus({ msg: "" });
-    try {
-      const made = await api.createInvite(email);
-      setInvites((list) => [made, ...(list ?? [])]);
-      setEmail("");
-      setStatus({ msg: `${made.email} pode usar as fichas.` });
-    } catch (e) {
-      setStatus({ msg: inviteErrorText(e), bad: true });
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function remove(item: Invite) {
-    setRemoving(item.id);
-    setStatus({ msg: "" });
-    try {
-      await api.deleteInvite(item.id);
-      setInvites((list) => (list ?? []).filter((x) => x.id !== item.id));
-      setStatus({ msg: `${item.email} não usa mais as fichas.` });
-    } catch (e) {
-      setStatus({ msg: errorText(e), bad: true });
-    } finally {
-      setRemoving(null);
-    }
-  }
-
-  return (
-    <Panel id="mesa" title="Jogadores da mesa" count={invites?.length ? String(invites.length) : undefined}>
-      <p className="pg-profile-note">
-        Convidar aqui libera as fichas pra esse e-mail. A conta no site continua sendo criada no painel do Firebase, como hoje.
-      </p>
-      <form
-        className="pg-field pg-jogo-invite"
-        onSubmit={(ev) => {
-          ev.preventDefault();
-          void invite();
-        }}
-      >
-        <label className="pg-field-label" htmlFor="pg-jogo-email">
-          E-mail do jogador
-        </label>
-        <div className="pg-field-row">
-          <input
-            id="pg-jogo-email"
-            type="email"
-            inputMode="email"
-            autoComplete="off"
-            spellCheck={false}
-            maxLength={254}
-            placeholder="jogador@email.com"
-            value={email}
-            onChange={(ev) => setEmail(ev.target.value)}
-            disabled={busy}
-          />
-          <button type="submit" className="pg-btn" disabled={busy || !email.trim()}>
-            {busy ? "Convidando…" : "Convidar"}
-          </button>
-        </div>
-      </form>
-      <p className={"pg-profile-status" + (status.bad ? " is-bad" : "")} role="status">
-        {status.msg}
-      </p>
-
-      {loadError ? (
-        <div role="alert">
-          <p className="pg-empty">{loadError}</p>
-          <button type="button" className="pg-btn-line pg-jogo-retry" onClick={load}>
-            Tentar de novo
-          </button>
-        </div>
-      ) : !invites ? (
-        <p className="pg-empty">Carregando os convites…</p>
-      ) : invites.length === 0 ? (
-        <p className="pg-empty">Ninguém convidado ainda.</p>
-      ) : (
-        <ul className="pg-invite-list">
-          {invites.map((item) => (
-            <li key={item.id} className="pg-invite-row">
-              <span className="pg-invite-text">
-                <span className="pg-invite-email">{item.email}</span>
-                <span className="pg-invite-meta">
-                  <span className={"pg-invite-state" + (item.joined ? " is-in" : "")}>{item.joined ? "já entrou" : "ainda não entrou"}</span>
-                  {item.invited_by && <span>{"convidado por " + item.invited_by}</span>}
-                </span>
-              </span>
-              <button
-                type="button"
-                className="pg-btn-text"
-                aria-label={"Remover o convite de " + item.email}
-                disabled={removing === item.id}
-                onClick={() => void remove(item)}
-              >
-                {removing === item.id ? "Removendo…" : "Remover"}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
     </Panel>
   );
 }

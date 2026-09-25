@@ -4,7 +4,6 @@ import { ApiError, NotInvitedError, OfflineError, SessionExpiredError, type Me, 
 import {
   errorText,
   fichasView,
-  inviteErrorText,
   legacySheet,
   parseImportFile,
   seedDrawer,
@@ -57,10 +56,6 @@ describe("mensagens de erro", () => {
   });
   it("erro do servidor (5xx) não mostra detalhe técnico", () => {
     expect(errorText(new ApiError(500, { code: "internal", message: "Erro interno" }, null))).toMatch(/Tente de novo/);
-  });
-  it("convite: a frase da API; formato de e-mail recusado ganha a da tela", () => {
-    expect(inviteErrorText(new ApiError(409, { code: "invite_exists", message: "Esse e-mail já foi convidado" }, null))).toBe("Esse e-mail já foi convidado");
-    expect(inviteErrorText(new ApiError(422, {}, null))).toMatch(/Confira o e-mail/);
   });
 });
 

@@ -76,16 +76,6 @@ describe("contrato com a API", () => {
     expect(err.message).toBe("mensagem pro jogador");
   });
 
-  it("convites: criar, repetido e remover", async () => {
-    const queue = [responseFor(CASES.convidar), responseFor(CASES.convite_repetido), responseFor(CASES.remover_convite)];
-    const { api } = client(async () => queue.shift()!);
-    expect((await api.createInvite("Novata@Mesa.test")).joined).toBe(false);
-    const dup = await api.createInvite("novata@mesa.test").catch((e) => e);
-    expect(dup).toBeInstanceOf(ApiError);
-    expect(dup.code).toBe("invite_exists");
-    await expect(api.deleteInvite(1)).resolves.toBeUndefined();
-  });
-
   it("fichas da mesa: o caminho do contrato, e jogador comum leva 403 forbidden", async () => {
     const fetchImpl = vi.fn<ApiClientDeps["fetch"]>(async () => responseFor(CASES.mesa_so_admin));
     const { api } = client(fetchImpl);
