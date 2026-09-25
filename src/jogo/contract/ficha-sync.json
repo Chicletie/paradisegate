@@ -1,0 +1,344 @@
+{
+  "description": "Pedidos e respostas de exemplo entre a ficha (paradisegate src/ficha-sync + src/jogo/apiClient) e a API. O pytest do pg-backend reproduz estes casos contra a API real; o paradisegate guarda uma cópia e usa as respostas como fetch falso. Mudou aqui, muda lá.",
+  "contract_version": 2,
+  "auth": {
+    "header": "Authorization: Bearer <Firebase ID token>",
+    "players": {
+      "player": {
+        "uid": "uid-player",
+        "email": "player@mesa.test",
+        "email_verified": true
+      },
+      "stranger": {
+        "uid": "uid-stranger",
+        "email": "stranger@elsewhere.test",
+        "email_verified": true
+      },
+      "admin": {
+        "uid": "uid-mestre",
+        "email": "mestre@mesa.test",
+        "email_verified": true
+      }
+    }
+  },
+  "error_shape": {
+    "detail": {
+      "code": "<string>",
+      "message": "<string pro jogador>"
+    }
+  },
+  "response_headers": [
+    "x-request-id"
+  ],
+  "cases": [
+    {
+      "name": "sem_token",
+      "request": {
+        "method": "GET",
+        "path": "/character-sheets",
+        "as": null
+      },
+      "response": {
+        "status": 401,
+        "detail_code": "missing_token"
+      }
+    },
+    {
+      "name": "fora_da_mesa",
+      "request": {
+        "method": "GET",
+        "path": "/character-sheets",
+        "as": "stranger"
+      },
+      "response": {
+        "status": 403,
+        "detail_code": "not_invited"
+      }
+    },
+    {
+      "name": "lista_vazia",
+      "request": {
+        "method": "GET",
+        "path": "/character-sheets",
+        "as": "player"
+      },
+      "response": {
+        "status": 200,
+        "body": []
+      }
+    },
+    {
+      "name": "criar_ficha",
+      "request": {
+        "method": "POST",
+        "path": "/character-sheets",
+        "as": "player",
+        "body": {
+          "nome": "Kael",
+          "data": {
+            "pv": 10
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "body_keys": [
+          "id",
+          "nome",
+          "prestigio_atual",
+          "version",
+          "updated_at",
+          "data"
+        ],
+        "body_subset": {
+          "nome": "Kael",
+          "version": 1,
+          "data": {
+            "pv": 10
+          }
+        }
+      },
+      "save": {
+        "sheet_id": "id"
+      }
+    },
+    {
+      "name": "listar_resumo",
+      "request": {
+        "method": "GET",
+        "path": "/character-sheets",
+        "as": "player"
+      },
+      "response": {
+        "status": 200,
+        "item_keys": [
+          "id",
+          "nome",
+          "prestigio_atual",
+          "version",
+          "updated_at"
+        ]
+      }
+    },
+    {
+      "name": "abrir_ficha",
+      "request": {
+        "method": "GET",
+        "path": "/character-sheets/{sheet_id}",
+        "as": "player"
+      },
+      "response": {
+        "status": 200,
+        "body_subset": {
+          "version": 1,
+          "data": {
+            "pv": 10
+          }
+        }
+      }
+    },
+    {
+      "name": "salvar",
+      "request": {
+        "method": "PUT",
+        "path": "/character-sheets/{sheet_id}",
+        "as": "player",
+        "body": {
+          "version": 1,
+          "data": {
+            "pv": 7
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_subset": {
+          "version": 2,
+          "data": {
+            "pv": 7
+          }
+        }
+      }
+    },
+    {
+      "name": "salvar_versao_velha",
+      "request": {
+        "method": "PUT",
+        "path": "/character-sheets/{sheet_id}",
+        "as": "player",
+        "body": {
+          "version": 1,
+          "data": {
+            "pv": 3
+          }
+        }
+      },
+      "response": {
+        "status": 409,
+        "detail_code": "sheet_conflict",
+        "detail_keys": [
+          "current_version",
+          "updated_at"
+        ],
+        "detail_subset": {
+          "current_version": 2
+        }
+      }
+    },
+    {
+      "name": "manter_deste_aparelho",
+      "request": {
+        "method": "PUT",
+        "path": "/character-sheets/{sheet_id}",
+        "as": "player",
+        "body": {
+          "version": 1,
+          "force": true,
+          "data": {
+            "pv": 3
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_subset": {
+          "version": 3,
+          "data": {
+            "pv": 3
+          }
+        }
+      }
+    },
+    {
+      "name": "ficha_grande_demais",
+      "request": {
+        "method": "PUT",
+        "path": "/character-sheets/{sheet_id}",
+        "as": "player",
+        "body_size_bytes": 1100000
+      },
+      "response": {
+        "status": 413,
+        "detail_code": "too_large"
+      }
+    },
+    {
+      "name": "ficha_de_outra_pessoa",
+      "request": {
+        "method": "GET",
+        "path": "/character-sheets/999999",
+        "as": "player"
+      },
+      "response": {
+        "status": 404,
+        "detail_code": "not_found"
+      }
+    },
+    {
+      "name": "servidor_acordado",
+      "request": {
+        "method": "GET",
+        "path": "/health",
+        "as": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "status": "ok"
+        }
+      }
+    },
+    {
+      "name": "convites_so_admin",
+      "request": {
+        "method": "GET",
+        "path": "/invites",
+        "as": "player"
+      },
+      "response": {
+        "status": 403,
+        "detail_code": "forbidden"
+      }
+    },
+    {
+      "name": "convidar",
+      "request": {
+        "method": "POST",
+        "path": "/invites",
+        "as": "admin",
+        "body": {
+          "email": "Novata@Mesa.test"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body_keys": [
+          "id",
+          "email",
+          "created_at",
+          "invited_by",
+          "joined"
+        ],
+        "body_subset": {
+          "email": "novata@mesa.test",
+          "joined": false
+        }
+      },
+      "save": {
+        "invite_id": "id"
+      }
+    },
+    {
+      "name": "convite_repetido",
+      "request": {
+        "method": "POST",
+        "path": "/invites",
+        "as": "admin",
+        "body": {
+          "email": "novata@mesa.test"
+        }
+      },
+      "response": {
+        "status": 409,
+        "detail_code": "invite_exists"
+      }
+    },
+    {
+      "name": "listar_convites",
+      "request": {
+        "method": "GET",
+        "path": "/invites",
+        "as": "admin"
+      },
+      "response": {
+        "status": 200,
+        "item_keys": [
+          "id",
+          "email",
+          "created_at",
+          "invited_by",
+          "joined"
+        ]
+      }
+    },
+    {
+      "name": "remover_convite",
+      "request": {
+        "method": "DELETE",
+        "path": "/invites/{invite_id}",
+        "as": "admin"
+      },
+      "response": {
+        "status": 204
+      }
+    }
+  ],
+  "setup": {
+    "admin_emails": [
+      "mestre@mesa.test"
+    ],
+    "invites": [
+      "player@mesa.test"
+    ]
+  }
+}
