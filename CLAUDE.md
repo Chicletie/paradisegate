@@ -6,20 +6,17 @@ pela colaboradora. Antes de mexer, leia `PRODUCT.md` (marca e público), `DESIGN
 visual, com uma parte só pra páginas fora da wiki), `CONTRIBUTING.md` (fluxo) e
 `docs/dados-da-wiki.md` (o que o site lê do banco).
 
-## Agora: o autor está no editor (desde setembro de 2026)
+## Aviso: por que o autor está parado no site (desde setembro de 2026)
 
-O autor está no meio de um trabalho em etapas pra **redesenhar o editor da wiki** (a ferramenta
-privada onde ele escreve as entradas que viram a wiki). O editor cresceu muito além do que foi
-pensado no começo, e a interface nova é pra deixar todas as funções fáceis de achar e de usar.
-**Isso é a prioridade dele por enquanto**, por isso ele não está mexendo no resto do site.
+Só pra informação, **não é tarefa pra ninguém aqui**. O autor está ocupado com outra coisa: um
+redesenho em etapas do editor privado onde ele escreve a wiki. Esse editor **não fica neste
+repositório** e ninguém daqui mexe nele. É por isso que ele não está abrindo PRs de site
+nesse período.
 
-- A primeira etapa (a página de cada entrada) já está no ar. As próximas vêm uma de cada vez.
-- O trabalho do editor **não muda a wiki pública**: o que ela recebe continua no mesmo formato
-  (`docs/dados-da-wiki.md`). Se isso mudar, vem num PR aqui, como sempre.
-- As páginas da colaboradora (marca, jogo, notícias, loja…) seguem normalmente. O autor continua
-  revisando os PRs dela, só não está abrindo PRs novos de site nesse período.
+- A colaboradora segue nas coisas dela normalmente. O autor continua revisando os PRs dela.
+- A wiki pública não muda por causa disso. Se um dia mudar, vem num PR aqui, como sempre.
 
-Quando o redesenho do editor terminar, este aviso sai.
+Quando o redesenho terminar, este aviso sai.
 
 ## Stack
 
