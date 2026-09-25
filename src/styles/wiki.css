@@ -970,3 +970,26 @@ body.pg-site:not(.pg-home) .wb-epi-attr a, body.pg-site:not(.pg-home) .wb-dl-who
   .pg-sp-thumb { width: 44px; height: 44px; }
   .pg-sp-title { font-size: 18px; }
 }
+
+/* ---- Username (@) no perfil, na janela e no menu da conta ---- */
+.pg-un-row { align-items: center; justify-content: space-between; min-height: 44px; padding: 4px 4px 4px 14px; border: 1px solid var(--pg-line); border-radius: 10px; }
+.pg-un-row .pg-btn { flex: none; }
+@media (max-width: 600px) { .pg-field-row.pg-un-row { flex-direction: row; } }
+.pg-un-name { font-weight: 600; color: var(--pg-ink); }
+.pg-un-none { color: var(--pg-muted); font-style: italic; }
+.pg-un-hint { display: block; font-size: 13px; color: var(--pg-muted); margin-top: 4px; }
+.pg-menu-handle { display: block; font-size: 13px; color: var(--pg-link); }
+body.pg-site .login-box:has(.pg-un) { max-width: 380px; }
+.pg-un h3 { margin: 0 0 8px; }
+.pg-un-text { margin: 0 0 14px; font-size: 14.5px; line-height: 1.5; color: var(--pg-muted); overflow-wrap: anywhere; }
+.pg-un-text strong { color: var(--pg-ink); }
+.pg-un .field-label { display: block; font-size: 13.5px; font-weight: 600; margin: 0 0 6px; color: var(--pg-ink); }
+.pg-un-field { display: flex; align-items: center; gap: 2px; border: 1px solid var(--pg-line-strong); border-radius: 10px; padding: 0 12px; background: var(--pg-panel); }
+.pg-un-field:focus-within { border-color: var(--pg-link); box-shadow: 0 0 0 3px var(--pg-link-wash); }
+.pg-un-field span { color: var(--pg-muted); font-size: 16px; }
+body.pg-site .login-box .pg-un-field input { border: 0; margin: 0; padding: 12px 0; background: transparent; font-size: 16px; min-height: 44px; outline: none; box-shadow: none; }
+.pg-un-status { min-height: 20px; margin: 6px 0 12px; font-size: 13.5px; color: var(--pg-muted); }
+.pg-un-status.is-bad { color: #b3261e; }
+.pg-un-status.is-ok { color: #1e7a3a; }
+@media (prefers-color-scheme: dark) { .pg-un-status.is-bad { color: #f2b8b5; } .pg-un-status.is-ok { color: #8fd6a4; } }
+body.pg-site .login-box .pg-un button.submit { min-height: 44px; }

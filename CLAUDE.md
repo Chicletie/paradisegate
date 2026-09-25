@@ -31,13 +31,17 @@ Vite + React 19 + TypeScript + Tailwind v4 + react-router. `npm test` (Vitest), 
    como é. Detalhes em `DESIGN.md`, "O site além da wiki".
 6. **Firebase só por `src/lib/api.ts`.** No Firestore, só leitura dos dados da wiki, e só estas
    coleções: `wikiIndex/lotus` (+ `shards/`), `wikiPublic`, `wikiRestrito`, `wikiProfiles`,
+   `wikiUsernames`,
    `wikiSuggestions` (`docs/dados-da-wiki.md`). A configuração do Firebase no código é pública
    por natureza; quem protege são as regras do banco, que ficam com o autor. Nada de coleção
    nova. O **Firebase Auth é o login único do site**: wiki e páginas do jogo (fichas, loja,
    biblioteca) usam a mesma conta, pelas funções de login de `api.ts`. **Conta só por convite**:
    não existe cadastro aberto; quem convida cria a conta e o e-mail de convite leva pra
-   `public/reset-senha.html`, onde a pessoa escolhe a senha. Só e-mail e senha: provedor como
-   Google cria conta sozinho pra quem entra e furaria o convite. As páginas do jogo mandam
+   `public/cadastro.html`, onde a pessoa escolhe o @username e a senha (`reset-senha.html`
+   fica só pro "esqueci minha senha"). Só e-mail e senha: provedor como Google cria conta
+   sozinho pra quem entra e furaria o convite. Entrar com o @username também vale, mas é o
+   mesmo login por e-mail e senha: a função `usernameSignIn` do autor confere a senha e
+   devolve o e-mail (`docs/dados-da-wiki.md`). As páginas do jogo mandam
    o token do Firebase pro backend do jogo (a API no Render), que guarda fichas, loja e
    catálogo no banco dele — nada disso vai pro Firestore.
 7. **Domínio, GitHub Pages e workflows** (`.github/`) só mudam com o autor. Nunca publique em
@@ -121,6 +125,7 @@ Valem pros dois (e pro Claude de cada um), em toda mudança:
 | `public/404.html` | Rotas de SPA no GitHub Pages: endereços antigos que mudaram de lugar são encaminhados; o resto reconstrói a URL bonita via `?p=`. |
 | `public/sw.js` | Service worker de desligamento (apaga caches antigos e se desregistra). |
 | `public/reset-senha.html` | "Esqueci minha senha", fora do bundle (link fixo nos e-mails); usa o mesmo CSS do build (`assets/wiki.css`). |
+| `public/cadastro.html` | Criar a conta a partir do convite: escolhe o @username e a senha, fora do bundle (link fixo no e-mail de convite); mesmo CSS. |
 | `public/og-padrao.png`, `public/robots.txt` | Prévia de link padrão e aviso pros robôs de busca. |
 
 ## Como testar
