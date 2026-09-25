@@ -19,9 +19,11 @@ export type JogoAccess =
 
 const NOTHING: Features = { fichas: false, mesa: false };
 
-/** O que mostrar pra esta conta; enquanto não sabe (ou sem conta na mesa), nada. */
+/** O que mostrar pra esta conta; enquanto não sabe (sem conta na mesa, ou uma API antiga que
+ * ainda não manda `features`), nada. */
 export function featuresOf(access: JogoAccess): Features {
-  return access.kind === "ready" ? access.me.features : NOTHING;
+  if (access.kind !== "ready") return NOTHING;
+  return access.me.features ?? NOTHING;
 }
 
 const answers = new Map<string, Promise<Me>>();
