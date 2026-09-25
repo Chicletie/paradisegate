@@ -79,7 +79,7 @@ describe("Alcunhas", () => {
 });
 
 describe("índice da entrada", () => {
-  it("lista numerada com Posts, Relações e Afinidades, na ordem do original", () => {
+  it("lista numerada com Escritos (antigos Posts), Relações e Afinidades, na ordem do original", () => {
     const out = html(
       <EntryView
         data={{
@@ -100,7 +100,7 @@ describe("índice da entrada", () => {
       "Índice",
       "História",
       "Origem",
-      "Posts",
+      "Escritos",
       "Relações",
       "Afinidades",
     ]);

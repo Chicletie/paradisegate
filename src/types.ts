@@ -38,11 +38,38 @@ export interface WikiIndexEntry {
   arcana?: WikiArcana | null;
   excerpt?: string;
   posts?: { id: string; title?: string; date?: string; excerpt?: string }[];
+  /** Escritos ligados a esta página (o mesmo escrito vem em cada página ligada). */
+  escritos?: WikiIndexWriting[];
   events?: WikiIndexEvent[];
   citacoes?: WikiCitation[];
 }
 
 export type WikiIndex = Record<string, WikiIndexEntry>;
+
+/** Tipo, marcas e autoria de um escrito (docs/dados-da-wiki.md, "Escritos"). */
+export interface WritingMeta {
+  /** conto, cronica, narracao, causo, documento, carta, poema, lenda, sonho, entrevista,
+   * bastidores, ese — ou "" (sem tipo). */
+  tipo?: string;
+  canone?: "canonico" | "provavel" | "fora" | "" | string;
+  origem?: "mundo" | "mesa" | "bastidores" | "" | string;
+  tags?: string[];
+  /** Username de quem escreveu (/@autor); vazio = o autor da wiki. */
+  autor?: string;
+}
+
+/** Um escrito no índice. Público traz `excerpt`; spoiler vem sem trecho e com `at`. */
+export interface WikiIndexWriting extends WritingMeta {
+  id: string;
+  /** Id do documento da página própria (wikiPublic/escrito-<id>); null = sem página própria. */
+  page?: string | null;
+  title?: string;
+  date?: string;
+  excerpt?: string;
+  vis?: FieldVisibility;
+  at?: string;
+  noDaily?: boolean;
+}
 
 export interface WikiArcana {
   kind: "major" | "minor";
@@ -138,7 +165,8 @@ export interface WikiCitation {
   at?: string;
 }
 
-export interface WikiPost {
+export interface WikiPost extends WritingMeta {
+  id?: string;
   title?: string;
   date?: string;
   body: string;
@@ -221,6 +249,8 @@ export interface WikiEntryDoc extends WikiArticleBundle {
   lunarBirth?: string;
   citacoes?: WikiCitation[];
   posts?: WikiPost[];
+  /** Cartões dos escritos ligados (mesma ordem de `posts`). */
+  escritos?: WikiIndexWriting[];
   tags?: WikiTag[];
   links?: WikiLink[];
   backlinks?: WikiLink[];
@@ -254,8 +284,26 @@ export interface WikiSeasonDoc {
   publishedAt?: string;
 }
 
-// wikiPublic/{slug} guarda ou uma entry ou uma temporada — discriminado por `kind`.
-export type WikiPublicDoc = WikiEntryDoc | WikiSeasonDoc;
+/** Página própria de um escrito: wikiPublic/escrito-<id>. */
+export interface WikiWritingDoc extends WritingMeta {
+  kind: "escrito";
+  id: string;
+  title: string;
+  date?: string;
+  universe?: string;
+  universeId?: string;
+  body: string;
+  excerpt?: string;
+  vis?: FieldVisibility;
+  at?: string;
+  spoilerObras?: SpoilerObra[];
+  /** Páginas em que aparece; id null = página não publicada (só o nome). */
+  pages?: { name: string; id: string | null }[];
+  publishedAt?: string;
+}
+
+// wikiPublic/{slug} guarda uma entry, uma temporada ou um escrito — discriminado por `kind`.
+export type WikiPublicDoc = WikiEntryDoc | WikiSeasonDoc | WikiWritingDoc;
 
 // --- Conta do leitor (etapa 4) — mesmas formas que wiki-core.js lê e grava hoje. ---
 
