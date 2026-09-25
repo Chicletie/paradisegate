@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useWikiIndex, hasEvents } from "../lib/wikiIndex";
 import { pgPlural } from "../lib/format";
 import { searchHref } from "../lib/search";
-import { PgSearchIcon, PgStar } from "./PgIcons";
+import { PgSearchIcon } from "./PgIcons";
 import { LoginBar } from "./AccountMenu";
 
 /** Busca controlada por quem chama (a home: filtra a lista a cada letra; Enter abre a busca). */
@@ -25,7 +25,7 @@ export function PgHeader({ search }: { search?: HeaderSearch }) {
         <div className="brand">
           <Link to="/wiki">
             <span className="pg-seal" aria-hidden="true">
-              <PgStar className="pg-seal-star" />
+              <span className="pg-mark" />
             </span>
             <span className="pg-wordmark">Paradise Gate</span>
           </Link>

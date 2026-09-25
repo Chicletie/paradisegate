@@ -162,7 +162,7 @@ O sistema recusa o cartão creme genérico empilhado e o "site de fantasia" perf
 **Key Characteristics:**
 - Estrutura de portal de wiki (cabeçalho, faixa do dia, corpo em duas colunas com coluna lateral).
 - Azul-noite e azul-profundo com poeira de estrelas estática só nas superfícies escuras.
-- Estrela de quatro pontas em SVG como marcador único de seção, rodapé e selo provisório.
+- Estrela de quatro pontas em SVG como marcador único de seção; o selo da marca (o portal, `public/selo.svg`) no cabeçalho e no rodapé.
 - Ouro velho só em fios, foco e estrelas pequenas.
 - Três vozes tipográficas: Castoro Titling (marca, títulos), Castoro (nomes, citação), Hanken Grotesk (interface).
 - Tema escuro por `prefers-color-scheme`, trocando só os valores dos tokens.
@@ -178,7 +178,7 @@ Uma paleta de azuis noturnos sobre um corpo claro azulado, com um único metal (
 - **Azul-Tinta de Link** (`link`, `link-hover`, `link-wash`): links, estrela de título de seção, numeral do ano, chips, botões contornados. O `link-wash` é o fundo de hover de linhas e chips.
 
 ### Secondary
-- **Ouro Velho** (`gold`, `gold-soft`): borda interna da carta, anel de foco, caret da busca, estrela do rodapé, hover de borda sobre fundos escuros, sublinhado da atribuição da citação.
+- **Ouro Velho** (`gold`, `gold-soft`): borda interna da carta, anel de foco, caret da busca, selo da marca, hover de borda sobre fundos escuros, sublinhado da atribuição da citação.
 - **Creme de Tarô** (`tarot-cream`): numeral romano e inicial da carta; também o ponto de estrela mais quente da poeira.
 - **Azul-Constelação** (`constellation`): traço das constelações em SVG, sempre com opacidade entre 0.22 e 0.45.
 
@@ -240,7 +240,7 @@ Híbrido: tonalidade faz a maior parte (faixas escuras sobre corpo claro, painel
 
 ## Shapes
 
-Cantos suaves e consistentes por escala: 8px em miniaturas e linhas de evento, 10px em botões de ação, 12px em cartões e peças, 14px em painéis e na carta, pílula (999px) em busca, chips, entrar e numeral romano; 10px nos itens do menu da conta. O selo provisório é um círculo de 42px (36px no celular) com fio dourado.
+Cantos suaves e consistentes por escala: 8px em miniaturas e linhas de evento, 10px em botões de ação, 12px em cartões e peças, 14px em painéis e na carta, pílula (999px) em busca, chips, entrar e numeral romano; 10px nos itens do menu da conta. No cabeçalho, o selo fica num círculo de 42px (36px no celular) com fio dourado.
 
 Bordas são sempre de 1px. A carta tem proporção 7:11.4 e uma moldura interna dourada inset 7px com raio 9px. A estrela de quatro pontas (SVG, `viewBox 0 0 24 24`, `currentColor`) é a única forma decorativa do sistema, em 12–18px como marcador e 46px no verso da carta.
 
@@ -268,8 +268,8 @@ Bordas são sempre de 1px. A carta tem proporção 7:11.4 e uma moldura interna 
 - **Focus:** a borda vira `gold` e o fundo sobe para branco a 12%; sem outline extra.
 
 ### Navigation
-- **Cabeçalho:** faixa `night` estrelada, uma linha no desktop; selo provisório + wordmark, busca central, entrar. No celular a marca e o entrar dividem a primeira linha e a busca ocupa a segunda, largura total.
-- **Rodapé:** régua `line`, estrela dourada 12px e "Paradise Gate · Wiki" em Castoro Titling 14px, 0.08em, `muted`.
+- **Cabeçalho:** faixa `night` estrelada, uma linha no desktop; selo + wordmark, busca central, entrar. No celular a marca e o entrar dividem a primeira linha e a busca ocupa a segunda, largura total.
+- **Rodapé:** régua `line` e um colofão centralizado: o selo dourado com 34px de altura em cima e "Paradise Gate · Wiki" embaixo, em Castoro Titling 14px, 0.08em, `muted`. Menor que isso os traços finos do portal viram mancha; por isso fica em cima do nome, não na mesma linha. Nas páginas fora do bundle (`reset-senha.html`, `cadastro.html`), o mesmo colofão com o selo a 30px.
 
 ### Menu da Conta
 Logado, o "entrar" vira um avatar circular de 40px (foto do perfil quando existe; senão, a inicial do apelido ou do e-mail em Castoro Titling creme sobre o verso estrelado, fio `gold-soft`). Quando o autor respondeu ou decidiu uma sugestão depois da última visita do leitor ao perfil, um ponto dourado de 11px aparece no canto do avatar. Abre um painel `panel` de 280px, raio 14px, sombra de menu, com cabeçalho (avatar 46px, o apelido — ou "Sua conta" —, e-mail em `muted`) e itens de 44px: Meu perfil, Minhas sugestões (com a marca "1 nova" em ouro claro quando houver novidade), Favoritos, Ver como convidado, separador, Sair. Padrão de divulgação (`aria-controls`/`aria-expanded`): foca o primeiro item ao abrir, fecha com Esc (volta o foco ao avatar), com clique fora e quando o foco sai do menu. No celular vira uma folha fixa de largura total sob o cabeçalho.
@@ -290,14 +290,14 @@ Carta de tarô retrato (até 260px; 230px e 200px nos breakpoints) com a imagem 
 ### Páginas Internas (entrada, temporada, linha do tempo, erro)
 Mesmo cabeçalho azul-noite da home (a busca leva pra home com `?q=`) e o mesmo rodapé. Em todas as páginas PG, uma **barra de navegação** fina logo abaixo do cabeçalho (fundo azul-noite a 28% mais escuro, links Hanken 14px/500 `on-dark-muted`, 44px de altura; hover e página atual em branco com fio dourado de 2px embaixo): as categorias — os tipos publicados no plural, ordenados por quantidade, até cinco, o resto num "Mais" — levam à home filtrada (`?tipo=`); à direita, Linha do tempo (só se houver eventos) e Página aleatória (`?aleatoria=1`, a home sorteia). No celular a barra rola de lado. O **rodapé** ganha Início · Linha do tempo · Página aleatória em `link` acima da marca. Abaixo do título, o tipo é um link pra categoria e vem seguido de "atualizado em 20 set. 2026". **Relações** agrupa as ligações por tipo — Família, Romance, Vínculos, Amizades, Aliados, Rivalidades, Facções, Lugares, Na história, Outras ligações —, cada grupo com um título em Hanken 14px/600 precedido de um ponto na cor do tipo e os cartões com retrato de 44px (capa ou inicial dourada sobre o azul estrelado); "Mencionado em" só lista quem não está nas ligações de ida, com o nome em cima e a relação escrita do ponto de vista da outra página. Abas (artigo, relações, retratos) seguem o padrão tablist com setas. Tarjas de spoiler são uma barra lisa na cor da tinta; o trecho aparece ao tocar. Nada de emoji marcando spoiler. Página de erro: título centralizado, mensagem e dois botões (Voltar pro início, Página aleatória). O artigo é um painel `panel` de até 1100px, raio 14px, fio `line`, sombra de painel, padding 34px 44px (no celular vira faixa cheia com gutter de 16px). Título em Castoro 30–42px; logo abaixo, o tipo em Hanken `muted` e, à direita, as ações de sugestão em pílulas de contorno ("Sugerir alteração", "Minhas sugestões aqui"), separados do texto por um fio. Seções com o mesmo título de seção da home (estrela `link`, Castoro Titling 17px, fio); seções recolhíveis ganham uma seta fina no fim da linha. Texto corrido em Castoro 17.5px/1.72. Infobox de 290px à direita (Alcunhas logo abaixo do retrato; Nascimento e Nascimento Lunar dentro do cabeçalho "Dados básicos" quando ele existe; tarja de spoiler numa linha só, e alcunha que quebra linha alinha depois do "•") (em cima do texto no celular): faixa de título no azul da faixa do dia com poeira de estrelas e Castoro Titling branco, abas de retrato em Hanken, linhas com fio `line`, rótulos em Hanken 12.5px/600 `muted`, valores em Castoro 15px, cabeçalhos internos em Castoro Titling sobre `link-wash`. Tags e abas de variante usam os chips da home. **Epígrafe** (a citação em destaque, fora da infobox desde 2026-09-24): abre o artigo de cada aba de texto, antes da visão geral, estilo Fandom — aspas de abertura em Castoro 72px `gold` à esquerda, texto em Castoro itálico 20px `ink`, autoria em Hanken 13.5px `muted` alinhada à direita ("— Alucard, sussurrando, para Luke · Ruínas de Vel · Livro I"), um fio `line` embaixo; ela respeita a infobox (flow-root), sem o fio passar por baixo dela. **Diálogos** são roteiro: nome em Hanken 12px/600 caixa-alta à direita de uma coluna estreita, fala em Castoro itálico ao lado, rubrica "(rindo)" reta em `muted`, direção de cena em itálico `muted` atravessando as duas colunas; no celular o nome sobe pra cima da fala. A aba **Citações** agrupa pelo papel da página: Falas, Diálogos, Trechos, Ditas a…, Sobre…; na home, um diálogo curto entra na faixa do dia com os nomes em dourado reto e as falas em Castoro branco. Os componentes antigos (galeria, árvore genealógica, grafo de relações, linha do tempo pessoal, conteúdo restrito) herdam o azul pelo remapeamento dos tokens antigos em `body.pg-site:not(.pg-home)`.
 
-### Selo da Marca (lugar reservado)
-Círculo de 42px com fio `gold-soft` e uma estrela no centro. É um marcador provisório: o autor troca o conteúdo por um `<img>` do selo quando ele existir. Não desenhar, sugerir nem gerar um selo.
+### Selo da Marca
+O portal com estrelas, arquivo `public/selo.svg` (proporção 250:293). Entra como máscara CSS (`.pg-mark`) pintada com `gold`, então o desenho é sempre o arquivo e a cor vem do token. No cabeçalho, 26px de altura (22px no celular) dentro do círculo de 42px com fio `gold-soft`; no rodapé, o colofão descrito em Navigation. O arquivo não se edita, redesenha nem "completa"; trocar o selo é trocar o arquivo, com o autor.
 
 ## Do's and Don'ts
 
 ### Do:
 - **Do** manter a estrutura de portal de wiki (cabeçalho com busca, faixa do dia, corpo em duas colunas com coluna lateral) e deixar a identidade nos detalhes.
-- **Do** usar a estrela de quatro pontas em SVG com `currentColor` como marcador de seção, rodapé e selo provisório.
+- **Do** usar a estrela de quatro pontas em SVG com `currentColor` como marcador de seção.
 - **Do** manter o ouro em fios de 1px, no anel de foco (2px, offset 3px) e em estrelas pequenas.
 - **Do** dar a toda página sem imagem o bloco `band` estrelado com a inicial, para as grades não quebrarem.
 - **Do** trocar tema claro/escuro só pelos valores dos tokens `--pg-*`, nunca por regras paralelas.
@@ -310,7 +310,7 @@ Círculo de 42px com fio `gold-soft` e uma estrela no centro. É um marcador pro
 - **Don't** pôr poeira de estrelas sobre o corpo claro ou em painéis brancos.
 - **Don't** usar o ouro como fundo de painel, botão ou faixa.
 - **Don't** escrever metadados em Hanken Grotesk com caixa alta espaçada; as maiúsculas são da Castoro Titling.
-- **Don't** criar, desenhar ou propor um selo para a marca; o círculo com estrela é lugar reservado.
+- **Don't** criar, redesenhar ou "completar" o selo da marca; ele é só o arquivo `public/selo.svg`.
 - **Don't** inventar lore, personagens, lugares, nomes ou termos. Conteúdo do mundo vem só do que está publicado na wiki ou do que o autor passar.
 
 ## O site além da wiki
