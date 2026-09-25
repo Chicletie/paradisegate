@@ -113,6 +113,11 @@ function AccountMenu({ user }: { user: AuthUser }) {
           <Link className="pg-menu-item" to="/wiki/_perfil" onClick={close}>
             Meu perfil
           </Link>
+          {profile?.username && (
+            <Link className="pg-menu-item" to={"/@" + profile.username} onClick={close}>
+              Meu perfil público
+            </Link>
+          )}
           <Link className="pg-menu-item" to="/wiki/_perfil#sugestoes" onClick={close}>
             Minhas sugestões
             {unread > 0 && <span className="pg-menu-badge">{unread === 1 ? "1 nova" : unread + " novas"}</span>}

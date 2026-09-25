@@ -23,7 +23,8 @@ import {
   useRestrito,
 } from "../components/EntryActions";
 import { PageObrasProvider, SpoilerProgressBar } from "../components/SpoilerProgress";
-import type { WikiEntryDoc } from "../types";
+import { WritingCard } from "./EscritosPage";
+import type { WikiEntryDoc, WikiPost } from "../types";
 
 /**
  * Página de entrada (`/wiki/<slug>`) — porta de renderEntry na wiki original. Pra quem
@@ -39,7 +40,7 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
   const epigraph = quoteNorm(data.featuredQuote, data.title);
   // Itens do índice que valem pra página toda (só entram na aba Geral), na ordem do original.
   const sharedToc: { id: string; label: string }[] = [];
-  if (data.posts?.length) sharedToc.push({ id: "posts", label: "Posts" });
+  if (data.posts?.length || data.escritos?.length) sharedToc.push({ id: "posts", label: "Escritos" });
   const relLabel = relationsSectionLabel(data.links, data.backlinks, data.events);
   if (relLabel) sharedToc.push({ id: "relacoes", label: relLabel });
   if (affinitiesOf(data.links).length) sharedToc.push({ id: "afinidades", label: "Afinidades" });
@@ -111,27 +112,37 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
           </div>
         ))}
 
-        {((data.posts && data.posts.length > 0) || nPostsR > 0) && (
+        {((data.posts && data.posts.length > 0) || (data.escritos && data.escritos.length > 0) || nPostsR > 0) && (
           <div className="posts-wrap">
             <h2 className="cathead" id="posts">
-              Posts
+              Escritos
             </h2>
-            {(data.posts || []).map((p, i) => (
-              <Fragment key={i}>
-              <RestritoBlocks area="posts" index={i} />
-              <details className="wiki-section post" open>
-                <summary className="post-summary">{(p.date ? `${p.date} · ` : "") + (p.title || "(sem título)")}</summary>
-                {p.vis === "spoiler" ? (
-                  <SpoilerBlock at={p.at}>
-                    <RenderMarkdown text={p.body} />
-                  </SpoilerBlock>
-                ) : (
-                  <RenderMarkdown text={p.body} />
-                )}
-              </details>
-              </Fragment>
-            ))}
-            <RestritoBlocks area="posts" index={(data.posts || []).length} />
+            {data.escritos ? (
+              // Escritos com página própria viram cartão (tipo, marcas, trecho); os demais
+              // continuam abrindo o texto aqui mesmo.
+              <div className="pg-wgrid pg-entry-escritos">
+                {data.escritos.map((w, i) => {
+                  const p = (data.posts || []).find((x) => x.id === w.id);
+                  return (
+                    <Fragment key={w.id}>
+                      <RestritoBlocks area="posts" index={i} />
+                      {w.page ? <WritingCard w={{ ...w, entries: [] }} hidePages /> : p ? <PostBlock p={p} /> : null}
+                    </Fragment>
+                  );
+                })}
+                <RestritoBlocks area="posts" index={data.escritos.length} />
+              </div>
+            ) : (
+              <>
+                {(data.posts || []).map((p, i) => (
+                  <Fragment key={i}>
+                    <RestritoBlocks area="posts" index={i} />
+                    <PostBlock p={p} />
+                  </Fragment>
+                ))}
+                <RestritoBlocks area="posts" index={(data.posts || []).length} />
+              </>
+            )}
           </div>
         )}
 
@@ -164,5 +175,21 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
     </SwapProvider>
     </RestritoPlaceProvider>
     </PageObrasProvider>
+  );
+}
+
+/** Um escrito com o texto inteiro na própria página (nota antiga, ou sem página própria). */
+function PostBlock({ p }: { p: WikiPost }) {
+  return (
+    <details className="wiki-section post" open>
+      <summary className="post-summary">{(p.date ? `${p.date} · ` : "") + (p.title || "(sem título)")}</summary>
+      {p.vis === "spoiler" ? (
+        <SpoilerBlock at={p.at}>
+          <RenderMarkdown text={p.body} />
+        </SpoilerBlock>
+      ) : (
+        <RenderMarkdown text={p.body} />
+      )}
+    </details>
   );
 }

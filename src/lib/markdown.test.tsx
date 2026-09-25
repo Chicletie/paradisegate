@@ -16,6 +16,12 @@ describe("markdown da casa (docs/dados-da-wiki.md)", () => {
     );
   });
 
+  it("[@nome](membro:<nome>) leva ao perfil público do membro, mesma aba", () => {
+    expect(html(<>{mdInline("Intérprete: [@ania](membro:ania)")}</>)).toBe(
+      'Intérprete: <a class="wl-live" href="/@ania" data-discover="true">@ania</a>',
+    );
+  });
+
   it("link externo continua abrindo em outra aba", () => {
     expect(html(<>{mdInline("[arquivo](https://example.com)")}</>)).toContain('target="_blank"');
   });
@@ -73,7 +79,7 @@ describe("Alcunhas", () => {
 });
 
 describe("índice da entrada", () => {
-  it("lista numerada com Posts, Relações e Afinidades, na ordem do original", () => {
+  it("lista numerada com Escritos (antigos Posts), Relações e Afinidades, na ordem do original", () => {
     const out = html(
       <EntryView
         data={{
@@ -94,7 +100,7 @@ describe("índice da entrada", () => {
       "Índice",
       "História",
       "Origem",
-      "Posts",
+      "Escritos",
       "Relações",
       "Afinidades",
     ]);

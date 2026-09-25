@@ -210,6 +210,13 @@ details.wiki-section.post:last-child { border-bottom: 0; }
 .cit-item { padding: 2px 16px; border-left: 3px solid var(--gold); }
 .cit-text { font-family: var(--font-wb); font-style: italic; font-size: 16.5px; line-height: 1.5; }
 .cit-meta { margin-top: 5px; font-size: 12.5px; color: var(--muted); }
+/* Narração do mestre: prosa normal (sem itálico nem aspas), selo pequeno em cima. */
+.cit-narr { font-family: var(--font-wb); font-size: 16.5px; line-height: 1.6; }
+.cit-narr p { margin: 0 0 0.7em; }
+.cit-narr p:last-child { margin-bottom: 0; }
+.cit-seal { display: inline-block; margin-bottom: 6px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+body.pg-site:not(.pg-home) .cit-narr { font-size: 18px; }
+body.pg-site .cit-seal { font-family: var(--pg-f-ui); color: var(--pg-muted); }
 .cit-meta a { color: var(--gold-ink); }
 
 dl.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; margin: 0; clear: both; }
@@ -869,6 +876,8 @@ body.pg-site:not(.pg-home) .pg-page-main > .card > h1.pg-msg-title { text-align:
 .wb-epigraph::before { content: "\201C"; position: absolute; left: 0; top: -12px; font-family: var(--font-wb); font-size: 72px; line-height: 1; color: var(--gold); pointer-events: none; }
 .wb-epi-text { margin: 0; }
 .wb-epi-text p { margin: 0; font-family: var(--font-wb); font-style: italic; font-size: 19px; line-height: 1.5; color: var(--ink); text-wrap: pretty; }
+.wb-epi-text.is-narr p { font-style: normal; margin-bottom: 0.6em; }
+.wb-epi-text.is-narr p:last-child { margin-bottom: 0; }
 .wb-epi-attr { margin-top: 10px; font-size: 13.5px; line-height: 1.45; color: var(--muted); text-align: right; }
 .wb-epi-attr a { color: var(--gold-ink); }
 .wb-epigraph .spoiler-block { margin: 0; }

@@ -59,3 +59,15 @@ describe("html", () => {
     expect(sitemap([{ path: "/wiki/a", lastmod: "2026-09-20" }])).toContain("<loc>https://paradisegate.com.br/wiki/a</loc><lastmod>2026-09-20</lastmod>");
   });
 });
+
+describe("escritos na prévia de link", () => {
+  it("cada escrito com página própria uma vez; spoiler sem trecho", async () => {
+    const { writingsOf, describeWriting } = await import("./seo.mjs");
+    const w1 = { id: "w1", page: "escrito-w1", title: "O farol", vis: "publico", excerpt: "Subiu o **farol**." };
+    const w2 = { id: "w2", page: "escrito-w2", title: "Segredo", vis: "spoiler" };
+    const list = writingsOf({ a: { escritos: [w1, w2] }, b: { escritos: [w1, { id: "w3", page: null, title: "sem página", vis: "publico" }] } });
+    expect(list.map((w) => w.id)).toEqual(["w1", "w2"]);
+    expect(describeWriting(w1)).toBe("Subiu o farol.");
+    expect(describeWriting(w2)).toBe("Um escrito de Paradise Gate.");
+  });
+});

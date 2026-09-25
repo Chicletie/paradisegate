@@ -6,7 +6,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import {
-  fieldsToObject, mergeEntries, describeEntry, headTags, injectHead, safeSlug, sitemap, SITE, SITE_NAME,
+  fieldsToObject, mergeEntries, describeEntry, describeWriting, headTags, injectHead, safeSlug, sitemap, writingsOf, SITE, SITE_NAME,
 } from "./seo.mjs";
 
 const DIST = path.resolve(process.argv[2] || "dist");
@@ -77,5 +77,26 @@ for (const id of Object.keys(entries).sort()) {
   urls.push({ path: `/wiki/${slug}`, lastmod: /^\d{4}-\d{2}-\d{2}$/.test(e.updatedAt || "") ? e.updatedAt : null });
   count++;
 }
+// Escritos: a lista geral (pasta, porque cada escrito mora dentro dela) e uma página por escrito
+// com página própria. Spoiler entra sem trecho na prévia.
+const writings = writingsOf(entries);
+if (writings.length) {
+  const es = `Escritos · ${SITE_NAME}`;
+  write("wiki/_escritos/index.html", page(es, headTags({
+    title: es, description: "Contos, crônicas, narrações de sessão, causos de mesa, cartas e bastidores de Paradise Gate.", path: "/wiki/_escritos", image: DEFAULT_IMAGE,
+  })));
+  urls.push({ path: "/wiki/_escritos" });
+}
+let wcount = 0;
+for (const w of writings) {
+  const slug = safeSlug(w.id);
+  if (!slug || !w.title) continue;
+  const title = `${w.title} · ${SITE_NAME}`;
+  write(`wiki/_escritos/${slug}.html`, page(title, headTags({
+    title, description: describeWriting(w), path: `/wiki/_escritos/${slug}`, image: DEFAULT_IMAGE, type: "article",
+  })));
+  urls.push({ path: `/wiki/_escritos/${slug}`, lastmod: /^\d{4}-\d{2}-\d{2}$/.test(w.date || "") ? w.date : null });
+  wcount++;
+}
 write("sitemap.xml", sitemap(urls));
-console.log(`Páginas prontas: ${count} páginas da wiki + home, linha do tempo, perfil e sitemap.xml.`);
+console.log(`Páginas prontas: ${count} páginas da wiki, ${wcount} escritos + home, linha do tempo, perfil e sitemap.xml.`);
