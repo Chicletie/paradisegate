@@ -29,13 +29,14 @@ Vite + React 19 + TypeScript + Tailwind v4 + react-router. `npm test` (Vitest), 
    `var(--pg-*)` ou pelas classes Tailwind do `@theme`), nunca hex solto; `PgHeader`/`PgFooter`
    sempre. Não estilize página nova mexendo em `src/styles/wiki.css`: ele existe pra wiki ficar
    como é. Detalhes em `DESIGN.md`, "O site além da wiki".
-6. **Firebase só por `src/lib/api.ts`.** No Firestore, só leitura dos dados da wiki, e só estas
+6. **Firebase só por `src/lib/api.ts` e `src/lib/auth.ts`.** O `auth.ts` tem o login (sem o
+   Firestore, pra ficha carregar leve) e o `api.ts` reexporta. No Firestore, só leitura dos dados da wiki, e só estas
    coleções: `wikiIndex/lotus` (+ `shards/`), `wikiPublic`, `wikiRestrito`, `wikiProfiles`,
    `wikiUsernames`,
    `wikiSuggestions` (`docs/dados-da-wiki.md`). A configuração do Firebase no código é pública
    por natureza; quem protege são as regras do banco, que ficam com o autor. Nada de coleção
    nova. O **Firebase Auth é o login único do site**: wiki e páginas do jogo (fichas, loja,
-   biblioteca) usam a mesma conta, pelas funções de login de `api.ts`. **Conta só por convite**:
+   biblioteca) usam a mesma conta, pelas funções de login de `auth.ts`. **Conta só por convite**:
    não existe cadastro aberto; quem convida cria a conta e o e-mail de convite leva pra
    `public/cadastro.html`, onde a pessoa escolhe o @username e a senha (`reset-senha.html`
    fica só pro "esqueci minha senha"). Só e-mail e senha: provedor como Google cria conta
@@ -118,7 +119,8 @@ Valem pros dois (e pro Claude de cada um), em toda mudança:
 |---|---|
 | `src/pages/` | Páginas da wiki: home, entrada, temporada, escritos (lista e página própria), linha do tempo, perfil, erro; e o perfil público do membro (`MemberPage`, rota `/@nome`, estilo em `src/styles/member.css`). |
 | `src/components/` | Cabeçalho (com "Entrar"/menu da conta) e rodapé PG, peças da página de entrada, e o que depende de login (`EntryActions.tsx`). |
-| `src/lib/` | `api.ts` (único acesso ao Firebase), índice (`wikiIndex.tsx`), conta do leitor (`account.tsx`), markdown, citações, relações, home, sorteio do dia, linha do tempo, perfil — lógica pura testável sem DOM onde dá. |
+| `src/lib/` | `api.ts` e `auth.ts` (únicos acessos ao Firebase; `firebaseApp.ts` é o app + Auth sem o Firestore), índice (`wikiIndex.tsx`), conta do leitor (`account.tsx`), markdown, citações, relações, home, sorteio do dia, linha do tempo, perfil — lógica pura testável sem DOM onde dá. |
+| `src/jogo/` | Páginas do jogo (fichas, convites): `apiClient.ts` fala com a API do jogo (testado no node, com as respostas de `contract/ficha-sync.json`, cópia do contrato do backend: mudou lá, muda aqui no mesmo par de PRs). |
 | `src/styles/tokens.css` | Tokens `--pg-*` + `@theme` do Tailwind, pras páginas novas. |
 | `src/styles/wiki.css` | CSS da wiki (não mexer pra estilizar página nova). |
 | `scripts/` | Páginas prontas e sitemap (`prerender.mjs`, `seo.mjs`). |
