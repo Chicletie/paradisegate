@@ -65,6 +65,7 @@ Lido por `src/lib/markdown.tsx`:
 |---|---|
 | `**negrito**`, `*itálico*`, `~~riscado~~`, `` `código` `` | o de sempre |
 | `\|\|trecho\|\|` | spoiler só naquele trecho: tarja lisa que revela no toque. Lido como markdown por dentro; escondido, o 1º toque só revela, nunca segue um link |
+| `\|\|@{<id da temporada>} trecho\|\|` | spoiler por temporada: igual, mas abre sozinho pra quem marcou que já viu até essa temporada (obras e temporadas em `spoilerObras` da página). A marca `@{…}` nunca aparece |
 | `[texto](https://…)` | link externo, em outra aba |
 | `[texto](wiki:<wikiId>)` | link pra outra página da wiki, na mesma aba |
 | `[[Nome]]` / `[[Nome\|texto]]` | nome em negrito sem link (página não publicada) |

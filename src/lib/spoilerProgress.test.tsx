@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { findSeason, isUnlocked, mergeObras, spoilerLabel, PageObrasContext, ProgressContext } from "./spoilerProgress";
-import { SpoilerBlock, SpoilerSpan } from "./markdown";
+import { mdInline, SpoilerBlock, SpoilerSpan } from "./markdown";
 import type { ReactNode } from "react";
 import type { SpoilerObra } from "../types";
 
@@ -44,5 +44,24 @@ describe("spoiler por obra", () => {
     expect(wrap("s2", <SpoilerBlock at="s2">segredo</SpoilerBlock>)).toBe("segredo");
     expect(wrap("s2", <SpoilerSpan text="irmã" at="s2" />)).toContain('class="md-unlocked"');
     expect(wrap("s1", <SpoilerSpan text="irmã" at="s2" />)).toContain("md-spoiler");
+  });
+
+  it("trecho no meio do texto com temporada: a marca nunca aparece", () => {
+    const wrap = (seen: string, node: ReactNode) =>
+      renderToStaticMarkup(
+        <ProgressContext.Provider value={{ progress: seen ? { fr1: seen } : {}, inAccount: false, setSeen: () => {} }}>
+          <PageObrasContext.Provider value={[PG]}>{node}</PageObrasContext.Provider>
+        </ProgressContext.Provider>,
+      );
+    const txt = "Ela fugiu. ||@{s2} Na verdade é a herdeira.|| Fim.";
+    const closed = wrap("", <>{mdInline(txt)}</>);
+    expect(closed).toContain("md-spoiler");
+    expect(closed).toContain("Spoiler de Paradise Gate · Temporada 2");
+    expect(closed).not.toContain("@{");
+    const open = wrap("s2", <>{mdInline(txt)}</>);
+    expect(open).toContain("md-unlocked");
+    expect(open).not.toContain("md-spoiler");
+    // spoiler comum continua tarja mesmo pra quem viu tudo
+    expect(wrap("*", <>{mdInline("||segredo||")}</>)).toContain("md-spoiler");
   });
 });

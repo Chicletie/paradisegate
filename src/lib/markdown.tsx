@@ -44,15 +44,18 @@ const INLINE_TOKEN_SOURCE =
  * revelado, um toque fora de link esconde de novo. Na fase de captura, pra rodar antes do
  * clique do `<Link>` do react-router (que navega no próprio onClick).
  */
-function InlineSpoiler({ children }: { children: ReactNode }) {
+function InlineSpoiler({ children, at }: { children: ReactNode; at?: string }) {
   const [on, setOn] = useState(false);
+  const sp = useSpoilerAt(at);
+  // Temporada que o leitor já viu: o trecho aparece aberto, sem tarja.
+  if (sp.open) return <span className="md-unlocked">{children}</span>;
   return (
     <span
       className={"md-spoiler" + (on ? " on" : "")}
       tabIndex={0}
       role="button"
-      title="Spoiler — toque pra revelar"
-      aria-label="spoiler, toque para revelar"
+      title={sp.label ? "Spoiler de " + sp.label + " — toque pra revelar" : "Spoiler — toque pra revelar"}
+      aria-label={sp.label ? "spoiler de " + sp.label + ", toque para revelar" : "spoiler, toque para revelar"}
       onClickCapture={(ev) => {
         if (!on) {
           ev.preventDefault();
@@ -216,7 +219,14 @@ export function mdInline(s: string | undefined): ReactNode[] {
     } else if (tok.slice(0, 2) === "~~") {
       nodes.push(<del key={k}>{tok.slice(2, -2)}</del>);
     } else if (tok.slice(0, 2) === "||") {
-      nodes.push(<InlineSpoiler key={k}>{mdInline(tok.slice(2, -2))}</InlineSpoiler>);
+      // `||@{<temporada>} trecho||`: spoiler por temporada (a marca nunca aparece).
+      const inner = tok.slice(2, -2);
+      const sm = /^@\{([^}]*)\}\s*/.exec(inner);
+      nodes.push(
+        <InlineSpoiler key={k} at={sm ? sm[1] : undefined}>
+          {mdInline(sm ? inner.slice(sm[0].length) : inner)}
+        </InlineSpoiler>,
+      );
     } else {
       nodes.push(<em key={k}>{tok.slice(1, -1)}</em>);
     }

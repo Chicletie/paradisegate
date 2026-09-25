@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { mdInline, RenderMarkdown, SpoilerBlock } from "../lib/markdown";
+import { RenderMarkdown, SpoilerBlock } from "../lib/markdown";
 import { QuoteEpigraph } from "../lib/quotes";
 import type { WikiArticleBundle, WikiCitation } from "../types";
 import { SwapBody } from "./EntryActions";
@@ -47,7 +47,8 @@ export function ArticleBundle({
   return (
     <div className="article">
       {epigraph && <QuoteEpigraph q={epigraph} />}
-      {bundle.summary && <p className="summary">{mdInline(bundle.summary)}</p>}
+      {/* O "resumo" antigo não aparece mais (o autor trocou pela epígrafe e pela visão geral);
+          página publicada antes ainda pode trazer o campo, que fica de fora. */}
       {bundle.body && <RenderMarkdown text={bundle.body} />}
       {tocEntries.length > 1 && (
         <div className="toc">
