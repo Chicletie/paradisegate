@@ -47,7 +47,7 @@
   @keyframes rs-pulse { 50% { opacity: .25; } }
   @media (prefers-reduced-motion: reduce) { .rs-dot { animation: none; } }
   .rs-page-foot { text-align: center; padding: 0 16px 28px; font-family: var(--pg-f-title); font-size: 13px; letter-spacing: 0.12em; color: var(--pg-muted); }
-  .rs-page-foot .pg-star { width: 10px; height: 10px; color: var(--pg-gold); vertical-align: -1px; margin-right: 6px; }
+  .rs-page-foot .pg-mark { --pg-mark-h: 30px; display: block; margin: 0 auto 12px; }
   @media (prefers-color-scheme: dark) { .rs-err, .rs-hint.is-bad { color: #f2b8b5; } .rs-hint.is-ok { color: #8fd6a4; } }
   @media (max-width: 480px) { .rs-card { padding: 26px 20px 22px; } .rs-card h1 { font-size: 26px; } .rs-main { padding-top: 28px; align-items: flex-start; } }
 </style>
@@ -64,7 +64,7 @@
   <div class="pg-mast-inner">
     <div class="brand">
       <a href="/wiki">
-        <span class="pg-seal" aria-hidden="true"><svg class="pg-seal-star" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 1.5c.9 6.1 3.4 8.6 10.5 10.5-7.1 1.9-9.6 4.4-10.5 10.5-.9-6.1-3.4-8.6-10.5-10.5C8.6 10.1 11.1 7.6 12 1.5z" fill="currentColor" /></svg></span>
+        <span class="pg-seal" aria-hidden="true"><span class="pg-mark"></span></span>
         <span class="pg-wordmark">Paradise Gate</span>
       </a>
     </div>
@@ -126,7 +126,7 @@
     </div>
   </section>
 </main>
-<footer class="rs-page-foot"><svg class="pg-star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.9 6.1 3.4 8.6 10.5 10.5-7.1 1.9-9.6 4.4-10.5 10.5-.9-6.1-3.4-8.6-10.5-10.5C8.6 10.1 11.1 7.6 12 1.5z" fill="currentColor" /></svg>PARADISE GATE · WIKI</footer>
+<footer class="rs-page-foot"><span class="pg-mark" aria-hidden="true"></span>PARADISE GATE · WIKI</footer>
 
 <script>
   var firebaseConfig = {

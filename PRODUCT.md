@@ -68,8 +68,8 @@ Restrições:
   romanos, douração fina) como toques discretos.
 - Referência de forma: uma wiki de fandom limpa (tipo Fandom), com identidade própria sutil.
   Nada de "carro alegórico" nem experiência performática.
-- **A marca ainda não tem selo próprio.** O círculo com a estrela no cabeçalho é um lugar
-  reservado: não gerar, desenhar nem propor um selo.
+- **O selo da marca é o portal com estrelas** (`public/selo.svg`), em dourado no cabeçalho e
+  no rodapé. É só esse arquivo: não gerar, redesenhar nem "completar" o selo.
 - `selo-whitmore.png` (medalhão prateado com "W") é de uma instituição do mundo, usado nos
   e-mails de convite. Não é o selo da marca.
 

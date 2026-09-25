@@ -312,7 +312,7 @@ a.tag:hover { border-color: var(--gold); }
    Gate" + corpo em duas colunas com coluna lateral), azul dominante, e a identidade só em
    detalhes: poeira de estrelas estática, estrela de quatro pontas como marcador, a carta de
    tarô do Personagem do dia (numeral romano do dia, borda dourada fina) e um lugar reservado
-   pro selo da marca (.pg-seal — trocar o conteúdo por um <img> quando o selo existir).
+   pro selo da marca (.pg-seal: o círculo com fio dourado e o selo, public/selo.svg, dentro).
    Identidade (tokens, cabeçalho, menu, foco, rodapé) em body.pg-site, em toda página PG; layout
    só da home em body.pg-home. Ouro (--pg-gold) só em bordas finas e foco. */
 body.pg-site {
@@ -357,7 +357,8 @@ body.pg-site .pg-mast { max-width: none; margin: 0; padding: 0; border: 0; borde
 body.pg-site .pg-mast .brand { flex: none; font-size: inherit; }
 body.pg-site .pg-mast .brand a { display: flex; align-items: center; gap: 12px; padding: 4px 0; margin: 0; color: #fff; text-decoration: none; letter-spacing: 0; }
 .pg-seal { flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--pg-gold-soft); color: var(--pg-gold); background: rgba(255,255,255,0.04); }
-.pg-seal-star { width: 18px; height: 18px; }
+/* O selo (public/selo.svg) como máscara, pintado com o dourado do token: o desenho é o arquivo, a cor vem do tema. */
+.pg-mark { --pg-mark-h: 26px; display: inline-block; flex: none; height: var(--pg-mark-h); width: calc(var(--pg-mark-h) * 250 / 293); background-color: var(--pg-gold); -webkit-mask: url("/selo.svg") center / contain no-repeat; mask: url("/selo.svg") center / contain no-repeat; }
 .pg-wordmark { font-family: var(--pg-f-title); font-size: 22px; letter-spacing: 0.07em; line-height: 1; }
 .pg-search-wrap { position: relative; flex: 1 1 300px; min-width: 0; max-width: 560px; margin: 0 auto; }
 .pg-search-icon { position: absolute; left: 15px; top: 50%; width: 18px; height: 18px; transform: translateY(-50%); color: var(--pg-on-dark-muted); pointer-events: none; }
@@ -559,7 +560,7 @@ a.pg-sug-page:hover { text-decoration: underline; }
 .pg-sug-reply-label { font-size: 13px; font-weight: 600; color: var(--pg-ink); }
 .pg-sug-none { margin: 0; font-size: 14px; font-style: italic; color: var(--pg-muted); }
 .pg-foot { max-width: 1160px; margin: 36px auto 0; padding: 26px 24px 44px; display: flex; align-items: center; justify-content: center; gap: 10px; border-top: 1px solid var(--pg-line); font-family: var(--pg-f-title); font-size: 14px; letter-spacing: 0.08em; color: var(--pg-muted); }
-.pg-foot-star { width: 12px; height: 12px; color: var(--pg-gold); }
+.pg-foot .pg-mark { --pg-mark-h: 34px; }
 
 @media (max-width: 860px) {
   .pg-body { grid-template-columns: minmax(0, 1fr); grid-template-areas: "main" "top" "bottom" "index"; grid-template-rows: auto; padding: 28px 16px 8px; }
@@ -590,6 +591,7 @@ a.pg-sug-page:hover { text-decoration: underline; }
   .pg-menu { position: fixed; top: 64px; left: 12px; right: 12px; width: auto; }
   .pg-wordmark { font-size: 19px; }
   .pg-seal { width: 36px; height: 36px; }
+  .pg-seal .pg-mark { --pg-mark-h: 22px; }
   .pg-tarot { max-width: 200px; }
   .pg-tarot-initial { font-size: 72px; }
   body.pg-home .links-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
@@ -823,7 +825,8 @@ body.pg-site .pg-mast .pg-nav :focus-visible { outline-color: var(--pg-gold); ou
 .pg-foot-nav a { display: inline-flex; align-items: center; min-height: 40px; color: var(--pg-link); text-decoration: none; }
 .pg-foot-nav a:hover { text-decoration: underline; }
 .pg-foot-nav a[hidden] { display: none; }
-.pg-foot-brand { display: flex; align-items: center; gap: 10px; }
+/* colofão: o selo em cima, grande o bastante pros traços finos do portal, e o nome embaixo */
+.pg-foot-brand { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 6px; }
 
 /* páginas internas: tipo como link, ações da mensagem de erro */
 .pg-entry-type a { color: var(--pg-link); text-decoration: none; }

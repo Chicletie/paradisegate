@@ -19,7 +19,7 @@ Vite + React 19 + TypeScript + Tailwind v4 + react-router. `npm test` (Vitest), 
    redirecionamento de endereços antigos (`public/404.html` e `public/tree/index.html`), só a URL.
 2. **Não inventar o mundo.** Lore, personagens, lugares, nomes, citações e números vêm só do que
    está publicado na wiki ou do que o autor passar. Arte da obra e o selo da marca: nunca gerar,
-   desenhar ou "completar" (o círculo com estrela no cabeçalho é um lugar reservado).
+   desenhar ou "completar" (o selo é só o arquivo `public/selo.svg`, o portal com estrelas).
 3. **Função acima de estética.** Um redesenho nunca remove nem piora uma função que já existia.
 4. **A wiki não muda sem revisão.** `src/pages/`, os componentes da página de entrada, `src/lib/`,
    `src/styles/wiki.css` e `scripts/` só mudam num PR revisado pela outra pessoa (o autor revisa
