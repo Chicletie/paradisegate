@@ -8,6 +8,12 @@ describe("restorePrettyUrl", () => {
     expect(replaceState).toHaveBeenCalledWith("/wiki/alucard-whitefang");
   });
 
+  it("volta pro perfil público /@nome", () => {
+    const replaceState = vi.fn();
+    restorePrettyUrl("?p=" + encodeURIComponent("/@ania_sombra"), replaceState);
+    expect(replaceState).toHaveBeenCalledWith("/@ania_sombra");
+  });
+
   it("não faz nada sem ?p=", () => {
     const replaceState = vi.fn();
     restorePrettyUrl("?q=busca", replaceState);
