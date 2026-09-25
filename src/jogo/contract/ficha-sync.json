@@ -166,7 +166,8 @@
           "prestigio_atual",
           "version",
           "updated_at",
-          "owner"
+          "owner",
+          "mine"
         ]
       }
     },
