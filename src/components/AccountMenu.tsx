@@ -69,6 +69,7 @@ function AccountMenu({ user }: { user: AuthUser }) {
   }, [open]);
 
   const nick = profile?.nickname || "";
+  const handle = profile?.username ? "@" + profile.username : "";
   const label = "Menu da conta (" + user.email + ")" + (unread ? " — " + (unread === 1 ? "1 resposta nova" : unread + " respostas novas") : "");
   const close = () => setOpen(false);
 
@@ -104,6 +105,7 @@ function AccountMenu({ user }: { user: AuthUser }) {
           <Avatar user={user} profile={profile} className="pg-avatar pg-avatar-lg" />
           <div className="pg-menu-who">
             <span className="pg-menu-name">{nick || "Sua conta"}</span>
+            {handle && <span className="pg-menu-handle">{handle}</span>}
             <span className="pg-menu-email">{user.email + (guest ? " · vendo como convidado" : "")}</span>
           </div>
         </div>

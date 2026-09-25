@@ -282,6 +282,10 @@ export interface WikiProfile {
   seenAt?: string;
   /** Spoiler por obra: até onde o leitor já viu cada obra. */
   progress?: SpoilerProgress;
+  /** Nome único da conta (@algumacoisa), sem o @; o apelido pode repetir, este não. */
+  username?: string;
+  /** Quando o username foi escolhido/trocado (Timestamp do Firestore): troca a cada 30 dias. */
+  usernameChangedAt?: unknown;
   updatedAt?: string;
 }
 

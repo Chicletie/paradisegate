@@ -29,7 +29,7 @@ Vite + React 19 + TypeScript + Tailwind v4 + react-router. `npm test` (Vitest), 
    sempre. Não estilize página nova mexendo em `src/styles/wiki.css`: ele existe pra wiki ficar
    como é. Detalhes em `DESIGN.md`, "O site além da wiki".
 6. **Firebase só por `src/lib/api.ts`**, só leitura dos dados da wiki, e só estas coleções:
-   `wikiIndex/lotus` (+ `shards/`), `wikiPublic`, `wikiRestrito`, `wikiProfiles`,
+   `wikiIndex/lotus` (+ `shards/`), `wikiPublic`, `wikiRestrito`, `wikiProfiles`, `wikiUsernames`,
    `wikiSuggestions` (`docs/dados-da-wiki.md`). A configuração do Firebase no código é pública
    por natureza; quem protege são as regras do banco, que ficam com o autor. Nada de coleção
    nova. Loja, cadastro de fãs, newsletter e o que mais precisar de servidor vão num serviço

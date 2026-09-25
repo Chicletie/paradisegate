@@ -13,7 +13,8 @@ e cada jogador logado só recebe o que foi liberado pro e-mail dele.
 | `wikiIndex/lotus/shards/{n}` | Continuação do índice quando ele fica grande | qualquer um lê |
 | `wikiPublic/{slug}` | Página completa (entrada ou temporada) | qualquer um lê |
 | `wikiRestrito/{wikiId}/itens/{itemId}` | Trechos liberados por pessoa (`permitidos: [e-mails]`) | jogador logado cujo e-mail está na lista |
-| `wikiProfiles/{uid}` | Perfil do leitor: apelido, foto, favoritos, `seenAt` | o próprio leitor lê e grava |
+| `wikiProfiles/{uid}` | Perfil do leitor: apelido, foto, favoritos, `seenAt`, `progress` (até onde viu cada obra), `username` e `usernameChangedAt` | o próprio leitor lê e grava |
+| `wikiUsernames/{nome}` | `{ uid, at }`: um documento por @username tomado (único por conta). Escolher/trocar = criar o novo, apagar o antigo e gravar no perfil numa gravação só; troca no máximo a cada 30 dias (a regra confere) | qualquer um confere um nome; só o dono cria/apaga o dele |
 | `wikiSuggestions/{id}` | Sugestões do leitor ao autor | o leitor cria e lê as próprias |
 
 `lotus` é o nome interno do mundo Paradise Gate nos dados (histórico, não aparece pro leitor).

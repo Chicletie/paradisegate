@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { fetchMySuggestions, fetchProfile, saveProfile, sendPasswordReset, signIn, watchAuth } from "./api";
+import { claimUsername, fetchMySuggestions, fetchProfile, saveProfile, sendPasswordReset, signIn, watchAuth } from "./api";
 import { mergeProfile, unreadCount } from "./profile";
 import type { AuthUser, WikiProfile, WikiProfilePatch } from "../types";
 
@@ -43,6 +43,8 @@ interface AccountState {
   /** O perfil (uma leitura por visita), pra quem precisa esperar por ele. */
   loadProfile: () => Promise<WikiProfile>;
   save: (patch: WikiProfilePatch) => Promise<void>;
+  /** Escolhe ou troca o username (a regra do banco confere se está livre e os 30 dias). */
+  setUsername: (name: string) => Promise<void>;
   clearUnread: () => void;
   openLogin: () => void;
 }
@@ -56,6 +58,7 @@ const LOGGED_OUT: AccountState = {
   profile: null,
   unread: 0,
   loadProfile: async () => ({}),
+  setUsername: async () => {},
   save: async () => {},
   clearUnread: () => {},
   openLogin: () => {},
@@ -123,6 +126,16 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     [user, loadProfile, setProfile],
   );
 
+  const setUsername = useCallback(
+    async (name: string) => {
+      if (!user) return;
+      const d = await loadProfile(user);
+      await claimUsername(user, name, d.username);
+      setProfile(user.uid, { ...d, email: user.email, username: name, usernameChangedAt: new Date() });
+    },
+    [user, loadProfile, setProfile],
+  );
+
   const value = useMemo<AccountState>(
     () => ({
       user,
@@ -132,12 +145,13 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       unread: user ? unreadByUid[user.uid] || 0 : 0,
       loadProfile: () => (user ? loadProfile(user) : Promise.resolve({})),
       save,
+      setUsername,
       clearUnread: () => {
         if (user) setUnreadByUid((m) => ({ ...m, [user.uid]: 0 }));
       },
       openLogin: () => setLoginOpen(true),
     }),
-    [user, ready, guest, profiles, unreadByUid, loadProfile, save],
+    [user, ready, guest, profiles, unreadByUid, loadProfile, save, setUsername],
   );
 
   return (
