@@ -13,8 +13,8 @@ e cada jogador logado só recebe o que foi liberado pro e-mail dele.
 | `wikiIndex/lotus/shards/{n}` | Continuação do índice quando ele fica grande | qualquer um lê |
 | `wikiPublic/{slug}` | Página completa (entrada, temporada ou escrito) | qualquer um lê |
 | `wikiRestrito/{wikiId}/itens/{itemId}` | Trechos liberados por pessoa (`permitidos: [e-mails]`) | jogador logado cujo e-mail está na lista |
-| `wikiProfiles/{uid}` | Perfil do leitor: apelido, foto, favoritos, `seenAt`, `progress` (até onde viu cada obra), `username` e `usernameChangedAt` | o próprio leitor lê e grava |
-| `wikiUsernames/{nome}` | `{ uid, at }` + o **cartão público** do membro (`nickname`, `photo`, `bio`, `since`, `showFavorites`, `favorites` só se mostrar; nunca o e-mail), lido pela página `/@nome`. Um documento por @username tomado (único por conta). Escolher/trocar = criar o novo (com o cartão), apagar o antigo e gravar no perfil numa gravação só; troca no máximo a cada 30 dias (a regra confere). O cartão acompanha o perfil a cada gravação | qualquer um lê um nome (não lista); só o dono cria, edita o cartão e apaga o dele; o autor modera o cartão |
+| `wikiProfiles/{uid}` | Perfil do leitor: apelido, foto, favoritos, `seenAt`, `progress` (até onde viu cada obra), `username` e `usernameChangedAt` | o próprio leitor lê e grava (o username só pela função `claimUsername`, ver abaixo) |
+| `wikiUsernames/{nome}` | `{ uid, at }` + o **cartão público** do membro (`nickname`, `photo`, `bio`, `since`, `showFavorites`, `favorites` só se mostrar; nunca o e-mail), lido pela página `/@nome`. Um documento por @username tomado (único por conta). Escolher/trocar acontece só na função `claimUsername`, que cria o novo (com o cartão), apaga o antigo e grava no perfil numa transação só; troca no máximo a cada 30 dias (a regra em `functions/username.js`, no repo do autor). O cartão acompanha o perfil a cada gravação | qualquer um lê um nome (não lista); edita o cartão o próprio dono; criar/apagar o documento é só pela função; o autor modera o cartão |
 | `wikiSuggestions/{id}` | Sugestões do leitor ao autor | o leitor cria e lê as próprias |
 
 `lotus` é o nome interno do mundo Paradise Gate nos dados (histórico, não aparece pro leitor).
@@ -23,9 +23,21 @@ Contas de jogador só nascem por convite do autor; o site não tem cadastro aber
 
 **Entrar com @username:** o login do Firebase só aceita e-mail, e o e-mail de ninguém fica
 legível no banco. Então, com username, o site chama a função `usernameSignIn` do autor (por
-`fetch`, em `src/lib/api.ts`): ela confere a senha no servidor e só então devolve o e-mail, e o
+`fetch`, em `src/lib/auth.ts`): ela confere a senha no servidor e só então devolve o e-mail, e o
 site entra pelo e-mail como sempre. 5 erros seguidos em 15 minutos travam aquele nome (o login
 por e-mail continua).
+
+**Escolher ou trocar o @username:** a regra toda (forma, nomes proibidos, prazo de 30 dias entre
+trocas) mora só no servidor, em `functions/username.js` (repo do autor). O site nunca decide isso
+sozinho:
+- `checkUsername` (`src/lib/api.ts`, `checkUsername`): confere enquanto a pessoa digita, com ou
+  sem login (também usada em `public/cadastro.html`, que não tem conta ainda);
+- `claimUsername` (`src/lib/api.ts`, `claimUsername`): escolhe ou troca de verdade, numa
+  transação no servidor. Devolve o nome como ficou, ou a frase de erro (nome em uso, prazo ainda
+  preso, proibido…). O componente `UsernameDialog.tsx` só mostra o que ela responde.
+As regras do Firestore recusam qualquer gravação de `username`/`usernameChangedAt` em
+`wikiProfiles` ou qualquer criação/remoção em `wikiUsernames` que não venha da função (que usa o
+Admin SDK, sem passar pelas regras).
 
 ## Índice em partes
 

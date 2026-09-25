@@ -71,3 +71,32 @@ export async function getIdToken(forceRefresh = false): Promise<string | null> {
   const user = auth.currentUser;
   return user ? user.getIdToken(forceRefresh) : null;
 }
+
+/** A função do servidor disse não (ou não respondeu): `message` é a frase dela, pro leitor. */
+export class FunctionError extends Error {
+  code: string;
+  constructor(message: string, code: string) {
+    super(message);
+    this.code = code;
+  }
+}
+
+/**
+ * Chama uma função do Firebase (as do autor, em functions/ do repo dele): quem decide a regra é
+ * ela; aqui só se manda o pedido e se devolve a resposta ou a frase do erro. Com login, vai o
+ * passe junto (a função sabe quem pediu).
+ */
+export async function callFunction<T>(name: string, data: unknown): Promise<T> {
+  const token = await getIdToken();
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  let res: Response;
+  try {
+    res = await fetch(functionUrl(name), { method: "POST", headers, body: JSON.stringify({ data }) });
+  } catch {
+    throw new FunctionError("Não consegui falar com o servidor agora. Tente de novo.", "unavailable");
+  }
+  const body = (await res.json().catch(() => ({}))) as { result?: T; error?: { message?: string; status?: string } };
+  if (res.ok && "result" in body) return body.result as T;
+  throw new FunctionError(body.error?.message || "Não deu certo agora. Tente de novo.", (body.error?.status || "internal").toLowerCase());
+}

@@ -2,11 +2,10 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { usePgBody } from "../lib/usePgBody";
 import { useAccount } from "../lib/account";
-import { fetchMyAccesses, fetchMySuggestions } from "../lib/api";
+import { checkUsername, fetchMyAccesses, fetchMySuggestions } from "../lib/api";
 import { useWikiIndex, useWikiObras } from "../lib/wikiIndex";
 import { ProgressPicker } from "../components/SpoilerProgress";
 import { UsernameDialog } from "../components/UsernameDialog";
-import { fmtDay, isBlockedNickname, nextChangeAt } from "../lib/username";
 import { objPos } from "../lib/format";
 import { resizePhoto } from "../lib/photo";
 import { BIO_MAX, memberHref } from "../lib/member";
@@ -60,6 +59,13 @@ export function ProfilePage() {
       <PgFooter />
     </>
   );
+}
+
+/** A frase embaixo do username no perfil, com o que o servidor disse (presa até quando, a regra). */
+function unHint(username: string | undefined, info: { locked: string; hint: string } | null): string {
+  if (!username) return "Nome único da sua conta (o apelido pode repetir, o username não).";
+  if (info?.locked) return "Dá pra trocar de novo a partir de " + info.locked + ".";
+  return "Nome único da sua conta." + (info?.hint ? " " + info.hint : "");
 }
 
 function Panel({ id, title, children }: { id: string; title: string; children: ReactNode }) {
@@ -221,20 +227,30 @@ function Identity({ user }: { user: AuthUser }) {
   const [unDismissed, setUnDismissed] = useState(false);
   const [fromLink] = useState(() => typeof location !== "undefined" && location.hash === "#username");
   const showUn = unOpen || (fromLink && !unDismissed && !!profile && !profile.username);
-  const lockedUntil = nextChangeAt(profile?.usernameChangedAt);
+  // Até quando a troca do username está presa e a frase de ajuda: quem sabe é o servidor.
+  const [unInfo, setUnInfo] = useState<{ locked: string; hint: string } | null>(null);
+  const username = profile?.username || "";
+  useEffect(() => {
+    let alive = true;
+    checkUsername("").then(
+      (r) => alive && setUnInfo({ locked: r.lockedUntilText, hint: r.hint }),
+      () => {},
+    );
+    return () => {
+      alive = false;
+    };
+  }, [username]);
 
   function saveNick() {
     const value = (nick ?? profile?.nickname ?? "").trim().slice(0, 32);
-    if (value !== (profile?.nickname || "") && isBlockedNickname(value)) {
-      say("Esse apelido não é permitido. Escolha outro.", true);
-      return;
-    }
     setBusy(true);
     say("Salvando…");
     save({ nickname: value })
       .then(
         () => say("Apelido salvo."),
-        () => say("Não consegui salvar agora. Tenta de novo daqui a pouco.", true),
+        // Quem recusa apelido proibido é a regra do banco (a lista mora no servidor, não aqui).
+        (e: { code?: string }) =>
+          say(e?.code === "permission-denied" ? "Esse apelido não é permitido. Escolha outro." : "Não consegui salvar agora. Tenta de novo daqui a pouco.", true),
       )
       .then(() => setBusy(false));
   }
@@ -316,11 +332,7 @@ function Identity({ user }: { user: AuthUser }) {
               </button>
             </div>
             <span className="pg-un-hint">
-              {profile?.username
-                ? lockedUntil
-                  ? "Dá pra trocar de novo a partir de " + fmtDay(lockedUntil) + "."
-                  : "Nome único da sua conta. Dá pra trocar uma vez a cada 30 dias."
-                : "Nome único da sua conta (o apelido pode repetir, o username não)."}
+              {unHint(profile?.username, unInfo)}
             </span>
           </div>
           {showUn && (

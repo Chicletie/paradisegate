@@ -46,7 +46,8 @@ interface AccountState {
   loadProfile: () => Promise<WikiProfile>;
   save: (patch: WikiProfilePatch) => Promise<void>;
   /** Escolhe ou troca o username (a regra do banco confere se está livre e os 30 dias). */
-  setUsername: (name: string) => Promise<void>;
+  /** Pede o username ao servidor (que confere tudo); devolve o nome como ficou guardado. */
+  setUsername: (raw: string) => Promise<string>;
   /** O cartão público (/@nome) de quem está logado; `null` sem username. Acerta o cartão se
    * ele estiver atrás do perfil (quem escolheu o nome antes do perfil público existir). */
   loadCard: () => Promise<MemberCard | null>;
@@ -65,7 +66,7 @@ const LOGGED_OUT: AccountState = {
   profile: null,
   unread: 0,
   loadProfile: async () => ({}),
-  setUsername: async () => {},
+  setUsername: async () => "",
   loadCard: async () => null,
   saveCard: async () => {},
   save: async () => {},
@@ -153,15 +154,16 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     [user, loadProfile, setProfile, syncCard],
   );
 
+  // O servidor confere, grava o nome e leva o cartão público junto; aqui só se relê o perfil.
   const setUsername = useCallback(
-    async (name: string) => {
-      if (!user) return;
-      const d = await loadProfile(user);
-      const old = d.username ? await fetchMemberCard(d.username).catch(() => null) : null;
-      await claimUsername(user, name, d.username, cardFields(d, { bio: old?.bio, showFavorites: old?.showFavorites }, old?.since || user.since));
-      setProfile(user.uid, { ...d, email: user.email, username: name, usernameChangedAt: new Date() });
+    async (raw: string): Promise<string> => {
+      if (!user) return "";
+      const { username } = await claimUsername(raw);
+      const fresh = await fetchProfile(user.uid).catch(() => null);
+      setProfile(user.uid, fresh ?? { ...latest.current[user.uid], username });
+      return username;
     },
-    [user, loadProfile, setProfile],
+    [user, setProfile],
   );
 
   const loadCard = useCallback(async () => {
