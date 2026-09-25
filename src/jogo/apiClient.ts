@@ -1,5 +1,6 @@
 /*
- * Cliente da API do jogo (fichas, convites), usado pela ficha e pelas páginas do jogo.
+ * Cliente da API do jogo (fichas, sugestões do mestre), usado pela ficha e pelas páginas do jogo.
+ * Convite não passa por aqui: é no editor do mestre (arvore), que pergunta à API.
  * Sem Firebase nem `fetch` global aqui dentro: quem cria o cliente passa o fetch, o passe
  * de login e o relógio, então dá pra testar tudo no node (apiClient.test.ts).
  *
@@ -56,7 +57,6 @@ export type MySheetNote = SheetNote & { sheet_nome: string };
 /** `features`: o que o site mostra pra esta conta. Quem decide é a API (FICHAS_PARA_JOGADORES, papel). */
 export type Features = { fichas: boolean; mesa: boolean };
 export type Me = { id: number; username: string | null; email: string; role: "player" | "admin"; features: Features };
-export type Invite = { id: number; email: string; created_at: string; invited_by: string | null; joined: boolean };
 
 export type ApiClientDeps = {
   baseUrl: string;
@@ -177,9 +177,6 @@ export function createApiClient(deps: ApiClientDeps) {
     listSheetNotes: (id: number) => request<SheetNote[]>(`/character-sheets/${id}/notes`),
     createNote: (id: number, text: string) => request<SheetNote>(`/character-sheets/${id}/notes`, { method: "POST", body: { text } }),
     deleteNote: (id: number, noteId: number) => request<void>(`/character-sheets/${id}/notes/${noteId}`, { method: "DELETE" }),
-    listInvites: () => request<Invite[]>("/invites"),
-    createInvite: (email: string) => request<Invite>("/invites", { method: "POST", body: { email } }),
-    deleteInvite: (id: number) => request<void>(`/invites/${id}`, { method: "DELETE" }),
   };
 }
 

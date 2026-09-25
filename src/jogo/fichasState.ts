@@ -108,11 +108,3 @@ export function updatedText(iso: string, timeZone?: string): string {
   const when = noteDate(iso, timeZone);
   return when ? "atualizada em " + when : "";
 }
-
-/** Convite recusado: o 422 do formato do e-mail vem da validação da API sem frase; o resto traz a dela. */
-export function inviteErrorText(error: unknown): string {
-  if (error instanceof ApiError && error.status === 422 && typeof error.detail.message !== "string") {
-    return "Confira o e-mail: ele não parece válido.";
-  }
-  return errorText(error);
-}
