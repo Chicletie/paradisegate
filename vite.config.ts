@@ -10,6 +10,8 @@ export default defineConfig({
   build: {
     cssTarget: ["safari14", "ios14", "chrome90", "firefox90", "edge90"],
     rollupOptions: {
+      // Duas páginas: o site (index.html) e a ficha (fichas.html, com o sync de src/ficha-sync/).
+      input: { main: "index.html", fichas: "fichas.html" },
       output: {
         // Nome fixo (sem hash) só pro CSS: public/reset-senha.html, fora do bundle, carrega
         // este mesmo arquivo por um caminho fixo — uma cópia só do CSS pra tudo (ver CLAUDE.md).

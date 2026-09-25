@@ -121,6 +121,8 @@ Valem pros dois (e pro Claude de cada um), em toda mudança:
 | `src/components/` | Cabeçalho (com "Entrar"/menu da conta) e rodapé PG, peças da página de entrada, e o que depende de login (`EntryActions.tsx`). |
 | `src/lib/` | `api.ts` e `auth.ts` (únicos acessos ao Firebase; `firebaseApp.ts` é o app + Auth sem o Firestore), índice (`wikiIndex.tsx`), conta do leitor (`account.tsx`), markdown, citações, relações, home, sorteio do dia, linha do tempo, perfil — lógica pura testável sem DOM onde dá. |
 | `src/jogo/` | Páginas do jogo (fichas, convites): `apiClient.ts` fala com a API do jogo (testado no node, com as respostas de `contract/ficha-sync.json`, cópia do contrato do backend: mudou lá, muda aqui no mesmo par de PRs). |
+| `fichas.html` | A ficha de personagem (página própria do Vite, segunda entrada do build). O script dela é da ficha e não se mexe por dentro; só a linha do `SAVE_KEY` (uma gaveta por `?sheet=<id>`) e a tag do módulo `src/ficha-sync/main.ts` são do site. Sem `?sheet=`, a ficha é só do aparelho, como sempre foi. |
+| `src/ficha-sync/` | Salvar a ficha na conta: lê a gaveta do autosave e conversa com a API (versão, conflito, sem rede, duas abas pela Web Locks). `sync.ts` é puro e testado no node; `ui.ts` usa as classes da própria ficha. `scripts/check-ficha.mjs` trava o build se a ficha passar a carregar o Firestore ou o `wiki.css`. |
 | `src/styles/tokens.css` | Tokens `--pg-*` + `@theme` do Tailwind, pras páginas novas. |
 | `src/styles/wiki.css` | CSS da wiki (não mexer pra estilizar página nova). |
 | `scripts/` | Páginas prontas e sitemap (`prerender.mjs`, `seo.mjs`). |

@@ -150,14 +150,14 @@ export function createApiClient(deps: ApiClientDeps) {
       request<Sheet>("/character-sheets", { method: "POST", body: { nome, data } }),
     saveSheet: (
       id: number,
-      save: { version: number; data: Record<string, unknown>; force?: boolean },
+      save: { version: number; data: Record<string, unknown>; nome?: string; force?: boolean },
       options: { keepalive?: boolean } = {},
-    ) =>
-      request<Sheet>(`/character-sheets/${id}`, {
-        method: "PUT",
-        body: save.force ? { version: save.version, data: save.data, force: true } : { version: save.version, data: save.data },
-        keepalive: options.keepalive,
-      }),
+    ) => {
+      const body: Record<string, unknown> = { version: save.version, data: save.data };
+      if (save.nome) body.nome = save.nome;
+      if (save.force) body.force = true;
+      return request<Sheet>(`/character-sheets/${id}`, { method: "PUT", body, keepalive: options.keepalive });
+    },
     deleteSheet: (id: number) => request<void>(`/character-sheets/${id}`, { method: "DELETE" }),
     listInvites: () => request<Invite[]>("/invites"),
     createInvite: (email: string) => request<Invite>("/invites", { method: "POST", body: { email } }),
