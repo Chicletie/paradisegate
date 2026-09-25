@@ -34,3 +34,11 @@ describe("nomes proibidos", () => {
     }
   });
 });
+
+describe("apelido proibido", () => {
+  it("bloqueia com espaço, acento e maiúscula", async () => {
+    const { isBlockedNickname } = await import("./username");
+    for (const n of ["Filho da Puta", "H1tl3r", "Nazi Supremo", "Pussy Destroyer", "Caralho!!", "Porra Louca"]) expect(isBlockedNickname(n), n).toBe(true);
+    for (const n of ["Paulo Silva", "Carolina", "Computador Velho", "Ânia das Sombras", "Picanha Feliz", "Pintor de Quadros"]) expect(isBlockedNickname(n), n).toBe(false);
+  });
+});

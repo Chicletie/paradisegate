@@ -6,7 +6,7 @@ import { fetchMyAccesses, fetchMySuggestions } from "../lib/api";
 import { useWikiIndex, useWikiObras } from "../lib/wikiIndex";
 import { ProgressPicker } from "../components/SpoilerProgress";
 import { UsernameDialog } from "../components/UsernameDialog";
-import { fmtDay, nextChangeAt } from "../lib/username";
+import { fmtDay, isBlockedNickname, nextChangeAt } from "../lib/username";
 import { objPos } from "../lib/format";
 import { resizePhoto } from "../lib/photo";
 import { accessLabel, groupAccesses, isNewSuggestion, newestFirst, suggestionStatus } from "../lib/profile";
@@ -123,9 +123,14 @@ function Identity({ user }: { user: AuthUser }) {
   const lockedUntil = nextChangeAt(profile?.usernameChangedAt);
 
   function saveNick() {
+    const value = (nick ?? profile?.nickname ?? "").trim().slice(0, 32);
+    if (value !== (profile?.nickname || "") && isBlockedNickname(value)) {
+      say("Esse apelido não é permitido. Escolha outro.", true);
+      return;
+    }
     setBusy(true);
     say("Salvando…");
-    save({ nickname: (nick ?? profile?.nickname ?? "").trim().slice(0, 32) })
+    save({ nickname: value })
       .then(
         () => say("Apelido salvo."),
         () => say("Não consegui salvar agora. Tenta de novo daqui a pouco.", true),

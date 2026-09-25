@@ -49,6 +49,13 @@ export function isBlockedUsername(name: string): boolean {
   return [...parts, ...leetParts].some((p) => BLOCK_PART.includes(p));
 }
 
+/** Apelido (texto livre, com espaço e acento) na mesma lista: sem acento, minúsculo e com
+ * espaço/pontuação virando _, pra "Filho da Puta" contar como "filho_da_puta". */
+export function isBlockedNickname(nick: string): boolean {
+  const n = normalizeUsername(nick).replace(/[^a-z0-9]+/g, "_");
+  return !!n && isBlockedUsername(n);
+}
+
 /** Por que o nome não serve (texto pro leitor), ou "" se serve. */
 export function usernameProblem(name: string): string {
   if (!name) return "Escolha um nome.";
