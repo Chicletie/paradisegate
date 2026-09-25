@@ -15,7 +15,7 @@ import { PgHeader } from "../components/PgHeader";
 import { PgFooter } from "../components/PgFooter";
 import { PgSectionHead } from "../components/PgIcons";
 import { Avatar, SignInButton } from "../components/AccountMenu";
-import { FichasSection } from "../jogo/Fichas";
+import { FichasSection, MestreNotesSection } from "../jogo/Fichas";
 import { useJogoAccess } from "../jogo/access";
 import { showsFichas } from "../jogo/flags";
 import type { AuthUser, WikiRestritoItem, WikiSuggestion } from "../types";
@@ -24,6 +24,7 @@ const SECTIONS: [string, string][] = [
   ["identidade", "Identidade"],
   ["publico", "Perfil público"],
   ["fichas", "Suas fichas"],
+  ["mestre", "Sugestões do mestre"],
   ["sugestoes", "Suas sugestões"],
   ["favoritos", "Favoritos"],
   ["acessos", "Seus acessos"],
@@ -78,7 +79,7 @@ function ProfileSections({ user }: { user: AuthUser }) {
   return (
     <>
       <nav className="pg-profile-nav" aria-label="Seções do perfil">
-        {SECTIONS.filter(([id]) => fichas || id !== "fichas").map(([id, label]) => (
+        {SECTIONS.filter(([id]) => fichas || (id !== "fichas" && id !== "mestre")).map(([id, label]) => (
           <a key={id} className="pg-profile-chip" href={"#" + id}>
             {label}
           </a>
@@ -87,6 +88,7 @@ function ProfileSections({ user }: { user: AuthUser }) {
       <Identity user={user} />
       <PublicProfile />
       {fichas && <FichasSection access={access} />}
+      {fichas && access.kind !== "error" && <MestreNotesSection />}
       <Suggestions user={user} />
       <Favorites />
       <Accesses user={user} />

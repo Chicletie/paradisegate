@@ -8,7 +8,7 @@ import { useAccount } from "../lib/account";
 import { usePgBody } from "../lib/usePgBody";
 import { useJogoAccess, type JogoAccess } from "./access";
 import { jogoApi } from "./api";
-import { OfflineError, type ApiClient, type Invite, type SheetSummary, type TableSheet } from "./apiClient";
+import { OfflineError, type ApiClient, type Invite, type MySheetNote, type SheetSummary, type TableSheet } from "./apiClient";
 import {
   drawerKeys,
   errorText,
@@ -18,6 +18,7 @@ import {
   LEGACY_DRAWER,
   legacySheet,
   NO_NAME,
+  noteDate,
   normalizeInviteEmail,
   ownerLabel,
   readImport,
@@ -126,6 +127,60 @@ export function FichasSection({ access }: { access: JogoAccess }) {
     );
   }
   return null;
+}
+
+/**
+ * "Sugestões do mestre" no perfil (âncora #mestre): o que o mestre comentou nas fichas da pessoa.
+ * Abrir o perfil conta como visto; as que eram novas ficam marcadas até recarregar.
+ */
+export function MestreNotesSection() {
+  const api = useMemo(() => jogoApi(), []);
+  const [notes, setNotes] = useState<MySheetNote[] | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    api.listMyNotes().then(
+      (list) => {
+        if (!alive) return;
+        setNotes(list);
+        if (list.some((n) => !n.seen_at)) api.markNotesSeen().catch(() => {});
+      },
+      () => alive && setFailed(true),
+    );
+    return () => {
+      alive = false;
+    };
+  }, [api]);
+
+  let body: ReactNode;
+  if (failed) body = <p className="pg-empty">Não consegui carregar as sugestões do mestre agora. Tente de novo daqui a pouco.</p>;
+  else if (!notes) body = <p className="pg-empty">Carregando…</p>;
+  else if (notes.length === 0) body = <p className="pg-empty">O mestre ainda não deixou sugestões nas suas fichas.</p>;
+  else {
+    body = notes.map((n) => (
+      <article key={n.id} className={"pg-sug" + (n.seen_at ? "" : " is-new")}>
+        <div className="pg-sug-head">
+          <a className="pg-sug-page" href={sheetHref(n.sheet_id)}>
+            {n.sheet_nome || NO_NAME}
+          </a>
+          {!n.seen_at && (
+            <span className="pg-sug-tags">
+              <span className="pg-sug-new">Novidade</span>
+            </span>
+          )}
+        </div>
+        <div className="pg-sug-meta">{[noteDate(n.created_at), n.author ? "@" + n.author : ""].filter(Boolean).join(" · ")}</div>
+        <p className="pg-sug-text">{n.text}</p>
+      </article>
+    ));
+  }
+
+  return (
+    <Panel id="mestre" title="Sugestões do mestre" count={notes?.length ? String(notes.length) : undefined}>
+      <div className="pg-sug-list">{body}</div>
+    </Panel>
+  );
 }
 
 /** A página da mesa (/jogo/mesa): só do mestre. */

@@ -211,6 +211,78 @@
       }
     },
     {
+      "name": "mestre_sugere",
+      "request": {
+        "method": "POST",
+        "path": "/character-sheets/{sheet_id}/notes",
+        "as": "admin",
+        "body": {
+          "text": "Revise a perícia de Furtividade"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body_keys": [
+          "id",
+          "sheet_id",
+          "text",
+          "created_at",
+          "seen_at",
+          "author"
+        ],
+        "body_subset": {
+          "text": "Revise a perícia de Furtividade",
+          "seen_at": null
+        }
+      }
+    },
+    {
+      "name": "jogador_nao_sugere",
+      "request": {
+        "method": "POST",
+        "path": "/character-sheets/{sheet_id}/notes",
+        "as": "player",
+        "body": {
+          "text": "Oi"
+        }
+      },
+      "response": {
+        "status": 403,
+        "detail_code": "forbidden"
+      }
+    },
+    {
+      "name": "sugestoes_do_mestre",
+      "request": {
+        "method": "GET",
+        "path": "/character-sheets/notes",
+        "as": "player"
+      },
+      "response": {
+        "status": 200,
+        "item_keys": [
+          "id",
+          "sheet_id",
+          "sheet_nome",
+          "text",
+          "created_at",
+          "seen_at",
+          "author"
+        ]
+      }
+    },
+    {
+      "name": "sugestoes_vistas",
+      "request": {
+        "method": "POST",
+        "path": "/character-sheets/notes/seen",
+        "as": "player"
+      },
+      "response": {
+        "status": 204
+      }
+    },
+    {
       "name": "salvar",
       "request": {
         "method": "PUT",

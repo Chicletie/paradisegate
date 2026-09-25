@@ -1,5 +1,6 @@
 import { jogoApi } from "../jogo/api";
 import { parseSheetId } from "./keys";
+import { mountNotes } from "./notes";
 import { createSheetSync, type KeyValue } from "./sync";
 import { mountSyncUi } from "./ui";
 
@@ -43,18 +44,26 @@ const TICK_MS = 5000;
 
 function start(sheetId: number): void {
   const ui = mountSyncUi(document, { onRefresh: () => location.reload() });
+  const api = jogoApi(() => ui.status({ kind: "connecting" }));
+  let owner = "";
   const sync = createSheetSync({
     sheetId,
     local: safe(() => localStorage),
     session: safe(() => sessionStorage),
-    api: jogoApi(() => ui.status({ kind: "connecting" })),
+    api,
     reload: () => location.reload(),
-    onStatus: ui.status,
+    onStatus: (s) => {
+      if (s.owner) owner = s.owner;
+      ui.status(s);
+    },
     onConflict: () => ui.showConflict((choice) => void sync.resolveConflict(choice)),
   });
 
   async function run(): Promise<never> {
     await sync.boot();
+    // Sugestões do mestre: ele escreve na ficha de um jogador (só leitura); a dona lê na dela.
+    if (sync.phase === "read_only") mountNotes(document, { api, sheetId, mode: "mestre", owner });
+    else if (sync.phase === "ready" || sync.phase === "conflict") mountNotes(document, { api, sheetId, mode: "dona" });
     setInterval(() => void sync.tick(), TICK_MS);
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "hidden") sync.flush();

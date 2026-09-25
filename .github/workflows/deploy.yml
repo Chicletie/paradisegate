@@ -35,7 +35,7 @@ jobs:
           VITE_API_URL: https://pg-backend-jfnn.onrender.com
           # "1" mostra o painel "Suas fichas" no perfil (e no menu da conta) pros jogadores; vazio,
           # só o mestre vê as fichas (perfil e "Fichas da mesa" na barra de navegação).
-          VITE_FEATURE_FICHAS: ""
+          VITE_FEATURE_FICHAS: "1"
       - run: npm run prerender
       - uses: actions/upload-pages-artifact@v3
         with:
