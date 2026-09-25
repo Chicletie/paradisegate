@@ -1,6 +1,6 @@
 {
   "description": "Pedidos e respostas de exemplo entre a ficha (paradisegate src/ficha-sync + src/jogo/apiClient) e a API. O pytest do pg-backend reproduz estes casos contra a API real; o paradisegate guarda uma cópia e usa as respostas como fetch falso. Mudou aqui, muda lá.",
-  "contract_version": 2,
+  "contract_version": 3,
   "auth": {
     "header": "Authorization: Bearer <Firebase ID token>",
     "players": {
@@ -131,10 +131,83 @@
         "status": 200,
         "body_subset": {
           "version": 1,
+          "mine": true,
+          "owner": null,
           "data": {
             "pv": 10
           }
         }
+      }
+    },
+    {
+      "name": "mesa_so_admin",
+      "request": {
+        "method": "GET",
+        "path": "/character-sheets/mesa",
+        "as": "player"
+      },
+      "response": {
+        "status": 403,
+        "detail_code": "forbidden"
+      }
+    },
+    {
+      "name": "fichas_da_mesa",
+      "request": {
+        "method": "GET",
+        "path": "/character-sheets/mesa",
+        "as": "admin"
+      },
+      "response": {
+        "status": 200,
+        "item_keys": [
+          "id",
+          "nome",
+          "prestigio_atual",
+          "version",
+          "updated_at",
+          "owner"
+        ]
+      }
+    },
+    {
+      "name": "mestre_abre_ficha",
+      "request": {
+        "method": "GET",
+        "path": "/character-sheets/{sheet_id}",
+        "as": "admin"
+      },
+      "response": {
+        "status": 200,
+        "body_keys": [
+          "owner"
+        ],
+        "body_subset": {
+          "version": 1,
+          "mine": false,
+          "data": {
+            "pv": 10
+          }
+        }
+      }
+    },
+    {
+      "name": "mestre_nao_salva",
+      "request": {
+        "method": "PUT",
+        "path": "/character-sheets/{sheet_id}",
+        "as": "admin",
+        "body": {
+          "version": 1,
+          "data": {
+            "pv": 0
+          },
+          "force": true
+        }
+      },
+      "response": {
+        "status": 404,
+        "detail_code": "not_found"
       }
     },
     {

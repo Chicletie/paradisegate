@@ -6,6 +6,7 @@ import {
   OfflineError,
   SessionExpiredError,
   type Me,
+  type SheetOwner,
   type SheetSummary,
 } from "./apiClient";
 
@@ -105,6 +106,11 @@ export function seedDrawer(id: number, version: number, data: Record<string, unk
 export function drawerKeys(id: number): string[] {
   const k = sheetKeys(id);
   return [k.drawer, k.version, k.synced];
+}
+
+/** De quem é a ficha, pro mestre: "@username", ou o e-mail se a pessoa ainda não tem username. */
+export function ownerLabel(owner: SheetOwner): string {
+  return owner.username ? "@" + owner.username : owner.email;
 }
 
 export function sheetHref(id: number): string {

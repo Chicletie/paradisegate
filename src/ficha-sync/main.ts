@@ -42,7 +42,7 @@ function safe(storage: () => Storage): KeyValue {
 const TICK_MS = 5000;
 
 function start(sheetId: number): void {
-  const ui = mountSyncUi(document);
+  const ui = mountSyncUi(document, { onRefresh: () => location.reload() });
   const sync = createSheetSync({
     sheetId,
     local: safe(() => localStorage),

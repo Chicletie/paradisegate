@@ -43,7 +43,11 @@ export class NotFoundError extends ApiError {}
 export class OfflineError extends ApiError {}
 
 export type SheetSummary = { id: number; nome: string; prestigio_atual: number; version: number; updated_at: string };
-export type Sheet = SheetSummary & { data: Record<string, unknown> };
+export type SheetOwner = { id: number; username: string | null; email: string };
+/** `mine: false` quando o mestre (admin) abre a ficha de um jogador: só leitura. */
+export type Sheet = SheetSummary & { data: Record<string, unknown>; mine?: boolean; owner?: SheetOwner | null };
+/** Uma linha de "Fichas da mesa" (só admin). */
+export type TableSheet = SheetSummary & { owner: SheetOwner };
 export type Me = { id: number; username: string | null; email: string; role: "player" | "admin" };
 export type Invite = { id: number; email: string; created_at: string; invited_by: string | null; joined: boolean };
 
@@ -145,6 +149,7 @@ export function createApiClient(deps: ApiClientDeps) {
     health: () => request<{ status: string }>("/health", { auth: false }),
     me: () => request<Me>("/users/me"),
     listSheets: () => request<SheetSummary[]>("/character-sheets"),
+    listTableSheets: () => request<TableSheet[]>("/character-sheets/mesa"),
     getSheet: (id: number) => request<Sheet>(`/character-sheets/${id}`),
     createSheet: (nome: string, data: Record<string, unknown>) =>
       request<Sheet>("/character-sheets", { method: "POST", body: { nome, data } }),

@@ -6,7 +6,7 @@ import { SignInButton } from "../components/AccountMenu";
 import { useAccount } from "../lib/account";
 import { usePgBody } from "../lib/usePgBody";
 import { jogoApi } from "./api";
-import type { ApiClient, Invite, Me, SheetSummary } from "./apiClient";
+import type { ApiClient, Invite, Me, SheetSummary, TableSheet } from "./apiClient";
 import {
   drawerKeys,
   errorText,
@@ -17,6 +17,7 @@ import {
   legacySheet,
   NO_NAME,
   normalizeInviteEmail,
+  ownerLabel,
   readImport,
   seedDrawer,
   sheetHref,
@@ -149,6 +150,7 @@ function FichasLoaded() {
   return (
     <>
       <SheetsPanel api={api} sheets={view.kind === "list" ? view.sheets : []} onChange={setSheets} />
+      {view.me.role === "admin" && <TablePanel api={api} />}
       {view.me.role === "admin" && <InvitesPanel api={api} />}
     </>
   );
@@ -336,6 +338,71 @@ function SheetRow({ sheet, api, onDeleted, onError }: { sheet: SheetSummary; api
         </button>
       )}
     </div>
+  );
+}
+
+/** Fichas da mesa (só admin): as fichas dos jogadores, abertas em só leitura na própria ficha. */
+function TablePanel({ api }: { api: ApiClient }) {
+  const [rows, setRows] = useState<TableSheet[] | null>(null);
+  const [loadError, setLoadError] = useState("");
+
+  const fetchRows = useCallback(() => {
+    api.listTableSheets().then(setRows, (e) => setLoadError(errorText(e)));
+  }, [api]);
+  useEffect(() => {
+    fetchRows();
+  }, [fetchRows]);
+
+  function load() {
+    setLoadError("");
+    fetchRows();
+  }
+
+  let body: ReactNode;
+  if (loadError) {
+    body = (
+      <div role="alert">
+        <p className="pg-empty">{loadError}</p>
+        <button type="button" className="pg-btn-line pg-jogo-retry" onClick={load}>
+          Tentar de novo
+        </button>
+      </div>
+    );
+  } else if (!rows) {
+    body = <p className="pg-empty">Carregando as fichas da mesa…</p>;
+  } else if (rows.length === 0) {
+    body = <p className="pg-empty">Nenhum jogador tem ficha na conta ainda.</p>;
+  } else {
+    body = (
+      <div className="pg-fav-list">
+        {rows.map((s) => {
+          const name = s.nome || NO_NAME;
+          return (
+            <div key={s.id} className="pg-fav-row pg-sheet-row">
+              <a className="pg-fav-link" href={sheetHref(s.id)}>
+                <span className="pg-fav-thumb is-empty" aria-hidden="true">
+                  {name.charAt(0).toUpperCase()}
+                </span>
+                <span className="pg-fav-text">
+                  <span className="pg-fav-title">{name}</span>
+                  <span className="pg-fav-type">
+                    <span className="pg-table-owner">{ownerLabel(s.owner)}</span>
+                    {" · " + updatedText(s.updated_at)}
+                  </span>
+                </span>
+              </a>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  return (
+    <Panel id="mesa-fichas" title="Fichas da mesa" count={rows?.length ? String(rows.length) : undefined}>
+      <p className="pg-profile-note">As fichas dos jogadores, pra consultar durante a sessão. Abrem só pra leitura: quem muda é o jogador.</p>
+      {body}
+    </Panel>
   );
 }
 
