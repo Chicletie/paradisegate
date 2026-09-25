@@ -126,8 +126,8 @@ export interface WikiSection {
   at?: string;
 }
 
-export type QuoteKind = "fala" | "dialogo" | "trecho";
-export type QuoteRole = "fala" | "dialogo" | "trecho" | "para" | "sobre";
+export type QuoteKind = "fala" | "dialogo" | "trecho" | "narracao";
+export type QuoteRole = "fala" | "dialogo" | "trecho" | "narracao" | "para" | "sobre";
 
 export interface QuoteRef {
   name: string;
@@ -148,7 +148,10 @@ export interface WikiCitation {
   daily?: boolean;
   kind?: QuoteKind;
   role?: QuoteRole;
+  /** Narração: texto em markdown da casa (parágrafos, links), sem aspas. */
   text?: string;
+  /** Só na narração: de mesa (sessão) ou de livro. */
+  narr?: "mesa" | "livro";
   speaker?: QuoteRef | null;
   speakerTitle?: string;
   speakerId?: string | null;

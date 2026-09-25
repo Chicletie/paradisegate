@@ -1,10 +1,10 @@
 import { Fragment, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import type { QuoteDialogueLine, QuoteRef, WikiCitation } from "../types";
-import { SpoilerBlock } from "./markdown";
+import { RenderMarkdown, SpoilerBlock } from "./markdown";
 
 // Porta de quoteNorm/quoteRefNode/quoteDialogue/quoteAttrKids/quoteBody/quoteEpigraph em
-// a wiki original — citações: falas, diálogos em roteiro e trechos.
+// a wiki original — citações: falas, diálogos em roteiro, trechos e narrações do mestre.
 
 /** Snapshots publicados antes das citações com papel trazem só {text,group,note,
  * contextTitle,contextId} — normaliza pro formato novo, como fala da própria página. */
@@ -86,7 +86,20 @@ export function quoteAttrKids(q: WikiCitation, omitSpeaker: boolean): ReactNode[
   return kids;
 }
 
+export const narrSeal = (q: WikiCitation) => "narração de " + (q.narr === "livro" ? "livro" : "mesa");
+
+/** Narração do mestre: prosa normal com parágrafos e links, sem aspas, com o selo em cima. */
+export function QuoteNarration({ q }: { q: WikiCitation }) {
+  return (
+    <div className="cit-narr">
+      <span className="cit-seal">{narrSeal(q)}</span>
+      <RenderMarkdown text={q.text} />
+    </div>
+  );
+}
+
 export function QuoteBody({ q }: { q: WikiCitation }) {
+  if (q.kind === "narracao") return <QuoteNarration q={q} />;
   if (q.kind === "dialogo") return <QuoteDialogue q={q} />;
   return <div className="cit-text">{"“" + (q.text || "") + "”"}</div>;
 }
@@ -94,9 +107,14 @@ export function QuoteBody({ q }: { q: WikiCitation }) {
 /** Epígrafe: a citação em destaque da entrada, antes da visão geral — aspas grandes, texto em
  * itálico, autoria alinhada à direita. */
 export function QuoteEpigraph({ q }: { q: WikiCitation }) {
-  const attr = quoteAttrKids(q, false);
+  const attr: ReactNode[] = quoteAttrKids(q, false);
+  if (q.kind === "narracao") attr.unshift(narrSeal(q), ...(attr.length ? [" · "] : []));
   const inner =
-    q.kind === "dialogo" ? (
+    q.kind === "narracao" ? (
+      <blockquote className="wb-epi-text is-narr">
+        <RenderMarkdown text={q.text} />
+      </blockquote>
+    ) : q.kind === "dialogo" ? (
       <QuoteDialogue q={q} />
     ) : (
       <blockquote className="wb-epi-text">
