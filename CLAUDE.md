@@ -36,7 +36,8 @@ Vite + React 19 + TypeScript + Tailwind v4 + react-router. `npm test` (Vitest), 
    nova. O **Firebase Auth é o login único do site**: wiki e páginas do jogo (fichas, loja,
    biblioteca) usam a mesma conta, pelas funções de login de `api.ts`. **Conta só por convite**:
    não existe cadastro aberto; quem convida cria a conta e o e-mail de convite leva pra
-   `public/reset-senha.html`, onde a pessoa escolhe a senha. As páginas do jogo mandam
+   `public/reset-senha.html`, onde a pessoa escolhe a senha. Só e-mail e senha: provedor como
+   Google cria conta sozinho pra quem entra e furaria o convite. As páginas do jogo mandam
    o token do Firebase pro backend do jogo (a API no Render), que guarda fichas, loja e
    catálogo no banco dele — nada disso vai pro Firestore.
 7. **Domínio, GitHub Pages e workflows** (`.github/`) só mudam com o autor. Nunca publique em
