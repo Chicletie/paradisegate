@@ -53,7 +53,6 @@
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 </head>
 <!-- Página de destino do link do e-mail de CONVITE (conta nova): a pessoa escolhe a senha e o
      username (@nome único da conta) e já sai logada. O "esqueci minha senha" tem a página dele
@@ -138,42 +137,34 @@
     appId: "1:979165283716:web:258160eb92ead2353e89d1"
   };
   firebase.initializeApp(firebaseConfig);
-  var auth = firebase.auth(), db = firebase.firestore();
+  var auth = firebase.auth();
+  // A regra do username (forma, proibidos, prazo) mora no servidor: functions/username.js no
+  // repo do autor (checkUsername confere, claimUsername grava). Aqui só se chama.
+  var functionsBase = "https://us-central1-rotina-555dd.cloudfunctions.net/";
   // Só no computador de quem desenvolve (localhost + chave ligada): simulador com dados de mentira.
   try {
     if (location.hostname === "localhost" && localStorage.getItem("pg.emulators") === "1") {
       auth.useEmulator("http://127.0.0.1:9099");
-      db.useEmulator("127.0.0.1", 8080);
+      functionsBase = "http://127.0.0.1:5001/rotina-555dd/us-central1/";
     }
   } catch (e) {}
 
-  // Mesmas regras de src/lib/username.ts (a palavra final é da regra do Firestore).
-  var RESERVED = ["admin", "adm", "autor", "mestre", "paradisegate", "paradise_gate", "suporte", "moderador", "moderacao", "wiki", "perfil", "busca", "null", "undefined"];
-  function norm(raw) { return String(raw || "").trim().replace(/^@+/, "").normalize("NFD").replace(/\p{M}/gu, "").toLowerCase(); }
-  function problem(n) {
-    if (!n) return "Escolha um username.";
-    if (n.length < 3) return "Pelo menos 3 caracteres.";
-    if (n.length > 20) return "No máximo 20 caracteres.";
-    if (!/^[a-z0-9_]+$/.test(n)) return "Só letras sem acento, números e _ (sem espaço).";
-    if (n[0] === "_") return "Comece com uma letra ou um número.";
-    if (RESERVED.indexOf(n) !== -1) return "Esse nome é reservado.";
-    if (blocked(n)) return "Esse nome não é permitido.";
-    return "";
-  }
-  // Nomes proibidos: mesma lista de src/lib/username.ts (explicação lá).
-  var BLOCK_ANY = ["hitler", "nazi", "nazis", "nazismo", "neonazi", "fascis", "siegheil", "heilhitler", "whitepower", "holocaust", "kukluxklan", "reichsfuhrer", "gestapo",
-    "nigger", "nigga", "pedofil", "pedophil", "estupr",
-    "buceta", "boceta", "bucetinha", "xoxota", "xereca", "piroca", "caralho", "porra", "punheta", "siririca", "boquete", "arrombad", "cuzao", "cusao", "foder", "fuder", "fodase", "fodido",
-    "merda", "bosta", "vagabunda", "putaria", "putinha", "filhodaputa", "viadinho",
-    "pussy", "fuck", "shit", "bitch", "cunt", "whore", "slut", "blowjob", "handjob", "dildo", "porn", "hentai", "penis", "vagina", "boobs", "motherfuck", "asshole"];
-  var BLOCK_PART = ["puta", "puto", "xana", "tits", "cu", "cus", "pau", "rola", "pinto", "pica", "foda", "fode", "viado", "bicha", "traveco", "crioulo", "anal", "sexo", "sex", "xxx", "rape", "cum", "dick", "cock", "ass", "fag", "retard",
-    "vsf", "pqp", "fdp", "tnc", "krl", "crl", "vtnc", "kct"];
-  var LEET = { "0": "o", "1": "i", "3": "e", "4": "a", "5": "s", "7": "t", "8": "b", "9": "g" };
-  function blocked(n) {
-    var collapsed = n.replace(/[0-9]/g, function (d) { return LEET[d] || ""; }).replace(/_/g, "");
-    if (BLOCK_ANY.some(function (w) { return collapsed.indexOf(w) !== -1; })) return true;
-    var parts = n.split(/[_0-9]+/).concat(n.replace(/[0-9]/g, function (d) { return LEET[d] || "_"; }).split("_"));
-    return parts.some(function (p) { return p && BLOCK_PART.indexOf(p) !== -1; });
+  function callFn(name, data) {
+    var token = auth.currentUser ? auth.currentUser.getIdToken() : Promise.resolve(null);
+    return token.then(function (tok) {
+      var headers = { "Content-Type": "application/json" };
+      if (tok) headers.Authorization = "Bearer " + tok;
+      return fetch(functionsBase + name, { method: "POST", headers: headers, body: JSON.stringify({ data: data }) });
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (body) {
+        if (res.ok && "result" in body) return body.result;
+        var err = new Error((body.error && body.error.message) || "Não deu certo agora. Tente de novo.");
+        err.code = (body.error && body.error.status || "internal").toLowerCase();
+        throw err;
+      });
+    }, function () {
+      throw new Error("Não consegui falar com o servidor agora. Tente de novo.");
+    });
   }
 
   var params = new URLSearchParams(location.search);
@@ -182,8 +173,9 @@
   var errEl = document.getElementById("err"), submitBtn = document.getElementById("submitBtn");
   var pass1 = document.getElementById("pass1"), pass2 = document.getElementById("pass2");
   var unameEl = document.getElementById("uname"), unHint = document.getElementById("unHint");
-  var email = "", passwordSaved = false, unFree = false, unTimer = null, unSeq = 0;
+  var email = "", passwordSaved = false, unFree = false, unName = "", unTimer = null, unSeq = 0;
   var unHintDefault = unHint.textContent;
+  callFn("checkUsername", { username: "" }).then(function (r) { unHintDefault = r.hint; if (!unameEl.value) hint(unHintDefault); }, function () {});
 
   function show(name) {
     Object.keys(st).forEach(function (k) { st[k].hidden = k !== name; });
@@ -215,38 +207,30 @@
     });
   });
 
-  // Confere se o username está livre um instante depois de parar de digitar.
+  // Confere no servidor (checkUsername) se está livre, um instante depois de parar de digitar.
+  // Sem login ainda (a senha só é salva no envio), então o servidor não sabe "é o mesmo nome de
+  // hoje": aqui não tem esse caso, é sempre conta nova.
   unameEl.addEventListener("input", function () {
-    unFree = false; clearTimeout(unTimer);
-    var n = norm(unameEl.value);
+    unFree = false; unName = ""; clearTimeout(unTimer);
     if (!unameEl.value) { hint(unHintDefault); return; }
-    var p = problem(n);
-    if (p) { hint(p, "bad"); return; }
     hint("Conferindo…");
     var my = ++unSeq;
     unTimer = setTimeout(function () {
-      db.collection("wikiUsernames").doc(n).get().then(function (d) {
+      callFn("checkUsername", { username: unameEl.value }).then(function (r) {
         if (my !== unSeq) return;
-        unFree = !d.exists;
-        hint(d.exists ? "@" + n + " já está em uso." : "@" + n + " está livre.", d.exists ? "bad" : "ok");
-      }).catch(function () { if (my === unSeq) hint("Não consegui conferir agora. Tente de novo.", "bad"); });
+        unFree = r.free === true;
+        unName = r.name;
+        if (r.problem) hint(r.problem, "bad");
+        else hint(r.free ? "@" + r.name + " está livre." : "@" + r.name + " já está em uso.", r.free ? "ok" : "bad");
+      }, function () {
+        if (my === unSeq) hint("Não consegui conferir agora. Tente de novo.", "bad");
+      });
     }, 350);
   });
-
-  function claim(n) {
-    var u = auth.currentUser;
-    var b = db.batch(), ts = firebase.firestore.FieldValue.serverTimestamp();
-    b.set(db.collection("wikiUsernames").doc(n), { uid: u.uid, at: ts });
-    b.set(db.collection("wikiProfiles").doc(u.uid), { email: u.email, username: n, usernameChangedAt: ts, updatedAt: new Date().toISOString() }, { merge: true });
-    return b.commit();
-  }
 
   st.form.addEventListener("submit", function (ev) {
     ev.preventDefault();
     errEl.textContent = "";
-    var n = norm(unameEl.value);
-    var p = problem(n);
-    if (p) { errEl.textContent = p; unameEl.focus(); return; }
     if (!unFree) { errEl.textContent = "Escolha um username livre."; unameEl.focus(); return; }
     if (!passwordSaved) {
       if (pass1.value.length < 6) { errEl.textContent = "A senha precisa ter pelo menos 6 caracteres."; pass1.focus(); return; }
@@ -257,8 +241,8 @@
       passwordSaved = true;
       return auth.signInWithEmailAndPassword(email, pass1.value);
     });
-    step.then(function () { return claim(n); }).then(function () {
-      document.getElementById("doneName").textContent = "@" + n;
+    step.then(function () { return callFn("claimUsername", { username: unName }); }).then(function (r) {
+      document.getElementById("doneName").textContent = "@" + r.username;
       show("done");
     }).catch(function (e) {
       submitBtn.disabled = false; submitBtn.textContent = passwordSaved ? "Salvar username" : "Criar conta";
@@ -271,7 +255,7 @@
       // Senha já salva e login feito: só o username falhou (provavelmente pego agora mesmo).
       document.getElementById("passFields").hidden = true;
       unFree = false;
-      hint("Esse nome acabou de ser pego. Escolha outro.", "bad");
+      hint(e && e.message ? e.message : "Esse nome acabou de ser pego. Escolha outro.", "bad");
       errEl.textContent = "Sua senha já foi salva. Falta só o username.";
       unameEl.focus();
     });

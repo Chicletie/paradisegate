@@ -42,7 +42,10 @@ Vite + React 19 + TypeScript + Tailwind v4 + react-router. `npm test` (Vitest), 
    fica só pro "esqueci minha senha"). Só e-mail e senha: provedor como Google cria conta
    sozinho pra quem entra e furaria o convite. Entrar com o @username também vale, mas é o
    mesmo login por e-mail e senha: a função `usernameSignIn` do autor confere a senha e
-   devolve o e-mail (`docs/dados-da-wiki.md`). As páginas do jogo mandam
+   devolve o e-mail (`docs/dados-da-wiki.md`). **Escolher/trocar o @username** também é só do
+   servidor: `checkUsername`/`claimUsername` (repo do autor, `functions/username.js`), chamadas
+   por `src/lib/api.ts`; o site nunca decide a regra sozinho e nunca grava `wikiUsernames` nem o
+   username do perfil direto. As páginas do jogo mandam
    o token do Firebase pro backend do jogo (a API no Render), que guarda fichas, loja e
    catálogo no banco dele — nada disso vai pro Firestore.
 7. **Domínio, GitHub Pages e workflows** (`.github/`) só mudam com o autor. Nunca publique em

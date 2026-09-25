@@ -9,12 +9,11 @@ import {
   getDoc,
   getDocs,
   query,
-  serverTimestamp,
   setDoc,
   where,
-  writeBatch,
 } from "firebase/firestore";
 import { db } from "./firebase";
+import { callFunction } from "./auth";
 import { allOrOwn } from "./restrito";
 import type {
   SpoilerObra,
@@ -99,27 +98,35 @@ export function saveProfile(user: AuthUser, patch: WikiProfilePatch, updatedAt: 
   return setDoc(doc(db, "wikiProfiles", user.uid), data, { merge: true });
 }
 
-// --- Username: wikiUsernames/{nome} = { uid } (um documento por nome tomado) ---
+// --- Username: quem decide e grava é o servidor (funções checkUsername/claimUsername do autor,
+// regra em functions/username.js do repo dele). O site não sabe a regra: só pergunta e mostra. ---
 
-/** O nome está livre? (a regra deixa conferir um de cada vez, sem login). */
-export async function usernameTaken(name: string): Promise<boolean> {
-  const snap = await getDoc(doc(db, "wikiUsernames", name));
-  return snap.exists();
+export { FunctionError } from "./auth";
+
+/** O que o servidor diz de um nome enquanto a pessoa digita (e, com login, da troca presa). */
+export type UsernameCheck = {
+  /** O nome como fica guardado (sem @, minúsculo, sem acento). */
+  name: string;
+  current: string;
+  /** Por que não serve ("" se serve). */
+  problem: string;
+  /** Livre? `null` quando nem chegou a conferir (problema, ou é o atual). */
+  free: boolean | null;
+  same: boolean;
+  lockedUntilText: string;
+  /** "Se trocar agora, só dá de novo em …" */
+  nextIfChangedText: string;
+  /** A frase de ajuda do campo, do próprio servidor. */
+  hint: string;
+};
+
+export function checkUsername(username: string): Promise<UsernameCheck> {
+  return callFunction<UsernameCheck>("checkUsername", { username });
 }
 
-/** Toma o nome novo, solta o antigo e grava no perfil, tudo numa gravação só (a regra do banco
- * confere que o nome está livre e o limite de 30 dias). O cartão público vai junto pro nome
- * novo (`card`, montado por cardFields em member.ts). */
-export function claimUsername(user: AuthUser, name: string, old: string | undefined, card: Omit<MemberCard, "uid"> = {}): Promise<void> {
-  const b = writeBatch(db);
-  b.set(doc(db, "wikiUsernames", name), { ...card, uid: user.uid, at: serverTimestamp() });
-  if (old && old !== name) b.delete(doc(db, "wikiUsernames", old));
-  b.set(
-    doc(db, "wikiProfiles", user.uid),
-    { email: user.email, username: name, usernameChangedAt: serverTimestamp(), updatedAt: new Date().toISOString() },
-    { merge: true },
-  );
-  return b.commit();
+/** Escolhe ou troca (o servidor confere tudo de novo; o erro vem com a frase dele). */
+export function claimUsername(username: string): Promise<{ username: string }> {
+  return callFunction<{ username: string }>("claimUsername", { username });
 }
 
 // --- Perfil público do membro: o cartão em wikiUsernames/{nome} ---
