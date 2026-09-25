@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/check-css.mjs",
+    "build": "vite build && node scripts/check-css.mjs && node scripts/check-ficha.mjs",
     "prerender": "node scripts/prerender.mjs",
     "typecheck": "tsc -b",
     "lint": "oxlint",
