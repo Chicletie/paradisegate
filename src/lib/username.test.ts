@@ -21,3 +21,16 @@ describe("username", () => {
     expect(t).toBe(Date.parse("2026-10-20T12:00:00Z"));
   });
 });
+
+describe("nomes proibidos", () => {
+  it("bloqueia ódio, palavrão e sexual, mesmo disfarçado", () => {
+    for (const n of ["hitler", "h1tl3r", "h_i_t_l_e_r", "xx_nazi_xx", "n4z1smo", "neonazi88", "buceta", "bucet4", "pussy_cat", "caralho", "porra_loka", "super_puta", "pu7a", "cu_de_ferro", "vsf", "fuck_you", "rola_grande"]) {
+      expect(usernameProblem(n), n).toBe("Esse nome não é permitido.");
+    }
+  });
+  it("não bloqueia nome inocente que só contém as letras", () => {
+    for (const n of ["computador", "paulo_silva", "carolina", "enviado", "canal_do_ze", "cuidado", "pintor", "essex", "washington", "sextante", "picanha", "xananda", "petits", "cucumber", "rolamento", "ania_sombra", "anytsa"]) {
+      expect(usernameProblem(n), n).toBe("");
+    }
+  });
+});

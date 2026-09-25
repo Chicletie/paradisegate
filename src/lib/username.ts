@@ -20,6 +20,35 @@ export function normalizeUsername(raw: string): string {
     .toLowerCase();
 }
 
+/*
+ * Nomes proibidos (ódio, palavrão, sexual). Mesma lista na regra do Firestore e em
+ * public/cadastro.html. Duas listas por causa do problema do "computador" (tem "puta" dentro):
+ * - BLOCK_ANY: palavras longas e sem outro sentido, proibidas em qualquer parte do nome, mesmo
+ *   disfarçadas (h1tl3r, h_i_t_l_e_r: números viram letras e o _ some antes de conferir);
+ * - BLOCK_PART: palavras curtas ou ambíguas, proibidas só como uma parte inteira do nome
+ *   (separada por _ ou número): "super_puta" não, "computador" sim.
+ */
+export const BLOCK_ANY = [
+  "hitler", "nazi", "nazis", "nazismo", "neonazi", "fascis", "siegheil", "heilhitler", "whitepower", "holocaust", "kukluxklan", "reichsfuhrer", "gestapo",
+  "nigger", "nigga", "pedofil", "pedophil", "estupr",
+  "buceta", "boceta", "bucetinha", "xoxota", "xereca", "piroca", "caralho", "porra", "punheta", "siririca", "boquete", "arrombad", "cuzao", "cusao", "foder", "fuder", "fodase", "fodido",
+  "merda", "bosta", "vagabunda", "putaria", "putinha", "filhodaputa", "viadinho",
+  "pussy", "fuck", "shit", "bitch", "cunt", "whore", "slut", "blowjob", "handjob", "dildo", "porn", "hentai", "penis", "vagina", "boobs", "motherfuck", "asshole",
+];
+export const BLOCK_PART = [
+  "puta", "puto", "xana", "tits", "cu", "cus", "pau", "rola", "pinto", "pica", "foda", "fode", "viado", "bicha", "traveco", "crioulo", "anal", "sexo", "sex", "xxx", "rape", "cum", "dick", "cock", "ass", "fag", "retard",
+  "vsf", "pqp", "fdp", "tnc", "krl", "crl", "vtnc", "kct",
+];
+const LEET: Record<string, string> = { "0": "o", "1": "i", "3": "e", "4": "a", "5": "s", "7": "t", "8": "b", "9": "g" };
+/** O nome cai na lista de proibidos? */
+export function isBlockedUsername(name: string): boolean {
+  const collapsed = name.replace(/[0-9]/g, (d) => LEET[d] || "").replace(/_/g, "");
+  if (BLOCK_ANY.some((w) => collapsed.includes(w))) return true;
+  const parts = name.split(/[_0-9]+/).filter(Boolean);
+  const leetParts = name.replace(/[0-9]/g, (d) => LEET[d] || "_").split("_").filter(Boolean);
+  return [...parts, ...leetParts].some((p) => BLOCK_PART.includes(p));
+}
+
 /** Por que o nome não serve (texto pro leitor), ou "" se serve. */
 export function usernameProblem(name: string): string {
   if (!name) return "Escolha um nome.";
@@ -28,6 +57,7 @@ export function usernameProblem(name: string): string {
   if (!/^[a-z0-9_]+$/.test(name)) return "Só letras sem acento, números e _ (sem espaço).";
   if (name[0] === "_") return "Comece com uma letra ou um número.";
   if (RESERVED.includes(name)) return "Esse nome é reservado.";
+  if (isBlockedUsername(name)) return "Esse nome não é permitido.";
   return "";
 }
 

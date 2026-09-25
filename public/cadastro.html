@@ -157,7 +157,23 @@
     if (!/^[a-z0-9_]+$/.test(n)) return "Só letras sem acento, números e _ (sem espaço).";
     if (n[0] === "_") return "Comece com uma letra ou um número.";
     if (RESERVED.indexOf(n) !== -1) return "Esse nome é reservado.";
+    if (blocked(n)) return "Esse nome não é permitido.";
     return "";
+  }
+  // Nomes proibidos: mesma lista de src/lib/username.ts (explicação lá).
+  var BLOCK_ANY = ["hitler", "nazi", "nazis", "nazismo", "neonazi", "fascis", "siegheil", "heilhitler", "whitepower", "holocaust", "kukluxklan", "reichsfuhrer", "gestapo",
+    "nigger", "nigga", "pedofil", "pedophil", "estupr",
+    "buceta", "boceta", "bucetinha", "xoxota", "xereca", "piroca", "caralho", "porra", "punheta", "siririca", "boquete", "arrombad", "cuzao", "cusao", "foder", "fuder", "fodase", "fodido",
+    "merda", "bosta", "vagabunda", "putaria", "putinha", "filhodaputa", "viadinho",
+    "pussy", "fuck", "shit", "bitch", "cunt", "whore", "slut", "blowjob", "handjob", "dildo", "porn", "hentai", "penis", "vagina", "boobs", "motherfuck", "asshole"];
+  var BLOCK_PART = ["puta", "puto", "xana", "tits", "cu", "cus", "pau", "rola", "pinto", "pica", "foda", "fode", "viado", "bicha", "traveco", "crioulo", "anal", "sexo", "sex", "xxx", "rape", "cum", "dick", "cock", "ass", "fag", "retard",
+    "vsf", "pqp", "fdp", "tnc", "krl", "crl", "vtnc", "kct"];
+  var LEET = { "0": "o", "1": "i", "3": "e", "4": "a", "5": "s", "7": "t", "8": "b", "9": "g" };
+  function blocked(n) {
+    var collapsed = n.replace(/[0-9]/g, function (d) { return LEET[d] || ""; }).replace(/_/g, "");
+    if (BLOCK_ANY.some(function (w) { return collapsed.indexOf(w) !== -1; })) return true;
+    var parts = n.split(/[_0-9]+/).concat(n.replace(/[0-9]/g, function (d) { return LEET[d] || "_"; }).split("_"));
+    return parts.some(function (p) { return p && BLOCK_PART.indexOf(p) !== -1; });
   }
 
   var params = new URLSearchParams(location.search);
