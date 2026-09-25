@@ -24,6 +24,7 @@ const TEXT: Record<StatusKind, string> = {
   error: "Não consegui salvar na conta: salva neste aparelho",
   read_only: "só leitura, o que mudar aqui não vai pra conta",
   read_only_stale: "mudou desde que você abriu",
+  closed: "As fichas ainda não estão abertas pra mesa: salva só neste aparelho",
 };
 
 const TONE: Record<StatusKind, "ok" | "busy" | "warn"> = {
@@ -44,6 +45,7 @@ const TONE: Record<StatusKind, "ok" | "busy" | "warn"> = {
   error: "warn",
   read_only: "warn",
   read_only_stale: "warn",
+  closed: "warn",
 };
 
 const NEEDS_LOGIN = new Set<StatusKind>(["signed_out", "expired"]);

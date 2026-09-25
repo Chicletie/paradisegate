@@ -6,9 +6,9 @@ import { PgSectionHead } from "../components/PgIcons";
 import { SignInButton } from "../components/AccountMenu";
 import { useAccount } from "../lib/account";
 import { usePgBody } from "../lib/usePgBody";
-import { useJogoAccess, type JogoAccess } from "./access";
+import { featuresOf, useJogoAccess } from "./access";
 import { jogoApi } from "./api";
-import { OfflineError, type ApiClient, type Invite, type MySheetNote, type SheetSummary, type TableSheet } from "./apiClient";
+import { OfflineError, type ApiClient, type Invite, type Me, type MySheetNote, type SheetSummary, type TableSheet } from "./apiClient";
 import {
   drawerKeys,
   errorText,
@@ -17,15 +17,11 @@ import {
   LEGACY_DONE,
   LEGACY_DRAWER,
   legacySheet,
-  NO_NAME,
   noteDate,
-  normalizeInviteEmail,
-  ownerLabel,
-  readImport,
+  parseImportFile,
   seedDrawer,
   sheetHref,
   updatedText,
-  type ImportedSheet,
 } from "./fichasState";
 
 /*
@@ -72,32 +68,28 @@ function Panel({ id, title, count, children }: { id: string; title: string; coun
 
 const SHEETS_TITLE = "Suas fichas";
 
-/** Painel "Suas fichas" do perfil (âncora #fichas). Quem decide se aparece é o perfil (showsFichas). */
-export function FichasSection({ access }: { access: JogoAccess }) {
+/** Painel "Suas fichas" do perfil (âncora #fichas). Aparece quando a API diz (features.fichas). */
+export function FichasSection({ me }: { me: Me }) {
   const [waking, setWaking] = useState(false);
   const api = useMemo(() => jogoApi(() => setWaking(true)), []);
   const [sheets, setSheets] = useState<SheetSummary[] | null>(null);
   const [error, setError] = useState<unknown>(null);
-  const me = access.kind === "admin" || access.kind === "player" ? access.me : null;
 
   const fetchSheets = useCallback(() => {
     api.listSheets().then(setSheets, setError);
   }, [api]);
 
   useEffect(() => {
-    if (me) fetchSheets();
-  }, [me, fetchSheets]);
+    fetchSheets();
+  }, [fetchSheets]);
 
   function retry() {
-    // A conta nem respondeu quem é: a página pergunta de novo do zero.
-    if (!me) return location.reload();
     setError(null);
     setWaking(false);
     fetchSheets();
   }
 
-  const accessError = access.kind === "error" ? new OfflineError(0, { code: "offline" }, null) : null;
-  const view = fichasView({ ready: true, signedIn: true, waking, error: error ?? accessError, me, sheets });
+  const view = fichasView({ ready: true, signedIn: true, waking, error, me, sheets });
 
   if (view.kind === "empty" || view.kind === "list") {
     return <SheetsPanel api={api} sheets={view.kind === "list" ? view.sheets : []} onChange={setSheets} />;
@@ -162,7 +154,7 @@ export function MestreNotesSection() {
       <article key={n.id} className={"pg-sug" + (n.seen_at ? "" : " is-new")}>
         <div className="pg-sug-head">
           <a className="pg-sug-page" href={sheetHref(n.sheet_id)}>
-            {n.sheet_nome || NO_NAME}
+            {n.sheet_nome}
           </a>
           {!n.seen_at && (
             <span className="pg-sug-tags">
@@ -170,7 +162,7 @@ export function MestreNotesSection() {
             </span>
           )}
         </div>
-        <div className="pg-sug-meta">{[noteDate(n.created_at), n.author ? "@" + n.author : ""].filter(Boolean).join(" · ")}</div>
+        <div className="pg-sug-meta">{[noteDate(n.created_at), n.author ?? ""].filter(Boolean).join(" · ")}</div>
         <p className="pg-sug-text">{n.text}</p>
       </article>
     ));
@@ -203,7 +195,7 @@ export function MesaPage() {
         <SignInButton className="pg-signin pg-signin-light" />
       </section>
     );
-  } else if (access.kind === "admin") {
+  } else if (featuresOf(access).mesa) {
     body = (
       <>
         <TablePanel api={api} />
@@ -249,11 +241,12 @@ function SheetsPanel({ api, sheets, onChange }: { api: ApiClient; sheets: SheetS
   const [status, setStatus] = useState<Status>({ msg: "" });
   const [legacy, setLegacy] = useState(() => legacySheet(store.get(LEGACY_DRAWER), store.get(LEGACY_DONE)));
 
-  async function create(sheet: ImportedSheet, kind: "import" | "legacy"): Promise<boolean> {
+  /** Sobe uma ficha exportada (arquivo ou a achada no navegador): a API confere e dá o nome. */
+  async function create(data: Record<string, unknown>, kind: "import" | "legacy"): Promise<boolean> {
     setBusy(kind);
     setStatus({ msg: "" });
     try {
-      const made = await api.createSheet(sheet.nome, sheet.data);
+      const made = await api.importSheet(data);
       Object.entries(seedDrawer(made.id, made.version, made.data)).forEach(([k, v]) => store.set(k, v));
       onChange([made, ...sheets]);
       setStatus({ msg: `“${made.nome}” está na sua conta. Toque nela pra abrir.` });
@@ -270,7 +263,7 @@ function SheetsPanel({ api, sheets, onChange }: { api: ApiClient; sheets: SheetS
     setBusy("new");
     setStatus({ msg: "" });
     try {
-      const made = await api.createSheet(NO_NAME, {});
+      const made = await api.createSheet();
       location.assign(sheetHref(made.id));
     } catch (e) {
       setStatus({ msg: errorText(e), bad: true });
@@ -281,9 +274,9 @@ function SheetsPanel({ api, sheets, onChange }: { api: ApiClient; sheets: SheetS
   function importFile(file: File) {
     const reader = new FileReader();
     reader.onload = () => {
-      const read = readImport(String(reader.result ?? ""), file.size);
-      if (!read.ok) return setStatus({ msg: read.message, bad: true });
-      void create(read.sheet, "import");
+      const data = parseImportFile(String(reader.result ?? ""));
+      if (!data) return setStatus({ msg: "Esse arquivo não abre como .json. Use o do botão “Exportar ficha”.", bad: true });
+      void create(data, "import");
     };
     reader.onerror = () => setStatus({ msg: "Não consegui ler esse arquivo.", bad: true });
     reader.readAsText(file);
@@ -323,14 +316,14 @@ function SheetsPanel({ api, sheets, onChange }: { api: ApiClient; sheets: SheetS
       {legacy && (
         <div className="pg-jogo-found">
           <p>
-            Achei uma ficha salva só neste navegador: <strong>{legacy.nome}</strong>. Ela ainda não está na sua conta.
+            Achei uma ficha salva só neste navegador. Ela ainda não está na sua conta.
           </p>
           <div className="pg-jogo-found-actions">
             <button
               type="button"
               className="pg-btn-line"
               disabled={!!busy}
-              onClick={() => void create(legacy, "legacy").then((ok) => ok && legacyDone())}
+              onClick={() => void create(legacy.data, "legacy").then((ok) => ok && legacyDone())}
             >
               {busy === "legacy" ? "Trazendo…" : "Trazer pra conta"}
             </button>
@@ -371,7 +364,7 @@ function SheetRow({ sheet, api, onDeleted, onError }: { sheet: SheetSummary; api
   const [deleting, setDeleting] = useState(false);
   const confirmRef = useRef<HTMLButtonElement>(null);
   const askRef = useRef<HTMLButtonElement>(null);
-  const name = sheet.nome || NO_NAME;
+  const name = sheet.nome;
 
   useEffect(() => {
     if (confirming) confirmRef.current?.focus();
@@ -462,7 +455,7 @@ function TablePanel({ api }: { api: ApiClient }) {
     body = (
       <div className="pg-fav-list">
         {rows.map((s) => {
-          const name = s.nome || NO_NAME;
+          const name = s.nome;
           return (
             <div key={s.id} className="pg-fav-row pg-sheet-row">
               <a className="pg-fav-link" href={sheetHref(s.id)}>
@@ -472,7 +465,7 @@ function TablePanel({ api }: { api: ApiClient }) {
                 <span className="pg-fav-text">
                   <span className="pg-fav-title">{name}</span>
                   <span className="pg-fav-type">
-                    <span className="pg-table-owner">{s.mine ? "sua" : ownerLabel(s.owner)}</span>
+                    <span className="pg-table-owner">{s.mine ? "sua" : s.owner.name}</span>
                     {" · " + updatedText(s.updated_at)}
                   </span>
                 </span>
@@ -515,12 +508,11 @@ function InvitesPanel({ api }: { api: ApiClient }) {
   }
 
   async function invite() {
-    const clean = normalizeInviteEmail(email);
-    if (!clean) return setStatus({ msg: "Confira o e-mail: ele não parece válido.", bad: true });
+    // Quem confere e normaliza o e-mail é a API; aqui só se manda o que foi digitado.
     setBusy(true);
     setStatus({ msg: "" });
     try {
-      const made = await api.createInvite(clean);
+      const made = await api.createInvite(email);
       setInvites((list) => [made, ...(list ?? [])]);
       setEmail("");
       setStatus({ msg: `${made.email} pode usar as fichas.` });

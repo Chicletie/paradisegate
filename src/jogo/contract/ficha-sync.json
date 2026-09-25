@@ -1,6 +1,6 @@
 {
   "description": "Pedidos e respostas de exemplo entre a ficha (paradisegate src/ficha-sync + src/jogo/apiClient) e a API. O pytest do pg-backend reproduz estes casos contra a API real; o paradisegate guarda uma cópia e usa as respostas como fetch falso. Mudou aqui, muda lá.",
-  "contract_version": 3,
+  "contract_version": 4,
   "auth": {
     "header": "Authorization: Bearer <Firebase ID token>",
     "players": {
@@ -378,6 +378,70 @@
       "response": {
         "status": 404,
         "detail_code": "not_found"
+      }
+    },
+    {
+      "name": "quem_sou",
+      "request": {
+        "method": "GET",
+        "path": "/users/me",
+        "as": "player"
+      },
+      "response": {
+        "status": 200,
+        "body_keys": [
+          "id",
+          "username",
+          "email",
+          "role",
+          "features"
+        ],
+        "body_subset": {
+          "role": "player",
+          "features": {
+            "fichas": true,
+            "mesa": false
+          }
+        }
+      }
+    },
+    {
+      "name": "importar_ficha",
+      "request": {
+        "method": "POST",
+        "path": "/character-sheets/import",
+        "as": "player",
+        "body": {
+          "data": {
+            "campos": {
+              "nome": "Luke"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "body_subset": {
+          "nome": "Luke",
+          "version": 1
+        }
+      }
+    },
+    {
+      "name": "importar_nao_ficha",
+      "request": {
+        "method": "POST",
+        "path": "/character-sheets/import",
+        "as": "player",
+        "body": {
+          "data": {
+            "outra": 1
+          }
+        }
+      },
+      "response": {
+        "status": 422,
+        "detail_code": "not_a_sheet"
       }
     },
     {

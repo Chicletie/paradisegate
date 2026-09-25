@@ -4,8 +4,7 @@ import { setGuestMode, useAccount } from "../lib/account";
 import { signOutUser } from "../lib/api";
 import type { AuthUser, WikiProfile } from "../types";
 import { PgUserIcon } from "./PgIcons";
-import { useJogoAccess } from "../jogo/access";
-import { showsFichas } from "../jogo/flags";
+import { featuresOf, useJogoAccess } from "../jogo/access";
 
 /**
  * Canto direito do cabeçalho — porta de mountLoginBar no modo Paradise Gate: "Entrar" pra quem
@@ -54,7 +53,7 @@ const MENU_ID = "pg-account-menu";
 
 function AccountMenu({ user }: { user: AuthUser }) {
   const { profile, unread, guest } = useAccount();
-  const fichas = showsFichas(useJogoAccess().kind);
+  const fichas = featuresOf(useJogoAccess()).fichas;
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);

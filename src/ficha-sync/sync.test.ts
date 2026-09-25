@@ -225,12 +225,22 @@ describe("salvar durante o jogo", () => {
     expect(t.statuses.at(-1)).toBe("saved");
   });
 
-  it("manda o nome do personagem pra lista Minhas Fichas", async () => {
+  it("não decide o nome da lista: só manda a ficha (a API tira o nome de campos.nome)", async () => {
     const t = setup({ local: known(1, A) });
     await t.sync.boot();
     t.local.set(K.drawer, JSON.stringify({ campos: { nome: " Luke ", pv: "1" } }));
     await t.sync.tick();
-    expect(t.api.saveSheet).toHaveBeenCalledWith(ID, expect.objectContaining({ nome: "Luke" }), expect.anything());
+    const [, save] = vi.mocked(t.api.saveSheet).mock.calls[0];
+    expect(save).not.toHaveProperty("nome");
+  });
+
+  it("fichas fechadas pelo backend: para e avisa, sem insistir", async () => {
+    const closed = new ApiError(403, { code: "fichas_fechadas", message: "As fichas ainda não estão abertas pra mesa" }, null);
+    const t = setup({ local: known(1, A), api: { getSheet: vi.fn(async () => { throw closed; }) } });
+    await t.sync.boot();
+    await t.sync.tick();
+    expect(t.statuses.at(-1)).toBe("closed");
+    expect(t.api.getSheet).toHaveBeenCalledTimes(1);
   });
 
   it("sem rede: fica pendente neste aparelho e tenta de novo", async () => {
@@ -306,7 +316,7 @@ describe("o mestre abrindo a ficha de um jogador (só leitura)", () => {
   const theirs = (v: number, data: Record<string, unknown>): Sheet => ({
     ...sheet(v, data),
     mine: false,
-    owner: { id: 2, username: "luke", email: "luke@mesa.test" },
+    owner: { id: 2, username: "luke", email: "luke@mesa.test", name: "@luke" },
   });
 
   it("aparelho do mestre sem a ficha: abre a da conta", async () => {

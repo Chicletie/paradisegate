@@ -141,7 +141,7 @@ export function mountNotes(doc: Document, opts: { api: NotesApi; sheetId: number
       const meta = doc.createElement("span");
       meta.className = "pg-notes-meta";
       const date = doc.createElement("span");
-      date.textContent = when(note.created_at) + (note.author ? " · @" + note.author : "");
+      date.textContent = when(note.created_at) + (note.author ? " · " + note.author : "");
       meta.appendChild(date);
       const seen = doc.createElement("span");
       if (mode === "mestre") seen.textContent = note.seen_at ? "vista" : "ainda não vista";

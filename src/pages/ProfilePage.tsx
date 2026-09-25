@@ -16,8 +16,7 @@ import { PgFooter } from "../components/PgFooter";
 import { PgSectionHead } from "../components/PgIcons";
 import { Avatar, SignInButton } from "../components/AccountMenu";
 import { FichasSection, MestreNotesSection } from "../jogo/Fichas";
-import { useJogoAccess } from "../jogo/access";
-import { showsFichas } from "../jogo/flags";
+import { featuresOf, useJogoAccess } from "../jogo/access";
 import type { AuthUser, WikiRestritoItem, WikiSuggestion } from "../types";
 
 const SECTIONS: [string, string][] = [
@@ -73,9 +72,9 @@ function Panel({ id, title, children }: { id: string; title: string; children: R
 }
 
 function ProfileSections({ user }: { user: AuthUser }) {
-  // "Suas fichas" (API do jogo) só pra quem joga: o mestre sempre, o jogador com a chave ligada.
+  // "Suas fichas" e "Sugestões do mestre" (API do jogo): aparecem quando a API diz (features.fichas).
   const access = useJogoAccess();
-  const fichas = showsFichas(access.kind);
+  const fichas = featuresOf(access).fichas;
   return (
     <>
       <nav className="pg-profile-nav" aria-label="Seções do perfil">
@@ -87,8 +86,8 @@ function ProfileSections({ user }: { user: AuthUser }) {
       </nav>
       <Identity user={user} />
       <PublicProfile />
-      {fichas && <FichasSection access={access} />}
-      {fichas && access.kind !== "error" && <MestreNotesSection />}
+      {fichas && access.kind === "ready" && <FichasSection me={access.me} />}
+      {fichas && <MestreNotesSection />}
       <Suggestions user={user} />
       <Favorites />
       <Accesses user={user} />

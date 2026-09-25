@@ -11,7 +11,6 @@ import {
 } from "../jogo/apiClient";
 import {
   byteLength,
-  characterName,
   fingerprint,
   isEmptySheet,
   KEEPALIVE_LIMIT,
@@ -53,7 +52,8 @@ export type StatusKind =
   | "unavailable"
   | "error"
   | "read_only"
-  | "read_only_stale";
+  | "read_only_stale"
+  | "closed";
 
 /** `owner`: de quem é a ficha, quando o mestre abre a de um jogador (só leitura). */
 export type SyncStatus = { kind: StatusKind; at?: number; owner?: string };
@@ -84,10 +84,9 @@ const MAX_RELOADS = 2;
 /** Só leitura: confere se o jogador mudou a ficha a cada tantos ciclos (6 × 5s = 30s). */
 const READ_ONLY_CHECK_EVERY = 6;
 
+/** De quem é a ficha, pronto pra mostrar (a API manda "@username" ou o e-mail). */
 function ownerName(sheet: Sheet): string {
-  const owner = sheet.owner;
-  if (!owner) return "";
-  return owner.username ? "@" + owner.username : owner.email;
+  return sheet.owner?.name ?? "";
 }
 
 export function createSheetSync(deps: SheetSyncDeps) {
@@ -157,6 +156,8 @@ export function createSheetSync(deps: SheetSyncDeps) {
       return;
     }
     if (error instanceof NotInvitedError) return stop("not_invited");
+    // A API fechou as fichas pros jogadores (FICHAS_PARA_JOGADORES desligado): para e avisa.
+    if (error instanceof ApiError && error.code === "fichas_fechadas") return stop("closed");
     if (error instanceof NotFoundError) return stop("not_found");
     if (error instanceof OfflineError) {
       if (error.code === "not_configured") return stop("unavailable");
@@ -312,7 +313,8 @@ export function createSheetSync(deps: SheetSyncDeps) {
     try {
       const saved = await deps.api.saveSheet(
         deps.sheetId,
-        { version, data, nome: characterName(data), force: options.force },
+        // O nome da lista a API tira da própria ficha (campos.nome).
+        { version, data, force: options.force },
         { keepalive: options.keepalive },
       );
       remember(saved.version, print);

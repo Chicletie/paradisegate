@@ -43,16 +43,19 @@ export class NotFoundError extends ApiError {}
 export class OfflineError extends ApiError {}
 
 export type SheetSummary = { id: number; nome: string; prestigio_atual: number; version: number; updated_at: string };
-export type SheetOwner = { id: number; username: string | null; email: string };
+/** `name` vem pronto pra mostrar ("@username", ou o e-mail). */
+export type SheetOwner = { id: number; username: string | null; email: string; name: string };
 /** `mine: false` quando o mestre (admin) abre a ficha de um jogador: só leitura. */
 export type Sheet = SheetSummary & { data: Record<string, unknown>; mine?: boolean; owner?: SheetOwner | null };
 /** Uma linha de "Fichas da mesa" (só admin). `mine`: a ficha do próprio mestre (abre pra editar). */
 export type TableSheet = SheetSummary & { owner: SheetOwner; mine: boolean };
-/** Sugestão do mestre numa ficha. `seen_at` nulo = a dona ainda não viu. */
+/** Sugestão do mestre numa ficha. `seen_at` nulo = a dona ainda não viu; `author` pronto pra mostrar. */
 export type SheetNote = { id: number; sheet_id: number; text: string; created_at: string; seen_at: string | null; author: string | null };
 /** No perfil da dona: de qual ficha é. */
 export type MySheetNote = SheetNote & { sheet_nome: string };
-export type Me = { id: number; username: string | null; email: string; role: "player" | "admin" };
+/** `features`: o que o site mostra pra esta conta. Quem decide é a API (FICHAS_PARA_JOGADORES, papel). */
+export type Features = { fichas: boolean; mesa: boolean };
+export type Me = { id: number; username: string | null; email: string; role: "player" | "admin"; features: Features };
 export type Invite = { id: number; email: string; created_at: string; invited_by: string | null; joined: boolean };
 
 export type ApiClientDeps = {
@@ -155,15 +158,16 @@ export function createApiClient(deps: ApiClientDeps) {
     listSheets: () => request<SheetSummary[]>("/character-sheets"),
     listTableSheets: () => request<TableSheet[]>("/character-sheets/mesa"),
     getSheet: (id: number) => request<Sheet>(`/character-sheets/${id}`),
-    createSheet: (nome: string, data: Record<string, unknown>) =>
-      request<Sheet>("/character-sheets", { method: "POST", body: { nome, data } }),
+    /** Ficha nova; a API dá o nome (o da ficha, ou "Personagem sem nome"). */
+    createSheet: (data: Record<string, unknown> = {}) => request<Sheet>("/character-sheets", { method: "POST", body: { data } }),
+    /** Um .json exportado pela ficha: a API confere se é ficha (422 `not_a_sheet`) e dá o nome. */
+    importSheet: (data: Record<string, unknown>) => request<Sheet>("/character-sheets/import", { method: "POST", body: { data } }),
     saveSheet: (
       id: number,
-      save: { version: number; data: Record<string, unknown>; nome?: string; force?: boolean },
+      save: { version: number; data: Record<string, unknown>; force?: boolean },
       options: { keepalive?: boolean } = {},
     ) => {
       const body: Record<string, unknown> = { version: save.version, data: save.data };
-      if (save.nome) body.nome = save.nome;
       if (save.force) body.force = true;
       return request<Sheet>(`/character-sheets/${id}`, { method: "PUT", body, keepalive: options.keepalive });
     },
