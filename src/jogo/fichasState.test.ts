@@ -2,25 +2,24 @@ import { describe, expect, it } from "vitest";
 import { fingerprint } from "../ficha-sync/keys";
 import { ApiError, NotInvitedError, OfflineError, SessionExpiredError, type Me, type SheetSummary } from "./apiClient";
 import {
+  errorText,
   fichasView,
   inviteErrorText,
   legacySheet,
-  normalizeInviteEmail,
-  ownerLabel,
-  readImport,
+  parseImportFile,
   seedDrawer,
   sheetHref,
   updatedText,
   type FichasInput,
 } from "./fichasState";
 
-const ME: Me = { id: 1, username: "ania", email: "ania@x.test", role: "player" };
+const ME: Me = { id: 1, username: "ania", email: "ania@x.test", role: "player", features: { fichas: true, mesa: false } };
 const S1: SheetSummary = { id: 1, nome: "Luke", prestigio_atual: 0, version: 2, updated_at: "2026-09-20T10:00:00Z" };
 const S2: SheetSummary = { id: 2, nome: "Ânia", prestigio_atual: 0, version: 5, updated_at: "2026-09-25T10:00:00Z" };
 
 const base: FichasInput = { ready: true, signedIn: true, waking: false, error: null, me: null, sheets: null };
 
-describe("os estados de Minhas Fichas", () => {
+describe("os estados das fichas", () => {
   it("antes do login responder, nem entrar nem lista", () => {
     expect(fichasView({ ...base, ready: false }).kind).toBe("connecting");
   });
@@ -34,9 +33,9 @@ describe("os estados de Minhas Fichas", () => {
   it("vazio", () => {
     expect(fichasView({ ...base, me: ME, sheets: [] }).kind).toBe("empty");
   });
-  it("lista, a mais recente em cima", () => {
+  it("lista na ordem que a API mandou (a tela não reordena)", () => {
     const v = fichasView({ ...base, me: ME, sheets: [S1, S2] });
-    expect(v.kind === "list" && v.sheets.map((s) => s.id)).toEqual([2, 1]);
+    expect(v.kind === "list" && v.sheets.map((s) => s.id)).toEqual([1, 2]);
   });
   it("sem convite", () => {
     expect(fichasView({ ...base, error: new NotInvitedError(403, { code: "not_invited" }, null) }).kind).toBe("not_invited");
@@ -51,39 +50,38 @@ describe("os estados de Minhas Fichas", () => {
   });
 });
 
-describe("importar .json", () => {
-  it("ficha exportada vira nome + dados", () => {
-    const r = readImport(JSON.stringify({ campos: { nome: " Luke " }, raList: [] }), 100);
-    expect(r).toEqual({ ok: true, sheet: { nome: "Luke", data: { campos: { nome: " Luke " }, raList: [] } } });
+describe("mensagens de erro", () => {
+  it("erro de regra mostra a frase da própria API", () => {
+    expect(errorText(new ApiError(422, { code: "not_a_sheet", message: "Esse arquivo não parece uma ficha." }, null))).toBe("Esse arquivo não parece uma ficha.");
+    expect(errorText(new ApiError(403, { code: "fichas_fechadas", message: "As fichas ainda não estão abertas pra mesa" }, null))).toMatch(/não estão abertas/);
   });
-  it("sem nome vira Personagem sem nome; nome longo é cortado em 150", () => {
-    expect(readImport('{"campos":{}}', 10)).toMatchObject({ ok: true, sheet: { nome: "Personagem sem nome" } });
-    const long = readImport(JSON.stringify({ campos: { nome: "x".repeat(300) } }), 400);
-    expect(long.ok && long.sheet.nome.length).toBe(150);
+  it("erro do servidor (5xx) não mostra detalhe técnico", () => {
+    expect(errorText(new ApiError(500, { code: "internal", message: "Erro interno" }, null))).toMatch(/Tente de novo/);
   });
-  it("recusa o que não é ficha e o que passa de 1 MB", () => {
-    for (const bad of ["{quebrado", "[1]", '{"outra":1}', '{"campos":"x"}']) expect(readImport(bad, 10).ok, bad).toBe(false);
-    expect(readImport('{"campos":{}}', 1_000_001).ok).toBe(false);
+  it("convite: a frase da API; formato de e-mail recusado ganha a da tela", () => {
+    expect(inviteErrorText(new ApiError(409, { code: "invite_exists", message: "Esse e-mail já foi convidado" }, null))).toBe("Esse e-mail já foi convidado");
+    expect(inviteErrorText(new ApiError(422, {}, null))).toMatch(/Confira o e-mail/);
   });
 });
 
-describe("ficha antiga deste navegador", () => {
-  const raw = JSON.stringify({ campos: { nome: "Luke" } });
-  it("oferece trazer pra conta", () => {
-    expect(legacySheet(raw, null)).toMatchObject({ nome: "Luke" });
+describe("arquivo e ficha antiga do navegador", () => {
+  it("o arquivo só precisa abrir como objeto .json; se é ficha, a API diz", () => {
+    expect(parseImportFile('{"outra":1}')).toEqual({ outra: 1 });
+    for (const bad of ["{quebrado", "[1]", "null"]) expect(parseImportFile(bad), bad).toBeNull();
   });
-  it("não oferece de novo depois de trazer, nem se não for ficha", () => {
+  const raw = JSON.stringify({ campos: { nome: "Luke" } });
+  it("oferece trazer pra conta a ficha guardada só neste navegador", () => {
+    expect(legacySheet(raw, null)).toEqual({ data: { campos: { nome: "Luke" } }, print: fingerprint({ campos: { nome: "Luke" } }) });
+  });
+  it("não oferece de novo depois de trazer, nem gaveta vazia ou quebrada", () => {
     expect(legacySheet(raw, fingerprint({ campos: { nome: "Luke" } }))).toBeNull();
     expect(legacySheet(null, null)).toBeNull();
+    expect(legacySheet("{}", null)).toBeNull();
     expect(legacySheet("{quebrado", null)).toBeNull();
   });
 });
 
 describe("abrir e criar", () => {
-  it("de quem é a ficha: @username, ou o e-mail", () => {
-    expect(ownerLabel({ id: 2, username: "luke", email: "luke@x.test" })).toBe("@luke");
-    expect(ownerLabel({ id: 3, username: null, email: "ania@x.test" })).toBe("ania@x.test");
-  });
   it("link da ficha é a página da ficha com o id", () => {
     expect(sheetHref(31)).toBe("/fichas.html?sheet=31");
   });
@@ -96,16 +94,5 @@ describe("abrir e criar", () => {
   it("data da última mudança no fuso de quem vê", () => {
     expect(updatedText("2026-09-25T17:32:00Z", "America/Sao_Paulo")).toMatch(/^atualizada em 25 de set\.?,? 14:32$/);
     expect(updatedText("não é data")).toBe("");
-  });
-});
-
-describe("convites", () => {
-  it("e-mail sem espaço e minúsculo", () => {
-    expect(normalizeInviteEmail("  Fulano@Email.COM ")).toBe("fulano@email.com");
-    for (const bad of ["", "fulano", "a@b", "a b@c.com", "a@@b.com"]) expect(normalizeInviteEmail(bad), bad).toBeNull();
-  });
-  it("repetido e inválido com o texto certo", () => {
-    expect(inviteErrorText(new ApiError(409, { code: "invite_exists" }, null))).toMatch(/já está convidado/);
-    expect(inviteErrorText(new ApiError(422, {}, null))).toMatch(/Confira o e-mail/);
   });
 });

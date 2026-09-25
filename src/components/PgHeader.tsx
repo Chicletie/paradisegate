@@ -5,7 +5,7 @@ import { pgPlural } from "../lib/format";
 import { searchHref } from "../lib/search";
 import { PgSearchIcon } from "./PgIcons";
 import { LoginBar } from "./AccountMenu";
-import { useJogoAccess } from "../jogo/access";
+import { featuresOf, useJogoAccess } from "../jogo/access";
 
 /** Busca controlada por quem chama (a home: filtra a lista a cada letra; Enter abre a busca). */
 export interface HeaderSearch {
@@ -111,8 +111,8 @@ function PgNavBar() {
   const showTimeline = !!index && hasEvents(index);
   const showWritings = !!index && Object.values(index).some((e) => (e.escritos || e.posts || []).length > 0);
   const [moreOpen, setMoreOpen] = useState(false);
-  // Fichas da mesa: só o mestre (admin da API do jogo) vê o link.
-  const mestre = useJogoAccess().kind === "admin";
+  // Fichas da mesa: o link aparece quando a API diz (features.mesa, hoje só o mestre).
+  const mestre = featuresOf(useJogoAccess()).mesa;
 
   function typeLink(t: string, className: string) {
     return (

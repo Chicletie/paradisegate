@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { byteLength, canonical, characterName, fingerprint, parseDrawer, parseSheetId, sheetKeys } from "./keys";
+import { byteLength, canonical, fingerprint, parseDrawer, parseSheetId, sheetKeys } from "./keys";
 
 describe("ficha da conta no endereço", () => {
   it("[REGRESSÃO] sem ?sheet= é a ficha só deste aparelho", () => {
@@ -35,18 +35,6 @@ describe("impressão da ficha", () => {
     expect(parseDrawer("{quebrado")).toBeNull();
     expect(parseDrawer("[1,2]")).toBeNull();
     expect(parseDrawer("null")).toBeNull();
-  });
-});
-
-describe("nome do personagem", () => {
-  it("vem do campo nome, sem espaço e com no máximo 150", () => {
-    expect(characterName({ campos: { nome: "  Ânia Sombra " } })).toBe("Ânia Sombra");
-    expect(characterName({ campos: { nome: "x".repeat(200) } })?.length).toBe(150);
-  });
-  it("vazio ou ausente não troca o nome da lista", () => {
-    expect(characterName({ campos: { nome: "   " } })).toBeUndefined();
-    expect(characterName({})).toBeUndefined();
-    expect(characterName({ campos: { nome: 3 } })).toBeUndefined();
   });
 });
 

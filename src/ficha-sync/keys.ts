@@ -64,16 +64,6 @@ export function isEmptySheet(data: Record<string, unknown> | null | undefined): 
   return !data || Object.keys(data).length === 0;
 }
 
-/** O nome do personagem (campo `nome` da ficha) pra lista Minhas Fichas; vazio não troca o nome. */
-export function characterName(data: Record<string, unknown>): string | undefined {
-  const campos = data.campos;
-  if (!campos || typeof campos !== "object") return undefined;
-  const nome = (campos as Record<string, unknown>).nome;
-  if (typeof nome !== "string") return undefined;
-  const trimmed = nome.trim();
-  return trimmed ? trimmed.slice(0, 150) : undefined;
-}
-
 /** Tamanho do corpo em bytes: `keepalive` só aceita até 64 KB, e acima disso o envio some calado. */
 export function byteLength(text: string): number {
   return new TextEncoder().encode(text).length;

@@ -1,18 +1,11 @@
-import { characterName, fingerprint, parseDrawer, sheetKeys } from "../ficha-sync/keys";
-import {
-  ApiError,
-  NotFoundError,
-  NotInvitedError,
-  OfflineError,
-  SessionExpiredError,
-  type Me,
-  type SheetOwner,
-  type SheetSummary,
-} from "./apiClient";
+import { fingerprint, isEmptySheet, parseDrawer, sheetKeys } from "../ficha-sync/keys";
+import { ApiError, NotInvitedError, OfflineError, SessionExpiredError, type Me, type SheetSummary } from "./apiClient";
 
 /*
- * O que a página Minhas Fichas mostra, sem DOM (testado no node, fichasState.test.ts). A página
- * (Fichas.tsx) só desenha o estado que sai daqui.
+ * O estado da tela de fichas, sem DOM (testado no node, fichasState.test.ts). Regra de negócio
+ * não mora aqui: nome, ordem, quem vê o quê e as mensagens de erro de regra vêm prontos da API
+ * (pg-backend). Aqui fica só o que é da tela e do navegador: qual estado desenhar, ler o arquivo,
+ * a gaveta da ficha neste aparelho, datas no fuso de quem vê.
  */
 
 export type FichasView =
@@ -38,44 +31,35 @@ export function fichasView(input: FichasInput): FichasView {
   if (!input.signedIn) return { kind: "signed_out" };
   if (input.error) {
     if (input.error instanceof NotInvitedError) return { kind: "not_invited" };
-    return { kind: "error", message: errorText(input.error), retry: !(input.error instanceof SessionExpiredError), signIn: input.error instanceof SessionExpiredError };
+    const expired = input.error instanceof SessionExpiredError;
+    return { kind: "error", message: errorText(input.error), retry: !expired, signIn: expired };
   }
   if (!input.me || !input.sheets) return { kind: "connecting", waking: input.waking };
   if (input.sheets.length === 0) return { kind: "empty", me: input.me };
-  return { kind: "list", me: input.me, sheets: sortSheets(input.sheets) };
+  // A ordem é a da API (a mais recente em cima).
+  return { kind: "list", me: input.me, sheets: input.sheets };
 }
 
-/** A mais recente em cima: é a que o jogador está usando. */
-export function sortSheets(sheets: SheetSummary[]): SheetSummary[] {
-  return [...sheets].sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at)) || b.id - a.id);
-}
-
-/** Frase pro jogador; o detalhe técnico nunca aparece na tela. */
+/**
+ * Frase pro jogador, nunca o detalhe técnico. Erro de regra (4xx) traz a mensagem da própria API;
+ * aqui só os casos de conexão e sessão, que a API não tem como explicar.
+ */
 export function errorText(error: unknown): string {
   if (error instanceof SessionExpiredError) return "Sua sessão expirou. Entre de novo pra ver suas fichas.";
-  if (error instanceof NotInvitedError) return "Sua conta ainda não foi liberada pra mesa. Peça pro mestre te convidar.";
-  if (error instanceof NotFoundError) return "Essa ficha não está mais na sua conta.";
   if (error instanceof OfflineError) {
     if (error.code === "not_configured") return "A conta do jogo ainda não está ligada neste endereço.";
     return "Não consegui falar com a conta agora. O que está em cada ficha continua salvo no aparelho.";
   }
-  if (error instanceof ApiError && error.status === 413) return "Essa ficha é grande demais pra conta (o limite é 1 MB).";
+  if (error instanceof ApiError && error.status >= 400 && error.status < 500 && typeof error.detail.message === "string") {
+    return error.detail.message;
+  }
   return "Não deu certo agora. Tente de novo em instantes.";
 }
 
-export const NO_NAME = "Personagem sem nome";
-export const IMPORT_LIMIT = 1_000_000;
-
-export type ImportedSheet = { nome: string; data: Record<string, unknown> };
-
-/** Uma ficha exportada pela própria ficha (.json): objeto com `campos`. */
-export function readImport(text: string, size: number): { ok: true; sheet: ImportedSheet } | { ok: false; message: string } {
-  if (size > IMPORT_LIMIT) return { ok: false, message: "Esse arquivo passa de 1 MB, o limite da conta." };
-  const data = parseDrawer(text);
-  if (!data || !data.campos || typeof data.campos !== "object") {
-    return { ok: false, message: "Esse arquivo não parece uma ficha. Use o .json do botão “Exportar ficha”." };
-  }
-  return { ok: true, sheet: { nome: characterName(data) ?? NO_NAME, data } };
+/** O conteúdo de um arquivo escolhido: um objeto JSON, ou `null` se nem abre como .json. Se é
+ * mesmo uma ficha, quem confere é a API (POST /character-sheets/import). */
+export function parseImportFile(text: string): Record<string, unknown> | null {
+  return parseDrawer(text);
 }
 
 /** A gaveta da ficha antiga (sem conta) deste navegador. */
@@ -83,14 +67,14 @@ export const LEGACY_DRAWER = "fichaPG_save_v1";
 /** Impressão da ficha antiga que já subiu (ou que o jogador dispensou), pra não oferecer de novo. */
 export const LEGACY_DONE = "pg_legacy_done";
 
-/** Ficha deste navegador que ainda não está na conta, ou `null`. */
-export function legacySheet(raw: string | null, done: string | null): (ImportedSheet & { print: string }) | null {
+/** Ficha guardada só neste navegador que ainda não subiu pra conta, ou `null`. */
+export function legacySheet(raw: string | null, done: string | null): { data: Record<string, unknown>; print: string } | null {
   if (!raw) return null;
-  const read = readImport(raw, 0);
-  if (!read.ok) return null;
-  const print = fingerprint(read.sheet.data);
+  const data = parseDrawer(raw);
+  if (!data || isEmptySheet(data)) return null;
+  const print = fingerprint(data);
   if (print === done) return null;
-  return { ...read.sheet, print };
+  return { data, print };
 }
 
 /**
@@ -106,11 +90,6 @@ export function seedDrawer(id: number, version: number, data: Record<string, unk
 export function drawerKeys(id: number): string[] {
   const k = sheetKeys(id);
   return [k.drawer, k.version, k.synced];
-}
-
-/** De quem é a ficha, pro mestre: "@username", ou o e-mail se a pessoa ainda não tem username. */
-export function ownerLabel(owner: SheetOwner): string {
-  return owner.username ? "@" + owner.username : owner.email;
 }
 
 export function sheetHref(id: number): string {
@@ -130,15 +109,10 @@ export function updatedText(iso: string, timeZone?: string): string {
   return when ? "atualizada em " + when : "";
 }
 
-/** E-mail de convite: sem espaço e minúsculo; a API confere de novo. */
-export function normalizeInviteEmail(raw: string): string | null {
-  const email = raw.trim().toLowerCase();
-  return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) && email.length <= 254 ? email : null;
-}
-
-/** Erro de convite com o texto certo (repetido, e-mail inválido). */
+/** Convite recusado: o 422 do formato do e-mail vem da validação da API sem frase; o resto traz a dela. */
 export function inviteErrorText(error: unknown): string {
-  if (error instanceof ApiError && error.status === 409) return "Esse e-mail já está convidado.";
-  if (error instanceof ApiError && error.status === 422) return "Confira o e-mail: ele não parece válido.";
+  if (error instanceof ApiError && error.status === 422 && typeof error.detail.message !== "string") {
+    return "Confira o e-mail: ele não parece válido.";
+  }
   return errorText(error);
 }
