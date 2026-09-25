@@ -32,6 +32,8 @@ export interface WikiIndexEntry {
   wordCount?: number;
   linkCount?: number;
   postsCount?: number;
+  /** Membros do acervo citados com [[@nome]] no que a página mostra (perfil público /@nome). */
+  membros?: string[];
   birthdayMD?: string | null;
   arcana?: WikiArcana | null;
   excerpt?: string;
@@ -260,6 +262,23 @@ export type WikiPublicDoc = WikiEntryDoc | WikiSeasonDoc;
 export interface AuthUser {
   uid: string;
   email: string;
+  /** Quando a conta foi criada (ISO), pro "no acervo desde" do perfil público. */
+  since?: string;
+}
+
+/**
+ * wikiUsernames/{nome}: o dono do nome (uid) e o cartão público do membro
+ * (paradisegate.com.br/@nome). Só o que a pessoa escolhe mostrar, nunca o e-mail.
+ */
+export interface MemberCard {
+  uid: string;
+  nickname?: string;
+  photo?: string;
+  bio?: string;
+  since?: string;
+  /** Só quando `showFavorites`. */
+  favorites?: string[];
+  showFavorites?: boolean;
 }
 
 /** wikiProfiles/{uid}. `photo` é um data URL JPEG 256×256 reduzido no navegador. */

@@ -9,6 +9,7 @@ import { UsernameDialog } from "../components/UsernameDialog";
 import { fmtDay, isBlockedNickname, nextChangeAt } from "../lib/username";
 import { objPos } from "../lib/format";
 import { resizePhoto } from "../lib/photo";
+import { BIO_MAX, memberHref } from "../lib/member";
 import { accessLabel, groupAccesses, isNewSuggestion, newestFirst, suggestionStatus } from "../lib/profile";
 import { PgHeader } from "../components/PgHeader";
 import { PgFooter } from "../components/PgFooter";
@@ -18,6 +19,7 @@ import type { AuthUser, WikiRestritoItem, WikiSuggestion } from "../types";
 
 const SECTIONS: [string, string][] = [
   ["identidade", "Identidade"],
+  ["publico", "Perfil público"],
   ["sugestoes", "Suas sugestões"],
   ["favoritos", "Favoritos"],
   ["acessos", "Seus acessos"],
@@ -76,11 +78,101 @@ function ProfileSections({ user }: { user: AuthUser }) {
         ))}
       </nav>
       <Identity user={user} />
+      <PublicProfile />
       <Suggestions user={user} />
       <Favorites />
       <Accesses user={user} />
       <SpoilerSettings />
     </>
+  );
+}
+
+// Perfil público (/@nome): a bio e se os favoritos aparecem lá. Apelido e foto vêm da
+// Identidade; o cartão acompanha sozinho. Sem username, não tem perfil público ainda.
+function PublicProfile() {
+  const { profile, loadCard, saveCard } = useAccount();
+  const name = profile?.username || "";
+  const [prefs, setPrefs] = useState<{ bio: string; showFavorites: boolean } | null>(null);
+  const [status, setStatus] = useState<{ msg: string; bad?: boolean }>({ msg: "" });
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    if (!name) return;
+    let alive = true;
+    loadCard().then(
+      (c) => alive && setPrefs({ bio: c?.bio || "", showFavorites: !!c?.showFavorites }),
+      () => alive && setStatus({ msg: "Não consegui ler seu perfil público agora.", bad: true }),
+    );
+    return () => {
+      alive = false;
+    };
+  }, [name, loadCard]);
+
+  function doSave() {
+    if (!prefs) return;
+    setBusy(true);
+    setStatus({ msg: "Salvando…" });
+    saveCard({ bio: prefs.bio.trim(), showFavorites: prefs.showFavorites })
+      .then(
+        () => setStatus({ msg: "Perfil público salvo." }),
+        () => setStatus({ msg: "Não consegui salvar agora. Tenta de novo daqui a pouco.", bad: true }),
+      )
+      .then(() => setBusy(false));
+  }
+
+  return (
+    <Panel id="publico" title="Perfil público">
+      {!profile ? (
+        <p className="pg-empty">Carregando…</p>
+      ) : !name ? (
+        <p className="pg-profile-note">
+          Quem tem username ganha uma página pública, com endereço próprio, que o autor pode citar na wiki.{" "}
+          <a href="#username">Escolha seu username</a> pra ter a sua.
+        </p>
+      ) : (
+        <div className="pg-profile-fields">
+          <p className="pg-profile-note">
+            Seu endereço é <Link to={memberHref(name)}>paradisegate.com.br/@{name}</Link>. Lá aparecem sua foto, seu apelido, a bio abaixo e os
+            personagens que você interpreta na wiki. Seu e-mail nunca aparece.
+          </p>
+          <div className="pg-field">
+            <label className="pg-field-label" htmlFor="pg-bio">
+              Bio
+            </label>
+            <textarea
+              id="pg-bio"
+              className="pg-bio-input"
+              maxLength={BIO_MAX}
+              rows={3}
+              placeholder="Umas linhas sobre você, se quiser."
+              disabled={!prefs}
+              value={prefs?.bio ?? ""}
+              onChange={(ev) => prefs && setPrefs({ ...prefs, bio: ev.target.value })}
+            />
+            <span className="pg-un-hint">{(prefs?.bio.length ?? 0) + " de " + BIO_MAX}</span>
+          </div>
+          <label className="pg-check">
+            <input
+              type="checkbox"
+              disabled={!prefs}
+              checked={!!prefs?.showFavorites}
+              onChange={(ev) => prefs && setPrefs({ ...prefs, showFavorites: ev.target.checked })}
+            />
+            <span>Mostrar meus favoritos no perfil público</span>
+          </label>
+          <div className="pg-field-row">
+            <button className="pg-btn" type="button" disabled={busy || !prefs} onClick={doSave}>
+              Salvar
+            </button>
+            <Link className="pg-btn-line" to={memberHref(name)}>
+              Ver meu perfil público
+            </Link>
+          </div>
+          <p className={"pg-profile-status" + (status.bad ? " is-bad" : "")} role="status">
+            {status.msg}
+          </p>
+        </div>
+      )}
+    </Panel>
   );
 }
 

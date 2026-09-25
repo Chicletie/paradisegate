@@ -1,3 +1,4 @@
+import { memberHref } from "./member";
 import { createContext, useContext, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useSpoilerAt } from "./spoilerProgress";
@@ -36,7 +37,7 @@ function PlainWikiLink({ text }: { text: string }) {
 }
 
 const INLINE_TOKEN_SOURCE =
-  "(!\\[[^\\]]*\\]\\([^)\\s]+\\)|`[^`]+`|\\[\\[[^\\]\\[]+\\]\\]|\\[[^\\]]+\\]\\((?:https?:|mailto:|wiki:)[^)\\s]+\\)|\\|\\|(?:\\[\\[[^\\]\\[]+\\]\\]|[^|])+\\|\\||\\*\\*[^*]+\\*\\*|__[^_]+__|~~[^~]+~~|\\*[^*\\n]+\\*|(?:^|\\s)_[^_\\n]+_(?=\\s|$))";
+  "(!\\[[^\\]]*\\]\\([^)\\s]+\\)|`[^`]+`|\\[\\[[^\\]\\[]+\\]\\]|\\[[^\\]]+\\]\\((?:https?:|mailto:|wiki:|membro:)[^)\\s]+\\)|\\|\\|(?:\\[\\[[^\\]\\[]+\\]\\]|[^|])+\\|\\||\\*\\*[^*]+\\*\\*|__[^_]+__|~~[^~]+~~|\\*[^*\\n]+\\*|(?:^|\\s)_[^_\\n]+_(?=\\s|$))";
 
 /**
  * `||trecho||`: tarja só naquele trecho, lido como markdown por dentro (pode ter link).
@@ -205,6 +206,13 @@ export function mdInline(s: string | undefined): ReactNode[] {
       if (lm && lm[2].slice(0, 5) === "wiki:")
         nodes.push(
           <Link key={k} className="wl-live" to={`/wiki/${encodeURIComponent(wikiLinkTarget(lm[2].slice(5)))}`}>
+            {lm[1]}
+          </Link>,
+        );
+      // membro:<nome> = perfil público de um membro do acervo (/@nome, escrito [[@nome]] no editor).
+      else if (lm && lm[2].slice(0, 7) === "membro:")
+        nodes.push(
+          <Link key={k} className="wl-live" to={memberHref(lm[2].slice(7).toLowerCase())}>
             {lm[1]}
           </Link>,
         );
