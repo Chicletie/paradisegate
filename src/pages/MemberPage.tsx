@@ -3,7 +3,10 @@ import { Link, useParams } from "react-router-dom";
 import { usePgBody } from "../lib/usePgBody";
 import { useAccount } from "../lib/account";
 import { fetchMemberCard } from "../lib/api";
-import { useWikiIndex } from "../lib/wikiIndex";
+import { useWikiIndex, useWikiObras } from "../lib/wikiIndex";
+import { writingsBy, writingsFromIndex } from "../lib/escritos";
+import { PageObrasProvider } from "../components/SpoilerProgress";
+import { WritingCard } from "./EscritosPage";
 import { favoritePages, memberHandle, pagesOfMember, sinceLabel, type MemberPage as Page } from "../lib/member";
 import { objPos } from "../lib/format";
 import { PgHeader } from "../components/PgHeader";
@@ -62,6 +65,8 @@ function MemberView({ name, card }: { name: string; card: MemberCard }) {
   const mine = !!user && user.uid === card.uid;
   const pages = index ? pagesOfMember(index, name) : null;
   const favs = index ? favoritePages(index, card) : null;
+  const obras = useWikiObras();
+  const writings = index ? writingsBy(writingsFromIndex(index), name) : [];
   const since = sinceLabel(card.since);
   const initial = (card.nickname || name).charAt(0).toUpperCase();
 
@@ -89,6 +94,18 @@ function MemberView({ name, card }: { name: string; card: MemberCard }) {
         </section>
 
         <Block id="personagens" title="Personagens que interpreta" pages={pages} empty={mine ? "Quando o autor citar você numa página da wiki como [[@" + name + "]], ela aparece aqui." : null} grid />
+        {writings.length > 0 && (
+          <section className="pg-panel pg-member-sec" id="escritos" aria-labelledby="pg-member-escritos">
+            <PgSectionHead text="Escritos" id="pg-member-escritos" />
+            <PageObrasProvider obras={obras}>
+              <div className="pg-wgrid">
+                {writings.map((w) => (
+                  <WritingCard key={w.id} w={w} />
+                ))}
+              </div>
+            </PageObrasProvider>
+          </section>
+        )}
         {card.showFavorites && <Block id="favoritos" title="Favoritos na wiki" pages={favs} empty="Nenhuma página favorita ainda." />}
       </main>
       <PgFooter />

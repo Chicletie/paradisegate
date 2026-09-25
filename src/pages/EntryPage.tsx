@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { fetchPublicDoc } from "../lib/api";
 import { usePgBody } from "../lib/usePgBody";
 import { PgHeader } from "../components/PgHeader";
@@ -46,6 +46,10 @@ export function EntryPage() {
     if (readyTitle !== null) document.title = readyTitle || "wiki";
   }, [readyTitle]);
 
+  // Documento de escrito aberto pelo endereço cru: vai pro endereço dele.
+  if (state.status === "ready" && state.data.kind === "escrito") {
+    return <Navigate to={"/wiki/_escritos/" + encodeURIComponent(state.data.id)} replace />;
+  }
   if (state.status === "not-found") {
     return <ErrorPage message="Essa página não existe mais (o link pode ter sido despublicado)." />;
   }
@@ -65,7 +69,7 @@ export function EntryPage() {
           </div>
         ) : state.data.kind === "temporada" ? (
           <SeasonView data={state.data} wikiId={slug!} />
-        ) : (
+        ) : state.data.kind === "escrito" ? null : (
           <EntryView data={state.data} wikiId={slug!} />
         )}
       </main>

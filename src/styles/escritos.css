@@ -1,0 +1,85 @@
+/* Escritos: lista geral (/wiki/_escritos), página do escrito (/wiki/_escritos/<id>), cartões
+   na página do personagem e no perfil. Só tokens (tokens.css) e as variáveis que a casca do
+   site já define (--pg-card-shadow); nada aqui mexe em wiki.css. */
+
+/* Cartões */
+.pg-wgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; align-items: start; margin: 12px 0 0; }
+.pg-wcard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px 15px;
+  border-radius: 12px;
+  border: 1px solid var(--pg-line);
+  border-top: 2px solid var(--pg-gold-soft);
+  background: var(--pg-panel);
+  box-shadow: var(--pg-card-shadow);
+  color: var(--pg-ink);
+  text-decoration: none;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease-out;
+}
+.pg-wcard:hover { transform: translateY(-2px); border-color: var(--pg-line-strong); border-top-color: var(--pg-gold); }
+.pg-wcard:focus-visible { outline: 2px solid var(--pg-link); outline-offset: 2px; }
+.pg-wcard-kind {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-family: var(--pg-f-ui);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pg-muted);
+}
+.pg-wcard-kind > span:last-child { flex: none; }
+.pg-wcard-marks { font-family: var(--pg-f-ui); font-size: 12.5px; color: var(--pg-muted); font-style: italic; margin-top: -2px; }
+.pg-wcard-title { font-family: var(--pg-f-serif); font-size: 19px; line-height: 1.25; color: var(--pg-ink); overflow-wrap: anywhere; }
+.pg-wcard-excerpt {
+  font-family: var(--pg-f-serif);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--pg-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.pg-wcard-where { font-family: var(--pg-f-ui); font-size: 13px; color: var(--pg-link); }
+.pg-wcard.is-spoiler .pg-wcard-title { color: var(--pg-muted); font-style: italic; }
+.pg-entry-escritos { margin-bottom: 8px; }
+.pg-entry-escritos > details { grid-column: 1 / -1; }
+
+/* Lista geral */
+.pg-escritos-filters { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin: 4px 0 14px; }
+.pg-escritos-chip {
+  font-family: var(--pg-f-ui);
+  font-size: 14px;
+  border: 1px solid var(--pg-line-strong);
+  background: var(--pg-link-wash);
+  color: var(--pg-link);
+  border-radius: 999px;
+  padding: 6px 14px;
+  min-height: 36px;
+  cursor: pointer;
+}
+
+/* Página do escrito */
+.pg-escrito { max-width: 760px; margin-left: auto; margin-right: auto; }
+.pg-escrito-meta { margin: 4px 0 0; font-family: var(--pg-f-ui); font-size: 14.5px; color: var(--pg-muted); }
+.pg-escrito-marks { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; }
+.pg-escrito-mark {
+  font-family: var(--pg-f-ui);
+  font-size: 13px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--pg-gold-soft);
+  color: var(--pg-ink);
+  text-decoration: none;
+}
+.pg-escrito-mark:hover { border-color: var(--pg-gold); }
+.pg-escrito-body { margin-top: 22px; font-family: var(--pg-f-serif); font-size: 18px; line-height: 1.7; }
+.pg-escrito-pages { margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--pg-line); font-family: var(--pg-f-ui); font-size: 15px; color: var(--pg-muted); }
+
+@media (max-width: 600px) {
+  .pg-wgrid { grid-template-columns: 1fr; }
+  .pg-escrito-body { font-size: 17px; }
+}

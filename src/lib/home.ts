@@ -2,17 +2,24 @@ import type { WikiCitation, WikiIndex, WikiIndexEntry, WikiIndexEvent } from "..
 import { dailyPick, gmt3DateKey, inBirthdayWindow, todayMD } from "./daily";
 import { eventSortKey } from "./events";
 import { quoteNorm } from "./quotes";
+import { writingHref, writingsFromEntries } from "./escritos";
 
 // Lógica da home, porta de renderHome na wiki original, sem DOM — a tela fica em
 // src/pages/WikiHomePage.tsx.
 
 export type HomeEntry = WikiIndexEntry & { id: string };
+/** Um escrito na home ("<Tipo> do dia", "Escritos recentes"). */
 export interface HomeNote {
   id: string;
   title?: string;
   date?: string;
   excerpt?: string;
+  tipo?: string;
+  noDaily?: boolean;
+  /** Página própria do escrito, ou a nota dentro da página (publicada antes dos Escritos). */
+  href: string;
   entryId: string;
+  /** As páginas em que o escrito aparece. */
   entryTitle: string;
 }
 export type YearEvent = WikiIndexEvent & { entryId: string; entryTitle: string };
@@ -22,14 +29,14 @@ export function entriesFromIndex(index: WikiIndex): HomeEntry[] {
   return Object.keys(index).map((id) => ({ id, ...index[id] }));
 }
 
+// Escritos públicos (o spoiler não aparece fora da página dele), cada um uma vez.
 function notesOf(entries: HomeEntry[]): HomeNote[] {
-  const out: HomeNote[] = [];
-  entries.forEach((e) =>
-    (e.posts || []).forEach((p) =>
-      out.push({ id: p.id, title: p.title, date: p.date, excerpt: p.excerpt, entryId: e.id, entryTitle: e.title }),
-    ),
-  );
-  return out;
+  return writingsFromEntries(entries)
+    .filter((w) => w.vis !== "spoiler")
+    .map((w) => ({
+      id: w.id, title: w.title, date: w.date, excerpt: w.excerpt, tipo: w.tipo, noDaily: w.noDaily,
+      href: writingHref(w), entryId: w.entries[0]?.id || "", entryTitle: w.entries.map((e) => e.title).join(", "),
+    }));
 }
 
 const isCharacter = (e: HomeEntry) => e.type === "Personagem" || e.type === "Lupino";
@@ -109,7 +116,7 @@ export function dailyHighlights(entries: HomeEntry[], now = Date.now()): DailyHi
     charEmptyMsg: personagens.length
       ? "Todo mundo publicado está no próprio mês de aniversário — ninguém elegível pro sorteio de hoje."
       : "Ainda sem personagens publicados.",
-    note: dailyPick(notesOf(eligible), "nota", now),
+    note: dailyPick(notesOf(eligible).filter((n) => !n.noDaily), "nota", now),
     entrada: dailyPick(
       eligible.filter((e) => !isCharacter(e)),
       "entrada",
@@ -132,7 +139,7 @@ export function recentEntries(entries: HomeEntry[]): HomeEntry[] {
     );
 }
 
-/** Notas recentes: todas as notas públicas, a mais nova primeiro (sem a trava de hoje). */
+/** Escritos recentes: todos os públicos, o mais novo primeiro (sem a trava de hoje). */
 export function recentNotes(entries: HomeEntry[]): HomeNote[] {
   return notesOf(entries).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
 }
@@ -147,19 +154,21 @@ export interface WikiNumbers {
 export function wikiNumbers(entries: HomeEntry[]): WikiNumbers {
   let words = 0;
   let links = 0;
-  let posts = 0;
+  // Escritos contados uma vez cada (o mesmo escrito vem em cada página ligada); página
+  // publicada antes dos Escritos ainda conta pelo número antigo.
+  let posts = writingsFromEntries(entries.filter((e) => e.escritos)).length;
   const tagFreq: Record<string, number> = {};
   entries.forEach((e) => {
     words += e.wordCount || 0;
     links += e.linkCount || 0;
-    posts += e.postsCount || 0;
+    if (!e.escritos) posts += e.postsCount || 0;
     (e.tags || []).forEach((t) => (tagFreq[t] = (tagFreq[t] || 0) + 1));
   });
   const all: [number, string, string][] = [
     [entries.length, "Página", "Páginas"],
     [words, "Palavra", "Palavras"],
     [links, "Conexão", "Conexões"],
-    [posts, "Nota", "Notas"],
+    [posts, "Escrito", "Escritos"],
   ];
   return {
     nums: all.filter((n) => n[0] > 0),

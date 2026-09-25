@@ -7,6 +7,7 @@ import { fmtEventDate } from "../lib/events";
 import { quoteAttrKids, QuoteDialogue } from "../lib/quotes";
 import { arcanaInfo } from "../lib/arcana";
 import { gmt3DateKey } from "../lib/daily";
+import { dailyLabel, kindLabel } from "../lib/escritos";
 import {
   dailyHighlights,
   entriesFromIndex,
@@ -168,24 +169,29 @@ function HomeLoaded({ entries }: { entries: HomeEntry[] }) {
             <div hidden={filtering}>
               {notes.length > 0 && (
                 <>
-                  <PgSectionHead text="Notas recentes" />
+                  <PgSectionHead text="Escritos recentes" />
                   <div className="links-grid pg-notes-grid">
                     {notes.slice(0, notesShown).map((n, i) => (
-                      <Link key={i} className="link-card pg-note-card" to={wikiHref(n.entryId) + "#posts"}>
+                      <Link key={i} className="link-card pg-note-card" to={n.href}>
                         {n.excerpt ? <span className="link-card-excerpt">{n.excerpt}</span> : null}
                         <span className="link-card-label">
-                          <span>{n.entryTitle}</span>
+                          <span>{[n.tipo ? kindLabel(n.tipo) : "", n.entryTitle].filter(Boolean).join(" · ")}</span>
                           <span>{pgShortDate(n.date)}</span>
                         </span>
                         <span className="link-card-title">{n.title || "(sem título)"}</span>
                       </Link>
                     ))}
                   </div>
-                  {notes.length > notesShown && (
-                    <button className="home-random" type="button" style={{ marginTop: 10 }} onClick={() => setNotesShown((n) => n + PAGE)}>
-                      ver mais notas
-                    </button>
-                  )}
+                  <div className="pg-actions" style={{ marginTop: 10 }}>
+                    {notes.length > notesShown && (
+                      <button className="home-random" type="button" onClick={() => setNotesShown((n) => n + PAGE)}>
+                        ver mais escritos
+                      </button>
+                    )}
+                    <Link className="home-random" to="/wiki/_escritos">
+                      Todos os escritos
+                    </Link>
+                  </div>
                 </>
               )}
             </div>
@@ -371,7 +377,7 @@ function TodayBand({ daily, now, hidden }: { daily: DailyHighlights; now: number
             ) : (
               <EmptyTile caption="Entrada do dia" text="Nenhuma entrada ainda." />
             )}
-            {daily.note ? <NoteTile n={daily.note} /> : <EmptyTile caption="Nota do dia" text="Nenhuma nota ainda." />}
+            {daily.note ? <NoteTile n={daily.note} /> : <EmptyTile caption="Escrito do dia" text="Nenhum escrito ainda." />}
           </div>
         </div>
       </div>
@@ -401,15 +407,16 @@ function DayTile(props: { caption: string; title: string; to: string; cover?: st
   );
 }
 
-// Nota do dia: só texto — título e um trecho; a imagem da nota fica pra quem abrir a nota.
+// "<Tipo> do dia" (Conto do dia, Causo do dia… ou Escrito do dia): só texto, título e um
+// trecho; a imagem fica pra quem abrir o escrito.
 function NoteTile({ n }: { n: HomeNote }) {
   return (
-    <Link className="pg-tile pg-tile-note" to={wikiHref(n.entryId) + "#posts"}>
+    <Link className="pg-tile pg-tile-note" to={n.href}>
       <span className="pg-tile-top">
         <span className="pg-tile-title">{n.title || "(sem título)"}</span>
       </span>
       {n.excerpt ? <span className="pg-tile-excerpt">{n.excerpt}</span> : null}
-      <span className="pg-caption">{"Nota do dia · " + n.entryTitle}</span>
+      <span className="pg-caption">{dailyLabel(n.tipo) + (n.entryTitle ? " · " + n.entryTitle : "")}</span>
     </Link>
   );
 }
