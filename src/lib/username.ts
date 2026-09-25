@@ -58,7 +58,7 @@ export function isBlockedNickname(nick: string): boolean {
 
 /** Na tela de entrar: "voce@email.com" é e-mail; "@nome" e "nome" são username. */
 export function isEmailLogin(id: string): boolean {
-  return /^[^@s]+@[^@s]+$/.test(id.trim());
+  return /^[^@\s]+@[^@\s]+$/.test(id.trim());
 }
 
 /** Por que o nome não serve (texto pro leitor), ou "" se serve. */
