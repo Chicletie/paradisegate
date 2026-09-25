@@ -46,7 +46,8 @@ describe("apelido proibido", () => {
 describe("entrar com e-mail ou username", () => {
   it("separa um do outro", async () => {
     const { isEmailLogin } = await import("./username");
-    for (const n of ["voce@email.com", " a.b+c@x.com.br "]) expect(isEmailLogin(n), n).toBe(true);
-    for (const n of ["ania_sombra", "@ania_sombra", "", "a@b@c"]) expect(isEmailLogin(n), n).toBe(false);
+    const emails = ["voce@email.com", " a.b+c@x.com.br ", "sara.santos@gmail.com", "jogadores@paradisegate.com.br"];
+    for (const n of emails) expect(isEmailLogin(n), n).toBe(true);
+    for (const n of ["ania_sombra", "@ania_sombra", "", "a@b@c", "nome com@espaco.com"]) expect(isEmailLogin(n), n).toBe(false);
   });
 });
