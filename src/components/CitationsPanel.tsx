@@ -7,6 +7,7 @@ const GROUPS: [QuoteRole, (title: string) => string][] = [
   ["fala", () => "Falas"],
   ["dialogo", () => "Diálogos"],
   ["trecho", () => "Trechos"],
+  ["narracao", () => "Narrações"],
   ["para", (title) => `Ditas a ${title}`],
   ["sobre", (title) => `Sobre ${title}`],
 ];
@@ -31,7 +32,7 @@ export function CitationsPanel({ citacoes, title }: { citacoes: WikiCitation[]; 
                 }
                 const body = <QuoteBody q={q} />;
                 return (
-                  <div key={i} className={"cit-item" + (q.kind === "dialogo" ? " is-dialogue" : "")}>
+                  <div key={i} className={"cit-item" + (q.kind === "dialogo" ? " is-dialogue" : q.kind === "narracao" ? " is-narr" : "")}>
                     {q.vis === "spoiler" ? <SpoilerBlock>{body}</SpoilerBlock> : body}
                     {meta.length > 0 && (
                       <div className="cit-meta">

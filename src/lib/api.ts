@@ -19,6 +19,7 @@ import { allOrOwn } from "./restrito";
 import type {
   SpoilerObra,
   AuthUser,
+  MemberCard,
   WikiIndex,
   WikiProfile,
   WikiProfilePatch,
@@ -107,10 +108,11 @@ export async function usernameTaken(name: string): Promise<boolean> {
 }
 
 /** Toma o nome novo, solta o antigo e grava no perfil, tudo numa gravação só (a regra do banco
- * confere que o nome está livre e o limite de 30 dias). */
-export function claimUsername(user: AuthUser, name: string, old: string | undefined): Promise<void> {
+ * confere que o nome está livre e o limite de 30 dias). O cartão público vai junto pro nome
+ * novo (`card`, montado por cardFields em member.ts). */
+export function claimUsername(user: AuthUser, name: string, old: string | undefined, card: Omit<MemberCard, "uid"> = {}): Promise<void> {
   const b = writeBatch(db);
-  b.set(doc(db, "wikiUsernames", name), { uid: user.uid, at: serverTimestamp() });
+  b.set(doc(db, "wikiUsernames", name), { ...card, uid: user.uid, at: serverTimestamp() });
   if (old && old !== name) b.delete(doc(db, "wikiUsernames", old));
   b.set(
     doc(db, "wikiProfiles", user.uid),
@@ -118,6 +120,24 @@ export function claimUsername(user: AuthUser, name: string, old: string | undefi
     { merge: true },
   );
   return b.commit();
+}
+
+// --- Perfil público do membro: o cartão em wikiUsernames/{nome} ---
+
+/** O cartão de um membro (`null` se ninguém tem esse nome). */
+export async function fetchMemberCard(name: string): Promise<MemberCard | null> {
+  const snap = await getDoc(doc(db, "wikiUsernames", name));
+  return snap.exists() ? (snap.data() as MemberCard) : null;
+}
+
+/** Regrava o cartão do próprio nome com `want`; o que não está em `want` sai do cartão
+ * (uid e data de quando o nome foi tomado ficam). A regra do banco confere dono e limites. */
+export function saveMemberCard(name: string, want: Omit<MemberCard, "uid">): Promise<void> {
+  const data: Record<string, unknown> = {};
+  (["nickname", "photo", "bio", "since", "favorites", "showFavorites"] as const).forEach((k) => {
+    data[k] = want[k] === undefined ? deleteField() : want[k];
+  });
+  return setDoc(doc(db, "wikiUsernames", name), data, { merge: true });
 }
 
 // --- Sugestões: wikiSuggestions ---

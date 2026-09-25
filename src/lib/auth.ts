@@ -12,7 +12,11 @@ import type { AuthUser } from "../types";
 // --- Login (Firebase Auth, e-mail e senha; as contas vêm por convite) ---
 
 export function watchAuth(cb: (user: AuthUser | null) => void): () => void {
-  return onAuthStateChanged(auth, (u) => cb(u ? { uid: u.uid, email: u.email || "" } : null));
+  return onAuthStateChanged(auth, (u) => {
+    if (!u) return cb(null);
+    const t = Date.parse(u.metadata.creationTime || "");
+    cb({ uid: u.uid, email: u.email || "", since: Number.isNaN(t) ? undefined : new Date(t).toISOString() });
+  });
 }
 
 /**

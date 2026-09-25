@@ -32,15 +32,44 @@ export interface WikiIndexEntry {
   wordCount?: number;
   linkCount?: number;
   postsCount?: number;
+  /** Membros do acervo citados com [[@nome]] no que a página mostra (perfil público /@nome). */
+  membros?: string[];
   birthdayMD?: string | null;
   arcana?: WikiArcana | null;
   excerpt?: string;
   posts?: { id: string; title?: string; date?: string; excerpt?: string }[];
+  /** Escritos ligados a esta página (o mesmo escrito vem em cada página ligada). */
+  escritos?: WikiIndexWriting[];
   events?: WikiIndexEvent[];
   citacoes?: WikiCitation[];
 }
 
 export type WikiIndex = Record<string, WikiIndexEntry>;
+
+/** Tipo, marcas e autoria de um escrito (docs/dados-da-wiki.md, "Escritos"). */
+export interface WritingMeta {
+  /** conto, cronica, narracao, causo, documento, carta, poema, lenda, sonho, entrevista,
+   * bastidores, ese — ou "" (sem tipo). */
+  tipo?: string;
+  canone?: "canonico" | "provavel" | "fora" | "" | string;
+  origem?: "mundo" | "mesa" | "bastidores" | "" | string;
+  tags?: string[];
+  /** Username de quem escreveu (/@autor); vazio = o autor da wiki. */
+  autor?: string;
+}
+
+/** Um escrito no índice. Público traz `excerpt`; spoiler vem sem trecho e com `at`. */
+export interface WikiIndexWriting extends WritingMeta {
+  id: string;
+  /** Id do documento da página própria (wikiPublic/escrito-<id>); null = sem página própria. */
+  page?: string | null;
+  title?: string;
+  date?: string;
+  excerpt?: string;
+  vis?: FieldVisibility;
+  at?: string;
+  noDaily?: boolean;
+}
 
 export interface WikiArcana {
   kind: "major" | "minor";
@@ -97,8 +126,8 @@ export interface WikiSection {
   at?: string;
 }
 
-export type QuoteKind = "fala" | "dialogo" | "trecho";
-export type QuoteRole = "fala" | "dialogo" | "trecho" | "para" | "sobre";
+export type QuoteKind = "fala" | "dialogo" | "trecho" | "narracao";
+export type QuoteRole = "fala" | "dialogo" | "trecho" | "narracao" | "para" | "sobre";
 
 export interface QuoteRef {
   name: string;
@@ -119,7 +148,10 @@ export interface WikiCitation {
   daily?: boolean;
   kind?: QuoteKind;
   role?: QuoteRole;
+  /** Narração: texto em markdown da casa (parágrafos, links), sem aspas. */
   text?: string;
+  /** Só na narração: de mesa (sessão) ou de livro. */
+  narr?: "mesa" | "livro";
   speaker?: QuoteRef | null;
   speakerTitle?: string;
   speakerId?: string | null;
@@ -136,7 +168,8 @@ export interface WikiCitation {
   at?: string;
 }
 
-export interface WikiPost {
+export interface WikiPost extends WritingMeta {
+  id?: string;
   title?: string;
   date?: string;
   body: string;
@@ -219,6 +252,8 @@ export interface WikiEntryDoc extends WikiArticleBundle {
   lunarBirth?: string;
   citacoes?: WikiCitation[];
   posts?: WikiPost[];
+  /** Cartões dos escritos ligados (mesma ordem de `posts`). */
+  escritos?: WikiIndexWriting[];
   tags?: WikiTag[];
   links?: WikiLink[];
   backlinks?: WikiLink[];
@@ -252,14 +287,49 @@ export interface WikiSeasonDoc {
   publishedAt?: string;
 }
 
-// wikiPublic/{slug} guarda ou uma entry ou uma temporada — discriminado por `kind`.
-export type WikiPublicDoc = WikiEntryDoc | WikiSeasonDoc;
+/** Página própria de um escrito: wikiPublic/escrito-<id>. */
+export interface WikiWritingDoc extends WritingMeta {
+  kind: "escrito";
+  id: string;
+  title: string;
+  date?: string;
+  universe?: string;
+  universeId?: string;
+  body: string;
+  excerpt?: string;
+  vis?: FieldVisibility;
+  at?: string;
+  spoilerObras?: SpoilerObra[];
+  /** Páginas em que aparece; id null = página não publicada (só o nome). */
+  pages?: { name: string; id: string | null }[];
+  publishedAt?: string;
+}
+
+// wikiPublic/{slug} guarda uma entry, uma temporada ou um escrito — discriminado por `kind`.
+export type WikiPublicDoc = WikiEntryDoc | WikiSeasonDoc | WikiWritingDoc;
 
 // --- Conta do leitor (etapa 4) — mesmas formas que wiki-core.js lê e grava hoje. ---
 
 export interface AuthUser {
   uid: string;
   email: string;
+  /** Quando a conta foi criada (ISO), pro "no acervo desde" do perfil público. */
+  since?: string;
+}
+
+/**
+ * wikiUsernames/{nome}: o dono do nome (uid) e o cartão público do membro
+ * (paradisegate.com.br/@nome). Só o que a pessoa escolhe mostrar, nunca o e-mail.
+ */
+export interface MemberCard {
+  uid: string;
+  nickname?: string;
+  photo?: string;
+  bio?: string;
+  since?: string;
+  /** Só quando `showFavorites`. */
+  favorites?: string[];
+  showFavorites?: boolean;
 }
 
 /** wikiProfiles/{uid}. `photo` é um data URL JPEG 256×256 reduzido no navegador. */

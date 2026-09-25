@@ -1,9 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { claimUsername, fetchMySuggestions, fetchProfile, LoginError, saveProfile, sendPasswordReset, signIn, watchAuth } from "./api";
+import { claimUsername, fetchMemberCard, fetchMySuggestions, fetchProfile, LoginError, saveMemberCard, saveProfile, sendPasswordReset, signIn, watchAuth } from "./api";
+import { cardFields, cardOutdated } from "./member";
 import { mergeProfile, unreadCount } from "./profile";
 import { isEmailLogin } from "./username";
-import type { AuthUser, WikiProfile, WikiProfilePatch } from "../types";
+import type { AuthUser, MemberCard, WikiProfile, WikiProfilePatch } from "../types";
 
 /*
  * Conta do leitor — porta de mountLoginBar/pgLoadProfile/pgSaveProfile/pgUnreadCount/
@@ -46,6 +47,11 @@ interface AccountState {
   save: (patch: WikiProfilePatch) => Promise<void>;
   /** Escolhe ou troca o username (a regra do banco confere se está livre e os 30 dias). */
   setUsername: (name: string) => Promise<void>;
+  /** O cartão público (/@nome) de quem está logado; `null` sem username. Acerta o cartão se
+   * ele estiver atrás do perfil (quem escolheu o nome antes do perfil público existir). */
+  loadCard: () => Promise<MemberCard | null>;
+  /** Grava bio e "mostrar meus favoritos" no cartão público. */
+  saveCard: (prefs: { bio?: string; showFavorites?: boolean }) => Promise<void>;
   clearUnread: () => void;
   openLogin: () => void;
 }
@@ -60,6 +66,8 @@ const LOGGED_OUT: AccountState = {
   unread: 0,
   loadProfile: async () => ({}),
   setUsername: async () => {},
+  loadCard: async () => null,
+  saveCard: async () => {},
   save: async () => {},
   clearUnread: () => {},
   openLogin: () => {},
@@ -116,25 +124,57 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     if (user) void loadProfile(user);
   }, [user, loadProfile]);
 
+  // O cartão público acompanha o perfil: apelido, foto e favoritos vêm dele; bio e "mostrar
+  // favoritos" são do próprio cartão. Só grava quando algo mudou.
+  const syncCard = useCallback(
+    async (u: AuthUser, d: WikiProfile, prefs?: { bio?: string; showFavorites?: boolean }): Promise<MemberCard | null> => {
+      if (!d.username) return null;
+      const card = await fetchMemberCard(d.username);
+      if (!card || card.uid !== u.uid) return card;
+      const want = cardFields(d, prefs ?? { bio: card.bio, showFavorites: card.showFavorites }, card.since || u.since);
+      if (!cardOutdated(card, want)) return card;
+      await saveMemberCard(d.username, want);
+      return { uid: u.uid, ...want };
+    },
+    [],
+  );
+
   const save = useCallback(
     async (patch: WikiProfilePatch) => {
       if (!user) return;
       const updatedAt = new Date().toISOString();
       await saveProfile(user, patch, updatedAt);
       const d = await loadProfile(user);
-      setProfile(user.uid, mergeProfile(d, user, patch, updatedAt));
+      const merged = mergeProfile(d, user, patch, updatedAt);
+      setProfile(user.uid, merged);
+      // O perfil já salvou; se o cartão falhar agora, acerta na próxima visita ao perfil.
+      if (patch.nickname !== undefined || patch.photo !== undefined || patch.favorite) void syncCard(user, merged).catch(() => {});
     },
-    [user, loadProfile, setProfile],
+    [user, loadProfile, setProfile, syncCard],
   );
 
   const setUsername = useCallback(
     async (name: string) => {
       if (!user) return;
       const d = await loadProfile(user);
-      await claimUsername(user, name, d.username);
+      const old = d.username ? await fetchMemberCard(d.username).catch(() => null) : null;
+      await claimUsername(user, name, d.username, cardFields(d, { bio: old?.bio, showFavorites: old?.showFavorites }, old?.since || user.since));
       setProfile(user.uid, { ...d, email: user.email, username: name, usernameChangedAt: new Date() });
     },
     [user, loadProfile, setProfile],
+  );
+
+  const loadCard = useCallback(async () => {
+    if (!user) return null;
+    return syncCard(user, await loadProfile(user));
+  }, [user, loadProfile, syncCard]);
+
+  const saveCard = useCallback(
+    async (prefs: { bio?: string; showFavorites?: boolean }) => {
+      if (!user) return;
+      await syncCard(user, await loadProfile(user), prefs);
+    },
+    [user, loadProfile, syncCard],
   );
 
   const value = useMemo<AccountState>(
@@ -147,12 +187,14 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       loadProfile: () => (user ? loadProfile(user) : Promise.resolve({})),
       save,
       setUsername,
+      loadCard,
+      saveCard,
       clearUnread: () => {
         if (user) setUnreadByUid((m) => ({ ...m, [user.uid]: 0 }));
       },
       openLogin: () => setLoginOpen(true),
     }),
-    [user, ready, guest, profiles, unreadByUid, loadProfile, save, setUsername],
+    [user, ready, guest, profiles, unreadByUid, loadProfile, save, setUsername, loadCard, saveCard],
   );
 
   return (

@@ -108,6 +108,7 @@ function PgNavBar() {
   }, [index]);
 
   const showTimeline = !!index && hasEvents(index);
+  const showWritings = !!index && Object.values(index).some((e) => (e.escritos || e.posts || []).length > 0);
   const [moreOpen, setMoreOpen] = useState(false);
 
   function typeLink(t: string, className: string) {
@@ -138,6 +139,11 @@ function PgNavBar() {
         {showTimeline && (
           <Link className="pg-nav-link" to="/wiki/_timeline" aria-current={location.pathname === "/wiki/_timeline" ? "page" : undefined}>
             Linha do tempo
+          </Link>
+        )}
+        {showWritings && (
+          <Link className="pg-nav-link" to="/wiki/_escritos" aria-current={location.pathname.startsWith("/wiki/_escritos") ? "page" : undefined}>
+            Escritos
           </Link>
         )}
         <Link className="pg-nav-link" to="/wiki?aleatoria=1">

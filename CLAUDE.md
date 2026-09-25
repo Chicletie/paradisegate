@@ -117,7 +117,7 @@ Valem pros dois (e pro Claude de cada um), em toda mudança:
 
 | Caminho | O que é |
 |---|---|
-| `src/pages/` | Páginas da wiki: home, entrada, temporada, linha do tempo, perfil, erro. |
+| `src/pages/` | Páginas da wiki: home, entrada, temporada, escritos (lista e página própria), linha do tempo, perfil, erro; e o perfil público do membro (`MemberPage`, rota `/@nome`, estilo em `src/styles/member.css`). |
 | `src/components/` | Cabeçalho (com "Entrar"/menu da conta) e rodapé PG, peças da página de entrada, e o que depende de login (`EntryActions.tsx`). |
 | `src/lib/` | `api.ts` e `auth.ts` (únicos acessos ao Firebase; `firebaseApp.ts` é o app + Auth sem o Firestore), índice (`wikiIndex.tsx`), conta do leitor (`account.tsx`), markdown, citações, relações, home, sorteio do dia, linha do tempo, perfil — lógica pura testável sem DOM onde dá. |
 | `src/jogo/` | Páginas do jogo (fichas, convites): `apiClient.ts` fala com a API do jogo (testado no node, com as respostas de `contract/ficha-sync.json`, cópia do contrato do backend: mudou lá, muda aqui no mesmo par de PRs). |

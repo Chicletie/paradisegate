@@ -68,6 +68,27 @@ export function describeEntry(e) {
   return FICHA_INCOMPLETA;
 }
 
+// Escritos com página própria (o mesmo escrito vem em cada página ligada: conta uma vez).
+export function writingsOf(entries) {
+  const seen = new Set();
+  const out = [];
+  for (const id of Object.keys(entries).sort()) {
+    for (const w of (entries[id] && entries[id].escritos) || []) {
+      if (!w || !w.id || !w.page || seen.has(w.id)) continue;
+      if (w.vis !== "publico" && w.vis !== "spoiler") continue;
+      seen.add(w.id);
+      out.push(w);
+    }
+  }
+  return out;
+}
+
+/** Prévia de um escrito: o trecho (só o público; spoiler nunca aparece na prévia). */
+export function describeWriting(w) {
+  const text = w.vis === "publico" ? clip(cleanText(w.excerpt)) : "";
+  return text || "Um escrito de Paradise Gate.";
+}
+
 const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
 export function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ESC[c]); }
 
