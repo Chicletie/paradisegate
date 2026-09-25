@@ -3,7 +3,7 @@ import { ARCANA_GLYPHS } from "../lib/arcana";
 // Peças visuais do Paradise Gate — porta de pgStar/pgSearchIcon/pgConstellation/pgPartyHat/
 // wbArcanaGlyph/pgNoCover/pgSectionHead na wiki original.
 
-/** Estrela de quatro pontas: marcador de seção, selo provisório, rodapé, verso da carta. */
+/** Estrela de quatro pontas: marcador de seção, verso da carta. */
 export function PgStar({ className }: { className?: string }) {
   return (
     <svg className={className || "pg-star"} viewBox="0 0 24 24" aria-hidden="true" focusable="false">

@@ -318,8 +318,8 @@ a.tag:hover { border-color: var(--gold); }
    genérica". Estrutura de portal de wiki (cabeçalho azul-noite + faixa azul "Hoje em Paradise
    Gate" + corpo em duas colunas com coluna lateral), azul dominante, e a identidade só em
    detalhes: poeira de estrelas estática, estrela de quatro pontas como marcador, a carta de
-   tarô do Personagem do dia (numeral romano do dia, borda dourada fina) e um lugar reservado
-   pro selo da marca (.pg-seal: o círculo com fio dourado e o selo, public/selo.svg, dentro).
+   tarô do Personagem do dia (numeral romano do dia, borda dourada fina) e o selo
+   da marca (.pg-seal: o círculo com fio dourado e o selo, public/selo.svg, dentro).
    Identidade (tokens, cabeçalho, menu, foco, rodapé) em body.pg-site, em toda página PG; layout
    só da home em body.pg-home. Ouro (--pg-gold) só em bordas finas e foco. */
 body.pg-site {
