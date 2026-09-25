@@ -22,6 +22,8 @@ const TEXT: Record<StatusKind, string> = {
   other_tab: "Aberta em outra aba: ela salva na conta",
   unavailable: "A conta do jogo não está disponível neste endereço",
   error: "Não consegui salvar na conta: salva neste aparelho",
+  read_only: "só leitura, o que mudar aqui não vai pra conta",
+  read_only_stale: "mudou desde que você abriu",
 };
 
 const TONE: Record<StatusKind, "ok" | "busy" | "warn"> = {
@@ -40,6 +42,8 @@ const TONE: Record<StatusKind, "ok" | "busy" | "warn"> = {
   other_tab: "ok",
   unavailable: "warn",
   error: "warn",
+  read_only: "warn",
+  read_only_stale: "warn",
 };
 
 const NEEDS_LOGIN = new Set<StatusKind>(["signed_out", "expired"]);
@@ -53,6 +57,10 @@ const CSS = `
 .pg-cloud.is-warn{ color:var(--gold); opacity:1; }
 .pg-cloud.is-warn::before{ background:var(--gold); }
 .pg-cloud a{ color:inherit; text-underline-offset:2px; }
+.pg-cloud button{
+  background:none; border:0; padding:0 0 0 6px; color:inherit; font:inherit; letter-spacing:inherit;
+  text-transform:inherit; text-decoration:underline; text-underline-offset:2px; cursor:pointer;
+}
 a.pg-back{ text-decoration:none; display:inline-flex; align-items:center; }
 .pg-conflict{
   position:fixed; z-index:100000; left:50%; top:12px; transform:translateX(-50%);
@@ -78,7 +86,8 @@ export type SyncUi = {
   showConflict(choose: (choice: "remote" | "local") => void): void;
 };
 
-export function mountSyncUi(doc: Document): SyncUi {
+/** `onRefresh`: "Atualizar" do só leitura, quando o jogador mudou a ficha depois que ela abriu. */
+export function mountSyncUi(doc: Document, options: { onRefresh?: () => void } = {}): SyncUi {
   const style = doc.createElement("style");
   style.textContent = CSS;
   doc.head.appendChild(style);
@@ -93,7 +102,7 @@ export function mountSyncUi(doc: Document): SyncUi {
 
   const back = doc.createElement("a");
   back.className = "toolbar-btn pg-back";
-  back.href = "/jogo/fichas";
+  back.href = "/wiki/_perfil#fichas";
   back.textContent = "‹ Minhas fichas";
 
   if (toolbar && local) {
@@ -111,8 +120,20 @@ export function mountSyncUi(doc: Document): SyncUi {
     cloud.className = `save-status pg-cloud is-${TONE[s.kind]}`;
     let text = TEXT[s.kind];
     if (s.kind === "saved" && s.at) text += " às " + clock(s.at);
+    if (s.kind === "read_only" || s.kind === "read_only_stale") {
+      text = "Ficha de " + (s.owner || "outro jogador") + ": " + text;
+      // O mestre veio da página da mesa: volta pra lá.
+      back.href = "/jogo/mesa";
+      back.textContent = "‹ Fichas da mesa";
+    }
     cloud.replaceChildren();
-    if (NEEDS_LOGIN.has(s.kind)) {
+    if (s.kind === "read_only_stale" && options.onRefresh) {
+      const refresh = doc.createElement("button");
+      refresh.type = "button";
+      refresh.textContent = "Atualizar";
+      refresh.addEventListener("click", options.onRefresh);
+      cloud.append(text + ".", refresh);
+    } else if (NEEDS_LOGIN.has(s.kind)) {
       const link = doc.createElement("a");
       link.href = "/wiki";
       link.textContent = text;

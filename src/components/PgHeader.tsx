@@ -5,6 +5,7 @@ import { pgPlural } from "../lib/format";
 import { searchHref } from "../lib/search";
 import { PgSearchIcon } from "./PgIcons";
 import { LoginBar } from "./AccountMenu";
+import { useJogoAccess } from "../jogo/access";
 
 /** Busca controlada por quem chama (a home: filtra a lista a cada letra; Enter abre a busca). */
 export interface HeaderSearch {
@@ -91,8 +92,8 @@ function SearchInput({ value, onChange, onEnter }: { value: string; onChange: (v
   );
 }
 
-/** Porta de pgNavBar: categorias (tipos com mais páginas, até 5; o resto em "Mais"), Linha do
- * tempo (só se houver eventos) e Página aleatória. */
+/** Porta de pgNavBar: categorias (tipos com mais páginas, até 5; o resto em "Mais"), Fichas da
+ * mesa (só pro mestre), Linha do tempo (só se houver eventos), Escritos e Página aleatória. */
 function PgNavBar() {
   const index = useWikiIndex();
   const location = useLocation();
@@ -110,6 +111,8 @@ function PgNavBar() {
   const showTimeline = !!index && hasEvents(index);
   const showWritings = !!index && Object.values(index).some((e) => (e.escritos || e.posts || []).length > 0);
   const [moreOpen, setMoreOpen] = useState(false);
+  // Fichas da mesa: só o mestre (admin da API do jogo) vê o link.
+  const mestre = useJogoAccess().kind === "admin";
 
   function typeLink(t: string, className: string) {
     return (
@@ -136,6 +139,11 @@ function PgNavBar() {
             </details>
           )}
         </div>
+        {mestre && (
+          <Link className="pg-nav-link" to="/jogo/mesa" aria-current={location.pathname === "/jogo/mesa" ? "page" : undefined}>
+            Fichas da mesa
+          </Link>
+        )}
         {showTimeline && (
           <Link className="pg-nav-link" to="/wiki/_timeline" aria-current={location.pathname === "/wiki/_timeline" ? "page" : undefined}>
             Linha do tempo

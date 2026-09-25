@@ -85,6 +85,34 @@ describe("contrato com a API", () => {
     expect(dup.code).toBe("invite_exists");
     await expect(api.deleteInvite(1)).resolves.toBeUndefined();
   });
+
+  it("fichas da mesa: o caminho do contrato, e jogador comum leva 403 forbidden", async () => {
+    const fetchImpl = vi.fn<ApiClientDeps["fetch"]>(async () => responseFor(CASES.mesa_so_admin));
+    const { api } = client(fetchImpl);
+    const err = await api.listTableSheets().catch((e) => e);
+    expect(fetchImpl.mock.calls[0][0]).toBe("https://api.test" + CASES.fichas_da_mesa.request.path);
+    expect(err).toBeInstanceOf(ApiError);
+    expect(err).not.toBeInstanceOf(NotInvitedError);
+    expect(err.code).toBe("forbidden");
+  });
+
+  it("sugestões do mestre: criar manda o texto, jogador leva 403, marcar vistas é 204", async () => {
+    const queue = [responseFor(CASES.mestre_sugere), responseFor(CASES.jogador_nao_sugere), responseFor(CASES.sugestoes_vistas)];
+    const fetchImpl = vi.fn<ApiClientDeps["fetch"]>(async () => queue.shift()!);
+    const { api } = client(fetchImpl);
+    const note = await api.createNote(1, CASES.mestre_sugere.request.body!.text as string);
+    expect(note.seen_at).toBeNull();
+    expect(JSON.parse(fetchImpl.mock.calls[0][1].body as string)).toEqual(CASES.mestre_sugere.request.body);
+    const denied = await api.createNote(1, "Oi").catch((e) => e);
+    expect(denied.code).toBe("forbidden");
+    await expect(api.markNotesSeen()).resolves.toBeUndefined();
+    expect(fetchImpl.mock.calls[2][0]).toBe("https://api.test" + CASES.sugestoes_vistas.request.path);
+  });
+
+  it("o mestre abrindo a ficha de um jogador vem com mine: false", async () => {
+    const { api } = client(async () => responseFor(CASES.mestre_abre_ficha));
+    expect((await api.getSheet(1)).mine).toBe(false);
+  });
 });
 
 describe("passe de login", () => {

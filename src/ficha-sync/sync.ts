@@ -28,7 +28,8 @@ import {
  *                                    ├─ igual à conta ─▶ salvo
  *                                    ├─ conta igual à que o aparelho conhece ─▶ sobe a do aparelho
  *                                    ├─ conta mudou, aparelho não ─▶ grava a da conta, recarrega 1x
- *                                    └─ os dois mudaram ─▶ CONFLITO (o jogador escolhe)
+ *                                    ├─ os dois mudaram ─▶ CONFLITO (o jogador escolhe)
+ *                                    └─ ficha de outro (mestre) ─▶ SÓ LEITURA: gaveta = conta, nunca envia
  *   a cada 5s / ao esconder ─▶ mudou? ─▶ PUT com a versão ─┬─ 200 ─▶ salvo
  *                                                          ├─ 409 ─▶ CONFLITO
  *                                                          └─ rede ─▶ fica pendente, tenta de novo
@@ -50,9 +51,12 @@ export type StatusKind =
   | "open_failed"
   | "other_tab"
   | "unavailable"
-  | "error";
+  | "error"
+  | "read_only"
+  | "read_only_stale";
 
-export type SyncStatus = { kind: StatusKind; at?: number };
+/** `owner`: de quem é a ficha, quando o mestre abre a de um jogador (só leitura). */
+export type SyncStatus = { kind: StatusKind; at?: number; owner?: string };
 
 export type KeyValue = {
   get(key: string): string | null;
@@ -74,9 +78,17 @@ export type SheetSyncDeps = {
   now?: () => number;
 };
 
-type Phase = "idle" | "needs_boot" | "ready" | "conflict" | "stopped";
+type Phase = "idle" | "needs_boot" | "ready" | "conflict" | "read_only" | "stopped";
 
 const MAX_RELOADS = 2;
+/** Só leitura: confere se o jogador mudou a ficha a cada tantos ciclos (6 × 5s = 30s). */
+const READ_ONLY_CHECK_EVERY = 6;
+
+function ownerName(sheet: Sheet): string {
+  const owner = sheet.owner;
+  if (!owner) return "";
+  return owner.username ? "@" + owner.username : owner.email;
+}
 
 export function createSheetSync(deps: SheetSyncDeps) {
   const keys = sheetKeys(deps.sheetId);
@@ -87,10 +99,14 @@ export function createSheetSync(deps: SheetSyncDeps) {
   /** Impressão que a API recusou de vez (grande demais, inválida): só tenta de novo depois de mudar. */
   let refused: string | null = null;
   let lastKind: StatusKind | null = null;
+  let owner = "";
+  let readOnlyTicks = 0;
 
   function status(kind: StatusKind) {
     lastKind = kind;
-    deps.onStatus(kind === "saved" ? { kind, at: now() } : { kind });
+    if (kind === "saved") return deps.onStatus({ kind, at: now() });
+    if (kind === "read_only" || kind === "read_only_stale") return deps.onStatus({ kind, owner });
+    deps.onStatus({ kind });
   }
 
   function knownVersion(): number | null {
@@ -197,6 +213,8 @@ export function createSheetSync(deps: SheetSyncDeps) {
       return handle(error, "boot");
     }
 
+    if (remote.mine === false) return openReadOnly(remote);
+
     const remotePrint = fingerprint(remote.data);
     const raw = deps.local.get(keys.drawer);
     const known = knownVersion();
@@ -234,6 +252,45 @@ export function createSheetSync(deps: SheetSyncDeps) {
       return push(data, localPrint, remote.version);
     }
     return enterConflict(remote);
+  }
+
+  /**
+   * O mestre abrindo a ficha de um jogador: a gaveta deste aparelho sempre fica igual à da conta
+   * (o que ele mexer aqui some na próxima abertura) e nada é enviado. A API também não deixa
+   * salvar (404), isto só evita tentar.
+   */
+  function openReadOnly(remote: Sheet): void {
+    owner = ownerName(remote);
+    const raw = deps.local.get(keys.drawer);
+    if (isEmptySheet(remote.data)) {
+      // Ficha ainda em branco: a ficha abre vazia, sem gravar "{}" na gaveta.
+      if (raw !== null) {
+        deps.local.remove(keys.drawer);
+        return reloadOnce();
+      }
+    } else {
+      const data = raw === null ? null : parseDrawer(raw);
+      if (data === null || fingerprint(data) !== fingerprint(remote.data)) return adopt(remote);
+    }
+    remember(remote.version, fingerprint(remote.data));
+    phase = "read_only";
+    readOnlyTicks = 0;
+    deps.session.remove(keys.reload);
+    status("read_only");
+  }
+
+  async function checkReadOnly(): Promise<void> {
+    readOnlyTicks += 1;
+    if (lastKind === "read_only_stale" || readOnlyTicks % READ_ONLY_CHECK_EVERY !== 0) return;
+    busy = true;
+    try {
+      const remote = await deps.api.getSheet(deps.sheetId);
+      if (remote.version !== knownVersion()) status("read_only_stale");
+    } catch {
+      /* sem rede: confere de novo no próximo ciclo */
+    } finally {
+      busy = false;
+    }
   }
 
   function enterConflict(remote: Sheet): void {
@@ -299,6 +356,7 @@ export function createSheetSync(deps: SheetSyncDeps) {
   async function tick(): Promise<void> {
     if (busy) return;
     if (phase === "needs_boot") return boot();
+    if (phase === "read_only") return checkReadOnly();
     if (phase !== "ready") return;
     const next = pending();
     if (next) await push(next.data, next.print, next.version);

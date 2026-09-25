@@ -6,6 +6,7 @@ import {
   OfflineError,
   SessionExpiredError,
   type Me,
+  type SheetOwner,
   type SheetSummary,
 } from "./apiClient";
 
@@ -107,16 +108,26 @@ export function drawerKeys(id: number): string[] {
   return [k.drawer, k.version, k.synced];
 }
 
+/** De quem é a ficha, pro mestre: "@username", ou o e-mail se a pessoa ainda não tem username. */
+export function ownerLabel(owner: SheetOwner): string {
+  return owner.username ? "@" + owner.username : owner.email;
+}
+
 export function sheetHref(id: number): string {
   return `/fichas.html?sheet=${encodeURIComponent(String(id))}`;
 }
 
-/** "atualizada em 25 de set., 14:32" no fuso de quem está vendo. */
-export function updatedText(iso: string, timeZone?: string): string {
+/** "25 de set., 14:32" no fuso de quem está vendo ("" se não for data). */
+export function noteDate(iso: string, timeZone?: string): string {
   const t = Date.parse(iso);
   if (Number.isNaN(t)) return "";
-  const when = new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone }).format(t);
-  return "atualizada em " + when;
+  return new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone }).format(t);
+}
+
+/** "atualizada em 25 de set., 14:32" no fuso de quem está vendo. */
+export function updatedText(iso: string, timeZone?: string): string {
+  const when = noteDate(iso, timeZone);
+  return when ? "atualizada em " + when : "";
 }
 
 /** E-mail de convite: sem espaço e minúsculo; a API confere de novo. */

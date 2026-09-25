@@ -6,6 +6,7 @@ import {
   inviteErrorText,
   legacySheet,
   normalizeInviteEmail,
+  ownerLabel,
   readImport,
   seedDrawer,
   sheetHref,
@@ -79,6 +80,10 @@ describe("ficha antiga deste navegador", () => {
 });
 
 describe("abrir e criar", () => {
+  it("de quem é a ficha: @username, ou o e-mail", () => {
+    expect(ownerLabel({ id: 2, username: "luke", email: "luke@x.test" })).toBe("@luke");
+    expect(ownerLabel({ id: 3, username: null, email: "ania@x.test" })).toBe("ania@x.test");
+  });
   it("link da ficha é a página da ficha com o id", () => {
     expect(sheetHref(31)).toBe("/fichas.html?sheet=31");
   });

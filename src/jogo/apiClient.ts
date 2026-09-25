@@ -43,7 +43,15 @@ export class NotFoundError extends ApiError {}
 export class OfflineError extends ApiError {}
 
 export type SheetSummary = { id: number; nome: string; prestigio_atual: number; version: number; updated_at: string };
-export type Sheet = SheetSummary & { data: Record<string, unknown> };
+export type SheetOwner = { id: number; username: string | null; email: string };
+/** `mine: false` quando o mestre (admin) abre a ficha de um jogador: só leitura. */
+export type Sheet = SheetSummary & { data: Record<string, unknown>; mine?: boolean; owner?: SheetOwner | null };
+/** Uma linha de "Fichas da mesa" (só admin). */
+export type TableSheet = SheetSummary & { owner: SheetOwner };
+/** Sugestão do mestre numa ficha. `seen_at` nulo = a dona ainda não viu. */
+export type SheetNote = { id: number; sheet_id: number; text: string; created_at: string; seen_at: string | null; author: string | null };
+/** No perfil da dona: de qual ficha é. */
+export type MySheetNote = SheetNote & { sheet_nome: string };
 export type Me = { id: number; username: string | null; email: string; role: "player" | "admin" };
 export type Invite = { id: number; email: string; created_at: string; invited_by: string | null; joined: boolean };
 
@@ -145,6 +153,7 @@ export function createApiClient(deps: ApiClientDeps) {
     health: () => request<{ status: string }>("/health", { auth: false }),
     me: () => request<Me>("/users/me"),
     listSheets: () => request<SheetSummary[]>("/character-sheets"),
+    listTableSheets: () => request<TableSheet[]>("/character-sheets/mesa"),
     getSheet: (id: number) => request<Sheet>(`/character-sheets/${id}`),
     createSheet: (nome: string, data: Record<string, unknown>) =>
       request<Sheet>("/character-sheets", { method: "POST", body: { nome, data } }),
@@ -159,6 +168,11 @@ export function createApiClient(deps: ApiClientDeps) {
       return request<Sheet>(`/character-sheets/${id}`, { method: "PUT", body, keepalive: options.keepalive });
     },
     deleteSheet: (id: number) => request<void>(`/character-sheets/${id}`, { method: "DELETE" }),
+    listMyNotes: () => request<MySheetNote[]>("/character-sheets/notes"),
+    markNotesSeen: () => request<void>("/character-sheets/notes/seen", { method: "POST" }),
+    listSheetNotes: (id: number) => request<SheetNote[]>(`/character-sheets/${id}/notes`),
+    createNote: (id: number, text: string) => request<SheetNote>(`/character-sheets/${id}/notes`, { method: "POST", body: { text } }),
+    deleteNote: (id: number, noteId: number) => request<void>(`/character-sheets/${id}/notes/${noteId}`, { method: "DELETE" }),
     listInvites: () => request<Invite[]>("/invites"),
     createInvite: (email: string) => request<Invite>("/invites", { method: "POST", body: { email } }),
     deleteInvite: (id: number) => request<void>(`/invites/${id}`, { method: "DELETE" }),

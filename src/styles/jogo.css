@@ -33,6 +33,9 @@
 .pg-btn-danger { background: transparent; font-family: var(--pg-f-ui); color: #a3372b; border-color: rgba(163, 55, 43, 0.45); }
 .pg-btn-danger:hover { background: rgba(163, 55, 43, 0.08); border-color: #a3372b; }
 
+/* Fichas da mesa: de quem é a ficha, antes da data */
+.pg-table-owner { color: var(--pg-ink); font-weight: 500; }
+
 /* Convites */
 .pg-jogo-invite { margin-top: 14px; }
 .pg-jogo-invite input { min-height: 44px; box-sizing: border-box; }

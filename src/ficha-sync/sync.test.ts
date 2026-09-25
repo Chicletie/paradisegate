@@ -302,6 +302,63 @@ describe("ao esconder a aba", () => {
   });
 });
 
+describe("o mestre abrindo a ficha de um jogador (só leitura)", () => {
+  const theirs = (v: number, data: Record<string, unknown>): Sheet => ({
+    ...sheet(v, data),
+    mine: false,
+    owner: { id: 2, username: "luke", email: "luke@mesa.test" },
+  });
+
+  it("aparelho do mestre sem a ficha: abre a da conta", async () => {
+    const t = setup({ api: { getSheet: vi.fn(async () => theirs(4, B)) } });
+    await t.sync.boot();
+    expect(JSON.parse(t.local.get(K.drawer)!)).toEqual(B);
+    expect(t.reload).toHaveBeenCalledTimes(1);
+  });
+
+  it("igual à conta: mostra de quem é e nunca envia, nem mudando a gaveta", async () => {
+    const onStatus = vi.fn();
+    const t = setup({ local: known(4, B), api: { getSheet: vi.fn(async () => theirs(4, B)) } });
+    const sync = createSheetSync({ sheetId: ID, local: t.local, session: t.session, api: t.api, reload: t.reload, onConflict: t.onConflict, onStatus });
+    await sync.boot();
+    expect(onStatus).toHaveBeenLastCalledWith({ kind: "read_only", owner: "@luke" });
+    t.local.set(K.drawer, JSON.stringify(C));
+    await sync.tick();
+    sync.flush();
+    expect(t.api.saveSheet).not.toHaveBeenCalled();
+    expect(t.onConflict).not.toHaveBeenCalled();
+  });
+
+  it("o que o mestre mexeu aqui some na próxima abertura: volta a ser a da conta", async () => {
+    const t = setup({ local: known(4, B, C), api: { getSheet: vi.fn(async () => theirs(4, B)) } });
+    await t.sync.boot();
+    expect(JSON.parse(t.local.get(K.drawer)!)).toEqual(B);
+    expect(t.reload).toHaveBeenCalledTimes(1);
+    expect(t.onConflict).not.toHaveBeenCalled();
+  });
+
+  it("ficha do jogador ainda em branco: abre vazia, sem gravar {} na gaveta", async () => {
+    const t = setup({ local: { [K.drawer]: JSON.stringify(C) }, api: { getSheet: vi.fn(async () => theirs(1, {})) } });
+    await t.sync.boot();
+    expect(t.local.get(K.drawer)).toBeNull();
+    expect(t.reload).toHaveBeenCalledTimes(1);
+  });
+
+  it("confere de tempos em tempos e avisa quando o jogador mudou", async () => {
+    const getSheet = vi.fn<SheetSyncDeps["api"]["getSheet"]>().mockResolvedValueOnce(theirs(4, B)).mockResolvedValue(theirs(5, C));
+    const t = setup({ local: known(4, B), api: { getSheet } });
+    await t.sync.boot();
+    for (let i = 0; i < 5; i++) await t.sync.tick();
+    expect(getSheet).toHaveBeenCalledTimes(1);
+    await t.sync.tick();
+    expect(getSheet).toHaveBeenCalledTimes(2);
+    expect(t.statuses.at(-1)).toBe("read_only_stale");
+    for (let i = 0; i < 12; i++) await t.sync.tick();
+    expect(getSheet).toHaveBeenCalledTimes(2);
+    expect(t.reload).not.toHaveBeenCalled();
+  });
+});
+
 describe("conta e conexão", () => {
   it("ninguém logado: avisa e tenta abrir de novo sozinho", async () => {
     const getSheet = vi.fn<SheetSyncDeps["api"]["getSheet"]>().mockRejectedValueOnce(new SessionExpiredError(401, { code: "missing_token" }, null)).mockResolvedValue(sheet(1, A));
