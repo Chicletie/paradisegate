@@ -82,6 +82,14 @@
       <h1>Criar sua conta</h1>
       <p class="rs-lead">Bem-vindo à wiki de Paradise Gate. Sua conta é <strong id="emailOut"></strong>.</p>
       <input type="email" id="user" autocomplete="username" hidden />
+      <label class="rs-field">
+        <span class="rs-label">Username</span>
+        <span class="rs-input-wrap">
+          <span class="rs-at" aria-hidden="true">@</span>
+          <input class="rs-input has-at" type="text" id="uname" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="21" required aria-describedby="unHint" />
+        </span>
+        <span class="rs-hint" id="unHint" aria-live="polite">Seu nome único na wiki: 3 a 20 caracteres, letras sem acento, números e _. Dá pra trocar depois, uma vez a cada 30 dias.</span>
+      </label>
       <div id="passFields">
         <label class="rs-field">
           <span class="rs-label">Senha</span>
@@ -99,14 +107,6 @@
           </span>
         </label>
       </div>
-      <label class="rs-field">
-        <span class="rs-label">Username</span>
-        <span class="rs-input-wrap">
-          <span class="rs-at" aria-hidden="true">@</span>
-          <input class="rs-input has-at" type="text" id="uname" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="21" required aria-describedby="unHint" />
-        </span>
-        <span class="rs-hint" id="unHint" aria-live="polite">Seu nome único na wiki: 3 a 20 caracteres, letras sem acento, números e _. Dá pra trocar depois, uma vez a cada 30 dias.</span>
-      </label>
       <p class="rs-err" id="err" role="alert"></p>
       <button class="rs-btn" type="submit" id="submitBtn">Criar conta</button>
     </form>
@@ -187,7 +187,7 @@
 
   function show(name) {
     Object.keys(st).forEach(function (k) { st[k].hidden = k !== name; });
-    var f = name === "form" ? (passwordSaved ? unameEl : pass1) : name === "done" ? document.getElementById("doneTitle") : name === "bad" ? document.getElementById("badTitle") : null;
+    var f = name === "form" ? unameEl : name === "done" ? document.getElementById("doneTitle") : name === "bad" ? document.getElementById("badTitle") : null;
     if (f) f.focus();
   }
   function hint(msg, kind) { unHint.textContent = msg; unHint.className = "rs-hint" + (kind ? " is-" + kind : ""); }
@@ -245,13 +245,13 @@
     ev.preventDefault();
     errEl.textContent = "";
     var n = norm(unameEl.value);
+    var p = problem(n);
+    if (p) { errEl.textContent = p; unameEl.focus(); return; }
+    if (!unFree) { errEl.textContent = "Escolha um username livre."; unameEl.focus(); return; }
     if (!passwordSaved) {
       if (pass1.value.length < 6) { errEl.textContent = "A senha precisa ter pelo menos 6 caracteres."; pass1.focus(); return; }
       if (pass1.value !== pass2.value) { errEl.textContent = "As duas senhas não são iguais."; pass2.focus(); return; }
     }
-    var p = problem(n);
-    if (p) { errEl.textContent = p; unameEl.focus(); return; }
-    if (!unFree) { errEl.textContent = "Escolha um username livre."; unameEl.focus(); return; }
     submitBtn.disabled = true; submitBtn.textContent = "Criando…";
     var step = passwordSaved ? Promise.resolve() : auth.confirmPasswordReset(oobCode, pass1.value).then(function () {
       passwordSaved = true;
