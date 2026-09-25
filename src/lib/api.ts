@@ -15,8 +15,9 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { auth, db } from "./firebase";
+import { auth, db, functionUrl } from "./firebase";
 import { allOrOwn } from "./restrito";
+import { isEmailLogin } from "./username";
 import type {
   SpoilerObra,
   AuthUser,
@@ -83,8 +84,34 @@ export function watchAuth(cb: (user: AuthUser | null) => void): () => void {
   return onAuthStateChanged(auth, (u) => cb(u ? { uid: u.uid, email: u.email || "" } : null));
 }
 
-export async function signIn(email: string, password: string): Promise<void> {
+/**
+ * Entra com e-mail ou com o @username. Com username, quem acha o e-mail é a função
+ * `usernameSignIn` (confere a senha no servidor e só então devolve o e-mail; o e-mail de
+ * ninguém fica legível no banco), e o login segue pelo e-mail como sempre.
+ */
+export async function signIn(identifier: string, password: string): Promise<void> {
+  const id = identifier.trim();
+  const email = isEmailLogin(id) ? id : await emailForUsername(id, password);
   await signInWithEmailAndPassword(auth, email, password);
+}
+
+/** Erro do login por username, com o texto pro leitor. */
+export class LoginError extends Error {}
+
+async function emailForUsername(username: string, password: string): Promise<string> {
+  let res: Response;
+  try {
+    res = await fetch(functionUrl("usernameSignIn"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data: { username, password } }),
+    });
+  } catch {
+    throw new LoginError("Não consegui conferir agora. Tente de novo ou entre com o e-mail.");
+  }
+  const body = (await res.json().catch(() => ({}))) as { result?: { email?: string }; error?: { message?: string } };
+  if (res.ok && body.result?.email) return body.result.email;
+  throw new LoginError(body.error?.message || "Username ou senha incorretos.");
 }
 
 export function signOutUser(): Promise<void> {

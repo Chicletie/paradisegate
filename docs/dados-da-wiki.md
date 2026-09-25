@@ -21,6 +21,12 @@ e cada jogador logado só recebe o que foi liberado pro e-mail dele.
 **Nenhuma outra coleção.** O site não cria coleções novas nem grava fora de perfil e sugestões.
 Contas de jogador só nascem por convite do autor; o site não tem cadastro aberto.
 
+**Entrar com @username:** o login do Firebase só aceita e-mail, e o e-mail de ninguém fica
+legível no banco. Então, com username, o site chama a função `usernameSignIn` do autor (por
+`fetch`, em `src/lib/api.ts`): ela confere a senha no servidor e só então devolve o e-mail, e o
+site entra pelo e-mail como sempre. 5 erros seguidos em 15 minutos travam aquele nome (o login
+por e-mail continua).
+
 ## Índice em partes
 
 Um documento do Firestore tem teto de 1 MiB, então o índice pode ter continuações:

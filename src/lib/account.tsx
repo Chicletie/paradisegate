@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { claimUsername, fetchMySuggestions, fetchProfile, saveProfile, sendPasswordReset, signIn, watchAuth } from "./api";
+import { claimUsername, fetchMySuggestions, fetchProfile, LoginError, saveProfile, sendPasswordReset, signIn, watchAuth } from "./api";
 import { mergeProfile, unreadCount } from "./profile";
+import { isEmailLogin } from "./username";
 import type { AuthUser, WikiProfile, WikiProfilePatch } from "../types";
 
 /*
@@ -182,7 +183,7 @@ export function Modal({ onClose, children }: { onClose: () => void; children: Re
   );
 }
 
-/** Porta de openLoginModal: e-mail, senha, "esqueci minha senha" e cancelar. */
+/** Porta de openLoginModal: e-mail ou username, senha, "esqueci minha senha" e cancelar. */
 function LoginModal({ onClose }: { onClose: () => void }) {
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
@@ -193,9 +194,9 @@ function LoginModal({ onClose }: { onClose: () => void }) {
   function doSubmit() {
     setErr("");
     setBusy(true);
-    signIn(email.trim(), pass).then(onClose, () => {
+    signIn(email.trim(), pass).then(onClose, (e) => {
       setBusy(false);
-      setErr("Não consegui entrar. Confira email e senha.");
+      setErr(e instanceof LoginError ? e.message : isEmailLogin(email) ? "Não consegui entrar. Confira email e senha." : "Não consegui entrar. Confira username e senha.");
     });
   }
 
@@ -203,6 +204,10 @@ function LoginModal({ onClose }: { onClose: () => void }) {
     const addr = email.trim();
     if (!addr) {
       setErr("Digite seu email ali em cima primeiro.");
+      return;
+    }
+    if (!isEmailLogin(addr)) {
+      setErr("Pra recuperar a senha, digite o email da conta (não o username).");
       return;
     }
     setErr("");
@@ -220,12 +225,16 @@ function LoginModal({ onClose }: { onClose: () => void }) {
     <Modal onClose={onClose}>
       <h3>Entrar</h3>
       <label className="field-label" htmlFor="wiki-login-email">
-        Email
+        Email ou username
       </label>
       <input
         id="wiki-login-email"
-        type="email"
-        placeholder="voce@email.com"
+        type="text"
+        inputMode="email"
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
+        placeholder="voce@email.com ou @seunome"
         autoComplete="username"
         autoFocus
         value={email}

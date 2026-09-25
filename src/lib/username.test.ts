@@ -42,3 +42,11 @@ describe("apelido proibido", () => {
     for (const n of ["Paulo Silva", "Carolina", "Computador Velho", "Ânia das Sombras", "Picanha Feliz", "Pintor de Quadros"]) expect(isBlockedNickname(n), n).toBe(false);
   });
 });
+
+describe("entrar com e-mail ou username", () => {
+  it("separa um do outro", async () => {
+    const { isEmailLogin } = await import("./username");
+    for (const n of ["voce@email.com", " a.b+c@x.com.br "]) expect(isEmailLogin(n), n).toBe(true);
+    for (const n of ["ania_sombra", "@ania_sombra", "", "a@b@c"]) expect(isEmailLogin(n), n).toBe(false);
+  });
+});
