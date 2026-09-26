@@ -1,0 +1,774 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-26T01:41:26+00:00",
+  "title": "Design System: Paradise Gate",
+  "extensions": {
+    "colorMeta": {
+      "night": {
+        "role": "primary",
+        "displayName": "Azul-Noite",
+        "canonical": "#0b1a3f",
+        "oklch": "oklch(23.0% 0.074 264.6)",
+        "tonalRamp": [
+          "oklch(15.0% 0.074 264.6)",
+          "oklch(26.4% 0.074 264.6)",
+          "oklch(37.9% 0.074 264.6)",
+          "oklch(49.3% 0.074 264.6)",
+          "oklch(60.7% 0.074 264.6)",
+          "oklch(72.1% 0.074 264.6)",
+          "oklch(83.6% 0.074 264.6)",
+          "oklch(95.0% 0.074 264.6)"
+        ]
+      },
+      "band": {
+        "role": "primary",
+        "displayName": "Azul-Profundo da Faixa",
+        "canonical": "#132c6e",
+        "oklch": "oklch(31.9% 0.119 264.7)",
+        "tonalRamp": [
+          "oklch(15.0% 0.119 264.7)",
+          "oklch(26.4% 0.119 264.7)",
+          "oklch(37.9% 0.119 264.7)",
+          "oklch(49.3% 0.119 264.7)",
+          "oklch(60.7% 0.119 264.7)",
+          "oklch(72.1% 0.119 264.7)",
+          "oklch(83.6% 0.119 264.7)",
+          "oklch(95.0% 0.119 264.7)"
+        ]
+      },
+      "card-back": {
+        "role": "primary",
+        "displayName": "Verso da Carta",
+        "canonical": "#0d1f4f",
+        "oklch": "oklch(25.8% 0.092 265.0)",
+        "tonalRamp": [
+          "oklch(15.0% 0.092 265.0)",
+          "oklch(26.4% 0.092 265.0)",
+          "oklch(37.9% 0.092 265.0)",
+          "oklch(49.3% 0.092 265.0)",
+          "oklch(60.7% 0.092 265.0)",
+          "oklch(72.1% 0.092 265.0)",
+          "oklch(83.6% 0.092 265.0)",
+          "oklch(95.0% 0.092 265.0)"
+        ]
+      },
+      "page": {
+        "role": "neutral",
+        "displayName": "Papel Azulado",
+        "canonical": "#f2f4f9",
+        "oklch": "oklch(96.7% 0.007 268.5)",
+        "tonalRamp": [
+          "oklch(15.0% 0.007 268.5)",
+          "oklch(26.4% 0.007 268.5)",
+          "oklch(37.9% 0.007 268.5)",
+          "oklch(49.3% 0.007 268.5)",
+          "oklch(60.7% 0.007 268.5)",
+          "oklch(72.1% 0.007 268.5)",
+          "oklch(83.6% 0.007 268.5)",
+          "oklch(95.0% 0.007 268.5)"
+        ]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Painel",
+        "canonical": "#ffffff",
+        "oklch": "oklch(100.0% 0.000 89.9)",
+        "tonalRamp": [
+          "oklch(15.0% 0.000 89.9)",
+          "oklch(26.4% 0.000 89.9)",
+          "oklch(37.9% 0.000 89.9)",
+          "oklch(49.3% 0.000 89.9)",
+          "oklch(60.7% 0.000 89.9)",
+          "oklch(72.1% 0.000 89.9)",
+          "oklch(83.6% 0.000 89.9)",
+          "oklch(95.0% 0.000 89.9)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Fio",
+        "canonical": "#dce2ee",
+        "oklch": "oklch(91.2% 0.018 264.5)",
+        "tonalRamp": [
+          "oklch(15.0% 0.018 264.5)",
+          "oklch(26.4% 0.018 264.5)",
+          "oklch(37.9% 0.018 264.5)",
+          "oklch(49.3% 0.018 264.5)",
+          "oklch(60.7% 0.018 264.5)",
+          "oklch(72.1% 0.018 264.5)",
+          "oklch(83.6% 0.018 264.5)",
+          "oklch(95.0% 0.018 264.5)"
+        ]
+      },
+      "line-strong": {
+        "role": "neutral",
+        "displayName": "Fio Forte",
+        "canonical": "#b7c2d9",
+        "oklch": "oklch(81.3% 0.035 265.2)",
+        "tonalRamp": [
+          "oklch(15.0% 0.035 265.2)",
+          "oklch(26.4% 0.035 265.2)",
+          "oklch(37.9% 0.035 265.2)",
+          "oklch(49.3% 0.035 265.2)",
+          "oklch(60.7% 0.035 265.2)",
+          "oklch(72.1% 0.035 265.2)",
+          "oklch(83.6% 0.035 265.2)",
+          "oklch(95.0% 0.035 265.2)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Tinta",
+        "canonical": "#121a2c",
+        "oklch": "oklch(22.0% 0.037 265.2)",
+        "tonalRamp": [
+          "oklch(15.0% 0.037 265.2)",
+          "oklch(26.4% 0.037 265.2)",
+          "oklch(37.9% 0.037 265.2)",
+          "oklch(49.3% 0.037 265.2)",
+          "oklch(60.7% 0.037 265.2)",
+          "oklch(72.1% 0.037 265.2)",
+          "oklch(83.6% 0.037 265.2)",
+          "oklch(95.0% 0.037 265.2)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Tinta Apagada",
+        "canonical": "#4d5870",
+        "oklch": "oklch(46.0% 0.042 265.6)",
+        "tonalRamp": [
+          "oklch(15.0% 0.042 265.6)",
+          "oklch(26.4% 0.042 265.6)",
+          "oklch(37.9% 0.042 265.6)",
+          "oklch(49.3% 0.042 265.6)",
+          "oklch(60.7% 0.042 265.6)",
+          "oklch(72.1% 0.042 265.6)",
+          "oklch(83.6% 0.042 265.6)",
+          "oklch(95.0% 0.042 265.6)"
+        ]
+      },
+      "link": {
+        "role": "primary",
+        "displayName": "Azul-Tinta de Link",
+        "canonical": "#1f4fc4",
+        "oklch": "oklch(47.3% 0.190 263.7)",
+        "tonalRamp": [
+          "oklch(15.0% 0.160 263.7)",
+          "oklch(26.4% 0.160 263.7)",
+          "oklch(37.9% 0.160 263.7)",
+          "oklch(49.3% 0.160 263.7)",
+          "oklch(60.7% 0.160 263.7)",
+          "oklch(72.1% 0.160 263.7)",
+          "oklch(83.6% 0.160 263.7)",
+          "oklch(95.0% 0.160 263.7)"
+        ]
+      },
+      "link-hover": {
+        "role": "primary",
+        "displayName": "Azul-Tinta de Link (hover)",
+        "canonical": "#163b96",
+        "oklch": "oklch(38.9% 0.155 263.8)",
+        "tonalRamp": [
+          "oklch(15.0% 0.155 263.8)",
+          "oklch(26.4% 0.155 263.8)",
+          "oklch(37.9% 0.155 263.8)",
+          "oklch(49.3% 0.155 263.8)",
+          "oklch(60.7% 0.155 263.8)",
+          "oklch(72.1% 0.155 263.8)",
+          "oklch(83.6% 0.155 263.8)",
+          "oklch(95.0% 0.155 263.8)"
+        ]
+      },
+      "link-wash": {
+        "role": "primary",
+        "displayName": "Véu de Link",
+        "canonical": "rgba(31,79,196,0.08)",
+        "oklch": "oklch(47.3% 0.190 263.7 / 0.08)",
+        "tonalRamp": [
+          "oklch(15.0% 0.160 263.7)",
+          "oklch(26.4% 0.160 263.7)",
+          "oklch(37.9% 0.160 263.7)",
+          "oklch(49.3% 0.160 263.7)",
+          "oklch(60.7% 0.160 263.7)",
+          "oklch(72.1% 0.160 263.7)",
+          "oklch(83.6% 0.160 263.7)",
+          "oklch(95.0% 0.160 263.7)"
+        ]
+      },
+      "gold": {
+        "role": "secondary",
+        "displayName": "Ouro Velho",
+        "canonical": "#c9a45c",
+        "oklch": "oklch(73.7% 0.101 82.7)",
+        "tonalRamp": [
+          "oklch(15.0% 0.101 82.7)",
+          "oklch(26.4% 0.101 82.7)",
+          "oklch(37.9% 0.101 82.7)",
+          "oklch(49.3% 0.101 82.7)",
+          "oklch(60.7% 0.101 82.7)",
+          "oklch(72.1% 0.101 82.7)",
+          "oklch(83.6% 0.101 82.7)",
+          "oklch(95.0% 0.101 82.7)"
+        ]
+      },
+      "gold-soft": {
+        "role": "secondary",
+        "displayName": "Ouro Velho (fio suave)",
+        "canonical": "rgba(201,164,92,0.55)",
+        "oklch": "oklch(73.7% 0.101 82.7 / 0.55)",
+        "tonalRamp": [
+          "oklch(15.0% 0.101 82.7)",
+          "oklch(26.4% 0.101 82.7)",
+          "oklch(37.9% 0.101 82.7)",
+          "oklch(49.3% 0.101 82.7)",
+          "oklch(60.7% 0.101 82.7)",
+          "oklch(72.1% 0.101 82.7)",
+          "oklch(83.6% 0.101 82.7)",
+          "oklch(95.0% 0.101 82.7)"
+        ]
+      },
+      "on-dark": {
+        "role": "neutral",
+        "displayName": "Sobre o Escuro",
+        "canonical": "#eef2fb",
+        "oklch": "oklch(96.1% 0.013 266.7)",
+        "tonalRamp": [
+          "oklch(15.0% 0.013 266.7)",
+          "oklch(26.4% 0.013 266.7)",
+          "oklch(37.9% 0.013 266.7)",
+          "oklch(49.3% 0.013 266.7)",
+          "oklch(60.7% 0.013 266.7)",
+          "oklch(72.1% 0.013 266.7)",
+          "oklch(83.6% 0.013 266.7)",
+          "oklch(95.0% 0.013 266.7)"
+        ]
+      },
+      "on-dark-muted": {
+        "role": "neutral",
+        "displayName": "Sobre o Escuro (apagado)",
+        "canonical": "#b9c8ec",
+        "oklch": "oklch(83.3% 0.053 267.4)",
+        "tonalRamp": [
+          "oklch(15.0% 0.053 267.4)",
+          "oklch(26.4% 0.053 267.4)",
+          "oklch(37.9% 0.053 267.4)",
+          "oklch(49.3% 0.053 267.4)",
+          "oklch(60.7% 0.053 267.4)",
+          "oklch(72.1% 0.053 267.4)",
+          "oklch(83.6% 0.053 267.4)",
+          "oklch(95.0% 0.053 267.4)"
+        ]
+      },
+      "tarot-cream": {
+        "role": "secondary",
+        "displayName": "Creme de Tarô",
+        "canonical": "#f3e6c4",
+        "oklch": "oklch(92.7% 0.047 89.6)",
+        "tonalRamp": [
+          "oklch(15.0% 0.047 89.6)",
+          "oklch(26.4% 0.047 89.6)",
+          "oklch(37.9% 0.047 89.6)",
+          "oklch(49.3% 0.047 89.6)",
+          "oklch(60.7% 0.047 89.6)",
+          "oklch(72.1% 0.047 89.6)",
+          "oklch(83.6% 0.047 89.6)",
+          "oklch(95.0% 0.047 89.6)"
+        ]
+      },
+      "constellation": {
+        "role": "secondary",
+        "displayName": "Azul-Constelação",
+        "canonical": "#a9bff0",
+        "oklch": "oklch(80.5% 0.074 265.9)",
+        "tonalRamp": [
+          "oklch(15.0% 0.074 265.9)",
+          "oklch(26.4% 0.074 265.9)",
+          "oklch(37.9% 0.074 265.9)",
+          "oklch(49.3% 0.074 265.9)",
+          "oklch(60.7% 0.074 265.9)",
+          "oklch(72.1% 0.074 265.9)",
+          "oklch(83.6% 0.074 265.9)",
+          "oklch(95.0% 0.074 265.9)"
+        ]
+      },
+      "night-dark": {
+        "role": "primary",
+        "displayName": "Azul-Noite (tema escuro)",
+        "canonical": "#070f26",
+        "oklch": "oklch(17.6% 0.049 266.5)",
+        "tonalRamp": [
+          "oklch(15.0% 0.049 266.5)",
+          "oklch(26.4% 0.049 266.5)",
+          "oklch(37.9% 0.049 266.5)",
+          "oklch(49.3% 0.049 266.5)",
+          "oklch(60.7% 0.049 266.5)",
+          "oklch(72.1% 0.049 266.5)",
+          "oklch(83.6% 0.049 266.5)",
+          "oklch(95.0% 0.049 266.5)"
+        ]
+      },
+      "band-dark": {
+        "role": "primary",
+        "displayName": "Azul-Profundo da Faixa (tema escuro)",
+        "canonical": "#0f2358",
+        "oklch": "oklch(27.7% 0.099 264.9)",
+        "tonalRamp": [
+          "oklch(15.0% 0.099 264.9)",
+          "oklch(26.4% 0.099 264.9)",
+          "oklch(37.9% 0.099 264.9)",
+          "oklch(49.3% 0.099 264.9)",
+          "oklch(60.7% 0.099 264.9)",
+          "oklch(72.1% 0.099 264.9)",
+          "oklch(83.6% 0.099 264.9)",
+          "oklch(95.0% 0.099 264.9)"
+        ]
+      },
+      "card-back-dark": {
+        "role": "primary",
+        "displayName": "Verso da Carta (tema escuro)",
+        "canonical": "#0b1a44",
+        "oklch": "oklch(23.5% 0.082 265.5)",
+        "tonalRamp": [
+          "oklch(15.0% 0.082 265.5)",
+          "oklch(26.4% 0.082 265.5)",
+          "oklch(37.9% 0.082 265.5)",
+          "oklch(49.3% 0.082 265.5)",
+          "oklch(60.7% 0.082 265.5)",
+          "oklch(72.1% 0.082 265.5)",
+          "oklch(83.6% 0.082 265.5)",
+          "oklch(95.0% 0.082 265.5)"
+        ]
+      },
+      "page-dark": {
+        "role": "neutral",
+        "displayName": "Papel Azulado (tema escuro)",
+        "canonical": "#0a1226",
+        "oklch": "oklch(18.7% 0.043 266.0)",
+        "tonalRamp": [
+          "oklch(15.0% 0.043 266.0)",
+          "oklch(26.4% 0.043 266.0)",
+          "oklch(37.9% 0.043 266.0)",
+          "oklch(49.3% 0.043 266.0)",
+          "oklch(60.7% 0.043 266.0)",
+          "oklch(72.1% 0.043 266.0)",
+          "oklch(83.6% 0.043 266.0)",
+          "oklch(95.0% 0.043 266.0)"
+        ]
+      },
+      "panel-dark": {
+        "role": "neutral",
+        "displayName": "Painel (tema escuro)",
+        "canonical": "#0f1a33",
+        "oklch": "oklch(22.3% 0.051 264.7)",
+        "tonalRamp": [
+          "oklch(15.0% 0.051 264.7)",
+          "oklch(26.4% 0.051 264.7)",
+          "oklch(37.9% 0.051 264.7)",
+          "oklch(49.3% 0.051 264.7)",
+          "oklch(60.7% 0.051 264.7)",
+          "oklch(72.1% 0.051 264.7)",
+          "oklch(83.6% 0.051 264.7)",
+          "oklch(95.0% 0.051 264.7)"
+        ]
+      },
+      "line-dark": {
+        "role": "neutral",
+        "displayName": "Fio (tema escuro)",
+        "canonical": "#1f2d52",
+        "oklch": "oklch(30.5% 0.070 266.7)",
+        "tonalRamp": [
+          "oklch(15.0% 0.070 266.7)",
+          "oklch(26.4% 0.070 266.7)",
+          "oklch(37.9% 0.070 266.7)",
+          "oklch(49.3% 0.070 266.7)",
+          "oklch(60.7% 0.070 266.7)",
+          "oklch(72.1% 0.070 266.7)",
+          "oklch(83.6% 0.070 266.7)",
+          "oklch(95.0% 0.070 266.7)"
+        ]
+      },
+      "line-strong-dark": {
+        "role": "neutral",
+        "displayName": "Fio Forte (tema escuro)",
+        "canonical": "#33487c",
+        "oklch": "oklch(41.1% 0.091 265.9)",
+        "tonalRamp": [
+          "oklch(15.0% 0.091 265.9)",
+          "oklch(26.4% 0.091 265.9)",
+          "oklch(37.9% 0.091 265.9)",
+          "oklch(49.3% 0.091 265.9)",
+          "oklch(60.7% 0.091 265.9)",
+          "oklch(72.1% 0.091 265.9)",
+          "oklch(83.6% 0.091 265.9)",
+          "oklch(95.0% 0.091 265.9)"
+        ]
+      },
+      "ink-dark": {
+        "role": "neutral",
+        "displayName": "Tinta (tema escuro)",
+        "canonical": "#e4e9f4",
+        "oklch": "oklch(93.3% 0.016 266.3)",
+        "tonalRamp": [
+          "oklch(15.0% 0.016 266.3)",
+          "oklch(26.4% 0.016 266.3)",
+          "oklch(37.9% 0.016 266.3)",
+          "oklch(49.3% 0.016 266.3)",
+          "oklch(60.7% 0.016 266.3)",
+          "oklch(72.1% 0.016 266.3)",
+          "oklch(83.6% 0.016 266.3)",
+          "oklch(95.0% 0.016 266.3)"
+        ]
+      },
+      "muted-dark": {
+        "role": "neutral",
+        "displayName": "Tinta Apagada (tema escuro)",
+        "canonical": "#a3aec6",
+        "oklch": "oklch(75.0% 0.037 265.9)",
+        "tonalRamp": [
+          "oklch(15.0% 0.037 265.9)",
+          "oklch(26.4% 0.037 265.9)",
+          "oklch(37.9% 0.037 265.9)",
+          "oklch(49.3% 0.037 265.9)",
+          "oklch(60.7% 0.037 265.9)",
+          "oklch(72.1% 0.037 265.9)",
+          "oklch(83.6% 0.037 265.9)",
+          "oklch(95.0% 0.037 265.9)"
+        ]
+      },
+      "link-dark": {
+        "role": "primary",
+        "displayName": "Azul-Tinta de Link (tema escuro)",
+        "canonical": "#93b2f5",
+        "oklch": "oklch(76.6% 0.103 265.0)",
+        "tonalRamp": [
+          "oklch(15.0% 0.103 265.0)",
+          "oklch(26.4% 0.103 265.0)",
+          "oklch(37.9% 0.103 265.0)",
+          "oklch(49.3% 0.103 265.0)",
+          "oklch(60.7% 0.103 265.0)",
+          "oklch(72.1% 0.103 265.0)",
+          "oklch(83.6% 0.103 265.0)",
+          "oklch(95.0% 0.103 265.0)"
+        ]
+      },
+      "link-hover-dark": {
+        "role": "primary",
+        "displayName": "Azul-Tinta de Link (hover) (tema escuro)",
+        "canonical": "#bccefa",
+        "oklch": "oklch(85.3% 0.065 267.6)",
+        "tonalRamp": [
+          "oklch(15.0% 0.065 267.6)",
+          "oklch(26.4% 0.065 267.6)",
+          "oklch(37.9% 0.065 267.6)",
+          "oklch(49.3% 0.065 267.6)",
+          "oklch(60.7% 0.065 267.6)",
+          "oklch(72.1% 0.065 267.6)",
+          "oklch(83.6% 0.065 267.6)",
+          "oklch(95.0% 0.065 267.6)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Título da faixa do dia."
+      },
+      "quote": {
+        "displayName": "Quote",
+        "purpose": "Citação do dia, em branco sobre a faixa."
+      },
+      "numeral": {
+        "displayName": "Numeral",
+        "purpose": "Ano em foco; numerais romanos das cartas na mesma família."
+      },
+      "wordmark": {
+        "displayName": "Wordmark",
+        "purpose": "\"Paradise Gate\" no cabeçalho."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Títulos de seção, com a estrela e a régua."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Nomes de página em cartões, lista e peças."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Texto corrido de interface."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Metadados, contagens, chips, botões; sem caixa alta."
+      },
+      "hero-title": {
+        "displayName": "Hero Title",
+        "purpose": "Só \"Paradise Gate\" no topo da home da marca."
+      },
+      "hero-lede": {
+        "displayName": "Hero Lede",
+        "purpose": "A frase da marca no topo da home, em creme de tarô."
+      },
+      "game-title": {
+        "displayName": "Game Title",
+        "purpose": "Título da faixa \"O jogo\" na home da marca."
+      },
+      "reading": {
+        "displayName": "Reading",
+        "purpose": "Parágrafo de leitura de \"O mundo\" na home da marca."
+      }
+    },
+    "shadows": [
+      {
+        "name": "panel",
+        "value": "0 1px 2px rgba(18,26,44,0.05), 0 14px 32px -22px rgba(18,26,44,0.28)",
+        "purpose": "Painéis, lista, cartões de capa e retratos (tema claro)."
+      },
+      {
+        "name": "panel-dark",
+        "value": "0 1px 2px rgba(0,0,0,0.3), 0 16px 34px -22px rgba(0,0,0,0.7)",
+        "purpose": "Sombra de painel no tema escuro."
+      },
+      {
+        "name": "tarot-card",
+        "value": "0 2px 6px rgba(3,8,24,0.35), 0 30px 60px -26px rgba(3,8,24,0.85)",
+        "purpose": "Só a carta do dia; o único objeto elevado."
+      },
+      {
+        "name": "state-seal",
+        "value": "0 3px 10px rgba(3,8,24,0.35)",
+        "purpose": "Selo de aniversário sobre a carta."
+      },
+      {
+        "name": "gold-inset-line",
+        "value": "inset 0 0 0 1px color-mix(in srgb, var(--pg-gold) 40%, transparent)",
+        "purpose": "Fio dourado das cartas de impulso e das arcanas na home; ouro pleno no hover/ativo. Não é elevação."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Virada da carta, hover de cartões e todo o movimento da home da marca."
+      },
+      {
+        "name": "tarot-flip",
+        "value": "rotateY(-180deg -> 0) 1.2s, atraso 0.25s",
+        "purpose": "A carta do dia vira uma vez ao carregar (wiki e home)."
+      },
+      {
+        "name": "state-transition",
+        "value": "0.2s ease-out",
+        "purpose": "Hover de botões, chips, bordas."
+      },
+      {
+        "name": "home-tilt",
+        "value": "até 9deg Y / 7deg X, 0.6s",
+        "purpose": "Home da marca: a carta do dia inclina com o ponteiro (só mouse)."
+      },
+      {
+        "name": "home-magnet",
+        "value": "até 6px, retorno 0.45s",
+        "purpose": "Home da marca: ímã leve nos convites grandes (só mouse)."
+      },
+      {
+        "name": "home-spark-trail",
+        "value": "faíscas gold, vida ~1.1s",
+        "purpose": "Home da marca: rastro do ponteiro/dedo no céu, que se apaga."
+      },
+      {
+        "name": "home-parallax",
+        "value": "profundidades 0.12 / 0.3 / 0.6",
+        "purpose": "Home da marca: três camadas de estrelas com scroll e ponteiro."
+      },
+      {
+        "name": "home-reveal",
+        "value": "0.8-0.9s, cascata 70ms (retratos) / 75ms (impulsos)",
+        "purpose": "Home da marca: blocos sobem uma vez; impulsos viram uma vez; leque das arcanas abre com o scroll e fica aberto."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "prefers-reduced-motion: reduce",
+        "purpose": "Desliga tudo acima; a home aparece parada e visível, com o leque aberto."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "narrow",
+        "value": "340px"
+      },
+      {
+        "name": "sm",
+        "value": "560px"
+      },
+      {
+        "name": "md",
+        "value": "760px"
+      },
+      {
+        "name": "lg",
+        "value": "860px"
+      },
+      {
+        "name": "home-lg",
+        "value": "960px"
+      },
+      {
+        "name": "container",
+        "value": "1160px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botão Contornado",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Ação sobre o claro: coluna lateral e \"ver mais\".",
+      "html": "<button class=\"ds-btn-outline\">Ver todas as páginas</button>",
+      "css": ".ds-btn-outline { background: transparent; color: var(--pg-link); border: 1px solid var(--pg-line-strong); border-radius: 10px; padding: 12px 16px; font: 600 14.5px/1.2 'Hanken Grotesk', system-ui, sans-serif; cursor: pointer; transition: background-color 0.2s ease-out, border-color 0.2s ease-out; } .ds-btn-outline:hover { background: var(--pg-link-wash); border-color: var(--pg-link); } .ds-btn-outline:focus-visible { outline: 2px solid var(--pg-link); outline-offset: 3px; }"
+    },
+    {
+      "name": "Entrar",
+      "kind": "button",
+      "refersTo": "button-on-dark",
+      "description": "Pílula do cabeçalho sobre o azul-noite.",
+      "html": "<div class=\"ds-night\"><button class=\"ds-btn-entrar\">Entrar</button></div>",
+      "css": ".ds-night { background: var(--pg-night); padding: 20px; } .ds-btn-entrar { min-height: 44px; padding: 11px 16px; border-radius: 999px; border: 1px solid var(--pg-gold-soft); background: color-mix(in srgb, var(--pg-gold) 10%, transparent); color: var(--pg-tarot-cream); font: 600 14px/1 'Hanken Grotesk', system-ui, sans-serif; cursor: pointer; transition: background-color 0.2s ease-out, border-color 0.2s ease-out; } .ds-btn-entrar:hover { background: rgba(255,255,255,0.1); border-color: var(--pg-gold); color: #fff; } .ds-btn-entrar:focus-visible { outline: 2px solid var(--pg-gold); outline-offset: 3px; }"
+    },
+    {
+      "name": "Convite Primário (home)",
+      "kind": "button",
+      "refersTo": "button-hero-primary",
+      "description": "\"Conhecer o mundo\" / \"Abrir a ficha\" sobre o céu da home da marca.",
+      "html": "<div class=\"ds-night\"><a class=\"ds-btn-hero\" href=\"#\">Conhecer o mundo</a></div>",
+      "css": ".ds-night { background: var(--pg-night); padding: 20px; } .ds-btn-hero { display: inline-flex; align-items: center; min-height: 48px; padding: 12px 22px; border-radius: 999px; border: 1px solid #fff; background: #fff; color: var(--pg-night); font: 600 15px/1 'Hanken Grotesk', system-ui, sans-serif; text-decoration: none; transition: background-color 0.2s ease-out, border-color 0.2s ease-out; } .ds-btn-hero:hover { background: var(--pg-on-dark); border-color: var(--pg-gold); } .ds-btn-hero:focus-visible { outline: 2px solid var(--pg-gold); outline-offset: 3px; }"
+    },
+    {
+      "name": "Convite Secundário (home)",
+      "kind": "button",
+      "refersTo": "button-hero-secondary",
+      "description": "\"Sou da mesa\": a língua do Entrar, em tamanho de convite.",
+      "html": "<div class=\"ds-night\"><button class=\"ds-btn-hero-2\">Sou da mesa</button></div>",
+      "css": ".ds-night { background: var(--pg-night); padding: 20px; } .ds-btn-hero-2 { min-height: 48px; padding: 12px 22px; border-radius: 999px; border: 1px solid var(--pg-gold-soft); background: color-mix(in srgb, var(--pg-gold) 10%, transparent); color: var(--pg-tarot-cream); font: 600 15px/1 'Hanken Grotesk', system-ui, sans-serif; cursor: pointer; transition: background-color 0.2s ease-out, border-color 0.2s ease-out, color 0.2s ease-out; } .ds-btn-hero-2:hover { border-color: var(--pg-gold); background: color-mix(in srgb, var(--pg-gold) 20%, transparent); color: #fff; } .ds-btn-hero-2:focus-visible { outline: 2px solid var(--pg-gold); outline-offset: 3px; }"
+    },
+    {
+      "name": "Busca",
+      "kind": "input",
+      "refersTo": "search-field",
+      "description": "Busca em pílula no cabeçalho, caret dourado.",
+      "html": "<div class=\"ds-night\"><input class=\"ds-search\" type=\"search\" placeholder=\"Buscar na wiki\" aria-label=\"Buscar\"></div>",
+      "css": ".ds-night { background: var(--pg-night); padding: 20px; } .ds-search { width: 100%; max-width: 420px; padding: 12px 18px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: #fff; caret-color: var(--pg-gold); font: 400 15px/1.3 'Hanken Grotesk', system-ui, sans-serif; } .ds-search:focus { outline: none; border-color: var(--pg-gold); background: rgba(255,255,255,0.12); }"
+    },
+    {
+      "name": "Chip de Filtro",
+      "kind": "chip",
+      "refersTo": "filter-chip",
+      "description": "Filtro por tipo; ativo em link cheio.",
+      "html": "<button class=\"ds-chip\">Personagens</button> <button class=\"ds-chip is-on\">Lugares</button>",
+      "css": ".ds-chip { padding: 9px 15px; border-radius: 999px; border: 1px solid var(--pg-line-strong); background: var(--pg-panel); color: var(--pg-muted); font: 500 13.5px/1 'Hanken Grotesk', system-ui, sans-serif; cursor: pointer; transition: color 0.2s ease-out, border-color 0.2s ease-out; } .ds-chip:hover { color: var(--pg-ink); border-color: var(--pg-link); } .ds-chip.is-on { background: var(--pg-link); border-color: var(--pg-link); color: var(--pg-panel); font-weight: 600; } .ds-chip:focus-visible { outline: 2px solid var(--pg-link); outline-offset: 3px; }"
+    },
+    {
+      "name": "Cartão de Capa / Retrato",
+      "kind": "card",
+      "refersTo": "cover-card",
+      "description": "Capa retrato 4:5 com nome em Castoro; Novidades da wiki e retratos da home.",
+      "html": "<a class=\"ds-cover\" href=\"#\"><span class=\"ds-cover-img\"></span><span class=\"ds-cover-name\">Nome da página</span><span class=\"ds-cover-meta\">Personagem</span></a>",
+      "css": ".ds-cover { display: flex; flex-direction: column; width: 170px; border-radius: 12px; overflow: hidden; background: var(--pg-panel); border: 1px solid var(--pg-line); box-shadow: 0 1px 2px rgba(18,26,44,0.05), 0 14px 32px -22px rgba(18,26,44,0.28); color: inherit; text-decoration: none; transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), border-color 0.2s ease-out; } .ds-cover:hover { transform: translateY(-3px); border-color: var(--pg-line-strong); } .ds-cover:focus-visible { outline: 2px solid var(--pg-link); outline-offset: 3px; } .ds-cover-img { display: block; aspect-ratio: 4 / 5; background: var(--pg-band); } .ds-cover-name { padding: 11px 13px 2px; font: 400 17px/1.25 Castoro, Georgia, serif; color: var(--pg-ink); } .ds-cover:hover .ds-cover-name { color: var(--pg-link); } .ds-cover-meta { padding: 0 13px 12px; font: 400 12.5px/1.35 'Hanken Grotesk', system-ui, sans-serif; color: var(--pg-muted); }"
+    },
+    {
+      "name": "Título de Seção",
+      "kind": "custom",
+      "refersTo": "headline",
+      "description": "Estrela de quatro pontas, Castoro Titling 17px e régua de 1px.",
+      "html": "<h2 class=\"ds-sec\"><span class=\"ds-sec-star\"><svg viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M12 1.5 14.2 9.8 22.5 12 14.2 14.2 12 22.5 9.8 14.2 1.5 12 9.8 9.8Z\"/></svg></span>O mundo<span class=\"ds-sec-rule\"></span></h2>",
+      "css": ".ds-sec { display: flex; align-items: center; gap: 10px; margin: 0; font: 400 17px/1.2 'Castoro Titling', Castoro, Georgia, serif; letter-spacing: 0.07em; color: var(--pg-ink); } .ds-sec-star { display: inline-flex; color: var(--pg-link); } .ds-sec-rule { flex: 1; height: 1px; background: var(--pg-line); }"
+    },
+    {
+      "name": "Carta de Impulso (home)",
+      "kind": "card",
+      "refersTo": "drive-card",
+      "description": "Carta plana sobre o verso, fio dourado inset; vira uma vez ao entrar na tela.",
+      "html": "<div class=\"ds-night\"><div class=\"ds-drive\"><span class=\"ds-drive-star\"><svg viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M12 1.5 14.2 9.8 22.5 12 14.2 14.2 12 22.5 9.8 14.2 1.5 12 9.8 9.8Z\"/></svg></span><span class=\"ds-drive-name\">Nome do impulso</span><p class=\"ds-drive-sub\">uma linha sobre ele</p></div></div>",
+      "css": ".ds-night { background: var(--pg-night); padding: 20px; } .ds-drive { display: grid; gap: 10px; width: 200px; height: 158px; padding: 18px 18px 16px; border-radius: 12px; background: var(--pg-card-back); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pg-gold) 40%, transparent); transition: box-shadow 0.25s ease-out; } .ds-drive:hover { box-shadow: inset 0 0 0 1px var(--pg-gold); } .ds-drive-star { color: var(--pg-gold); } .ds-drive-name { font: 400 14.5px/1.25 'Castoro Titling', Castoro, Georgia, serif; letter-spacing: 0.03em; color: #fff; } .ds-drive-sub { margin: 0; font: italic 400 14.5px/1.4 Castoro, Georgia, serif; color: var(--pg-on-dark-muted); }"
+    },
+    {
+      "name": "Arcana (home)",
+      "kind": "button",
+      "refersTo": "arcana-card",
+      "description": "Botão-carta de uma arcana maior: numeral no canto, símbolo em traço dourado.",
+      "html": "<div class=\"ds-night\"><button class=\"ds-arcana\" aria-label=\"XVII, A Estrela\"><span class=\"ds-arcana-num\">XVII</span><span class=\"ds-arcana-glyph\"><svg viewBox=\"0 0 24 24\" width=\"26\" height=\"26\" aria-hidden=\"true\"><path fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\" d=\"M12 1.5 14.2 9.8 22.5 12 14.2 14.2 12 22.5 9.8 14.2 1.5 12 9.8 9.8Z\"/></svg></span></button></div>",
+      "css": ".ds-night { background: var(--pg-night); padding: 20px; } .ds-arcana { position: relative; width: 78px; height: 128px; padding: 0; border: 0; border-radius: 8px; background: var(--pg-card-back); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pg-gold) 40%, transparent); color: var(--pg-gold); cursor: pointer; transition: translate 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.2s ease-out; } .ds-arcana:hover { translate: 0 -14px; box-shadow: inset 0 0 0 1px var(--pg-gold); } .ds-arcana:focus-visible { outline: 2px solid var(--pg-gold); outline-offset: 2px; } .ds-arcana-num { position: absolute; top: 7px; left: 8px; font: 400 12px/1 'Castoro Titling', Castoro, Georgia, serif; letter-spacing: 0.06em; color: var(--pg-tarot-cream); } .ds-arcana-glyph { position: absolute; left: 50%; top: 50%; width: 26px; height: 26px; margin: -13px 0 0 -13px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "O Portal sob o Céu Noturno",
+    "overview": "Paradise Gate é uma wiki de fandom de verdade — cabeçalho com busca, destaques do dia, coluna lateral, listas densas — e a identidade do mundo entra só pelos detalhes: céu azul-noite com poeira de estrelas (estática na wiki; na home da marca, um céu que responde a quem visita), a estrela de quatro pontas como marcador, a carta de tarô do dia com numeral romano e douração fina. A estrutura é de portal clássico; a assinatura é pequena, recorrente e sempre a mesma.\n\nO azul domina. Duas faixas escuras no topo (noite e azul-profundo) carregam o céu; o corpo é claro e azulado, com painéis brancos de borda fina e sombra difusa. O ouro velho é luz, não superfície: aparece em fios, no foco e em estrelas pequenas. A densidade é de wiki: muito conteúdo visível, lista compacta com miniatura, sem blocos decorativos vazios.\n\nO sistema recusa o cartão creme genérico empilhado e o \"site de fantasia\" performático (carro alegórico): nada de texturas pesadas, ornamentos ou animação contínua. Na wiki, o único movimento de assinatura é a carta do dia virar uma vez ao carregar. A home da marca (`/`) pode se mexer mais — rica, mas reativa (decisão da usuária, 2026-09-25): tudo responde a scroll, ponteiro ou toque e para quando a pessoa para, nada fica em loop, e tudo se desliga em `prefers-reduced-motion`.",
+    "keyCharacteristics": [
+      "Estrutura de portal de wiki (cabeçalho, faixa do dia, corpo em duas colunas com coluna lateral).",
+      "Azul-noite e azul-profundo com poeira de estrelas só nas superfícies escuras: estática na wiki, céu em canvas com paralaxe no topo da home da marca.",
+      "Movimento só reativo, e só na home da marca; nada em loop em lugar nenhum.",
+      "Estrela de quatro pontas em SVG como marcador único de seção; o selo da marca (o portal, `public/selo.svg`) no cabeçalho e no rodapé.",
+      "Ouro velho só em fios, foco e estrelas pequenas.",
+      "Três vozes tipográficas: Castoro Titling (marca, títulos), Castoro (nomes, citação), Hanken Grotesk (interface).",
+      "Tema escuro por `prefers-color-scheme`, trocando só os valores dos tokens."
+    ],
+    "rules": [
+      {
+        "name": "The Gold Is Light Rule",
+        "body": "O ouro é fio de 1px, anel de foco ou estrela pequena. Nunca vira fundo de painel, botão ou faixa. A única área dourada existente é o selo \"Aniversário hoje\" na carta, um evento raro; não generalize. Na home da marca vale igual: nenhum botão ganha fundo dourado ou creme; o véu de ouro a 10–20% do convite secundário (a língua do \"Entrar\") é o limite, e o ouro entra só como fio de 1px, foco, estrela, faísca do rastro e traço de símbolo.",
+        "section": "colors"
+      },
+      {
+        "name": "The Stars Stay Dark Rule",
+        "body": "A poeira de estrelas (`--pg-stars`, estática; ou o céu em canvas do topo da home da marca) só aparece sobre azul-noite, azul-profundo ou verso da carta. O corpo claro nunca recebe estrelas.",
+        "section": "colors"
+      },
+      {
+        "name": "The Titling Voice Rule",
+        "body": "Castoro Titling é reservada à marca, títulos de seção, placa da carta, numerais e rodapé. Nomes de página são sempre Castoro, nunca Titling.",
+        "section": "typography"
+      },
+      {
+        "name": "The Quiet Label Rule",
+        "body": "Metadados em Hanken Grotesk ficam em caixa normal, sem espaçamento extra (o build zera `text-transform` e `letter-spacing` herdados). As maiúsculas do sistema vêm só da Castoro Titling.",
+        "section": "typography"
+      },
+      {
+        "name": "The Home Scale Rule",
+        "body": "Os tamanhos de display da home da marca (título até 80px, frase até 32px, título do jogo até 52px, leitura 19px, citação 21px) são dela. A wiki, as páginas internas e as páginas de leitura ficam na escala de cima.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Lifted Object Rule",
+        "body": "Só a carta do dia tem sombra profunda. Todo o resto usa a sombra de painel ou nenhuma. Na home da marca também: a carta do dia usa a sombra de carta; os retratos, a de painel; as cartas de impulso e as arcanas são planas, desenhadas só com um fio dourado inset de 1px (`box-shadow: inset 0 0 0 1px`, ouro a 40%; ouro pleno no hover ou na carta ativa).",
+        "section": "elevation"
+      },
+      {
+        "name": "The Reactive Motion Rule",
+        "body": "Na home da marca, nada se mexe sem a pessoa: o movimento responde a scroll, ponteiro ou toque e para quando ela para; revelações acontecem uma vez; nada fica em loop; e tudo se desliga em `prefers-reduced-motion`. Na wiki e nas páginas internas continua valendo o único movimento de assinatura, a carta virar uma vez.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "**Do** manter a estrutura de portal de wiki (cabeçalho com busca, faixa do dia, corpo em duas colunas com coluna lateral) e deixar a identidade nos detalhes.",
+      "**Do** usar a estrela de quatro pontas em SVG com `currentColor` como marcador de seção.",
+      "**Do** manter o ouro em fios de 1px, no anel de foco (2px, offset 3px) e em estrelas pequenas.",
+      "**Do** dar a toda página sem imagem o bloco `band` estrelado com a inicial, para as grades não quebrarem.",
+      "**Do** trocar tema claro/escuro só pelos valores dos tokens `--pg-*`, nunca por regras paralelas.",
+      "**Do** desligar a virada da carta, os saltos de hover e as transições em `prefers-reduced-motion` — e, na home da marca, também o céu, o rastro, a inclinação da carta, o ímã, as revelações e o leque.",
+      "**Do** manter o movimento da home da marca reativo: responde a scroll, ponteiro ou toque, para quando a pessoa para, e cada revelação acontece uma vez.",
+      "**Do** usar numerais romanos para as cartas e `tabular-nums` para números do mundo (ano, contagens). Números da wiki aparecem exatos (\"1.043\"), e o que está zerado não aparece."
+    ],
+    "donts": [
+      "**Don't** transformar a home (da wiki ou da marca) em \"site de fantasia\" performático: nada de ornamentos, texturas pesadas ou animação contínua. Na wiki, o único movimento de assinatura é a carta virar uma vez; na home da marca, o movimento é só reativo e nunca em loop.",
+      "**Don't** voltar ao cartão creme genérico empilhado como estrutura de página.",
+      "**Don't** pôr poeira de estrelas sobre o corpo claro ou em painéis brancos.",
+      "**Don't** usar o ouro como fundo de painel, botão ou faixa.",
+      "**Don't** escrever metadados em Hanken Grotesk com caixa alta espaçada; as maiúsculas são da Castoro Titling.",
+      "**Don't** criar, redesenhar ou \"completar\" o selo da marca; ele é só o arquivo `public/selo.svg`.",
+      "**Don't** inventar lore, personagens, lugares, nomes ou termos. Conteúdo do mundo vem só do que está publicado na wiki ou do que o autor passar."
+    ]
+  }
+}

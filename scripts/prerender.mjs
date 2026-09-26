@@ -13,8 +13,10 @@ const DIST = path.resolve(process.argv[2] || "dist");
 const API = "https://firestore.googleapis.com/v1/projects/rotina-555dd/databases/(default)/documents";
 // Imagem da prévia de link pra home e pra página sem retrato (public/og-padrao.png, 1200×630).
 const DEFAULT_IMAGE = SITE + "/og-padrao.png";
-// Texto da prévia de link da home, escrito pelo autor (voz da Academia Whitmore).
 const HOME_DESC = "É com satisfação que a Academia Whitmore confirma sua admissão para a leitura de seu arquivo mais completo. Bem-vindo à Paradise Gate Wiki!";
+// Texto da prévia de link da home da marca (/home), ainda em construção: sem link público, fora
+// do mapa do site, só pra quem já tem o endereço direto.
+const BRAND_DESC = "Fantasia urbana sombria e RPG de mesa. A magia existe, escondida no mundo de hoje: conheça o mundo na wiki e as escolhas da ficha.";
 
 async function getDoc(p) {
   const r = await fetch(`${API}/${p}`);
@@ -55,7 +57,11 @@ const home = page(homeTitle, headTags({ title: homeTitle, description: HOME_DESC
 // pasta wiki/ ao lado; os dois existem e são iguais.
 write("wiki.html", home);
 write("wiki/index.html", home);
-write("index.html", page(SITE_NAME, headTags({ title: SITE_NAME, description: HOME_DESC, path: "/", image: DEFAULT_IMAGE })));
+write("index.html", page(SITE_NAME, headTags({ title: SITE_NAME, description: HOME_DESC, path: "/wiki", image: DEFAULT_IMAGE })));
+// /home: em construção, sem link nenhum apontando pra ela ainda (nem daqui, nem do mapa do
+// site) — só prevê a prévia de link pra quem abrir o endereço direto.
+const homeMarca = `${SITE_NAME} · Home`;
+write("home.html", page(homeMarca, headTags({ title: homeMarca, description: BRAND_DESC, path: "/home", image: DEFAULT_IMAGE })));
 const tl = `Linha do tempo · ${SITE_NAME}`;
 write("wiki/_timeline.html", page(tl, headTags({ title: tl, description: "Os acontecimentos de Paradise Gate, ano a ano.", path: "/wiki/_timeline", image: DEFAULT_IMAGE })));
 const pf = `Seu perfil · ${SITE_NAME}`;
