@@ -3,3 +3,7 @@ dist/
 .DS_Store
 *.local
 node_modules/.tmp/
+
+# Impeccable: páginas de decisão e capturas de revisão são só locais
+.impeccable/questions/
+.impeccable/review/

@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { WikiHomePage } from "./pages/WikiHomePage";
+import { HomePage } from "./pages/HomePage";
 import { EntryPage } from "./pages/EntryPage";
 import { TimelinePage } from "./pages/TimelinePage";
 import { ProfilePage } from "./pages/ProfilePage";
@@ -23,9 +24,8 @@ export default function App() {
     <>
       <ScrollToTop />
       <Routes>
-        {/* A home do site é trabalho da colaboradora (docs/plano-passagem.md); por enquanto / só
-            leva pra wiki. */}
-        <Route path="/" element={<Navigate to="/wiki" replace />} />
+        {/* Home da marca: o verso da caixa do jogo (o mundo, o jogo, a mesa, as novidades). */}
+        <Route path="/" element={<HomePage />} />
         <Route path="/wiki" element={<HomeRoute />} />
         <Route path="/wiki/_timeline" element={<TimelinePage />} />
         <Route path="/wiki/_perfil" element={<ProfilePage />} />

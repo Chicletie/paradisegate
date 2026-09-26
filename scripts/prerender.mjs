@@ -14,6 +14,7 @@ const API = "https://firestore.googleapis.com/v1/projects/rotina-555dd/databases
 // Imagem da prévia de link pra home e pra página sem retrato (public/og-padrao.png, 1200×630).
 const DEFAULT_IMAGE = SITE + "/og-padrao.png";
 // Texto da prévia de link da home, escrito pelo autor (voz da Academia Whitmore).
+const BRAND_DESC = "Fantasia urbana sombria e RPG de mesa. A magia existe, escondida no mundo de hoje: conheça o mundo na wiki e as escolhas da ficha.";
 const HOME_DESC = "É com satisfação que a Academia Whitmore confirma sua admissão para a leitura de seu arquivo mais completo. Bem-vindo à Paradise Gate Wiki!";
 
 async function getDoc(p) {
@@ -55,7 +56,7 @@ const home = page(homeTitle, headTags({ title: homeTitle, description: HOME_DESC
 // pasta wiki/ ao lado; os dois existem e são iguais.
 write("wiki.html", home);
 write("wiki/index.html", home);
-write("index.html", page(SITE_NAME, headTags({ title: SITE_NAME, description: HOME_DESC, path: "/", image: DEFAULT_IMAGE })));
+write("index.html", page(SITE_NAME, headTags({ title: SITE_NAME, description: BRAND_DESC, path: "/", image: DEFAULT_IMAGE })));
 const tl = `Linha do tempo · ${SITE_NAME}`;
 write("wiki/_timeline.html", page(tl, headTags({ title: tl, description: "Os acontecimentos de Paradise Gate, ano a ano.", path: "/wiki/_timeline", image: DEFAULT_IMAGE })));
 const pf = `Seu perfil · ${SITE_NAME}`;
@@ -64,7 +65,7 @@ write("wiki/_perfil.html", page(pf, headTags({ title: pf, description: HOME_DESC
 const bs = `Busca · ${SITE_NAME}`;
 write("wiki/_busca.html", page(bs, headTags({ title: bs, description: HOME_DESC, path: "/wiki/_busca", noindex: true })));
 
-const urls = [{ path: "/wiki" }, { path: "/wiki/_timeline" }];
+const urls = [{ path: "/" }, { path: "/wiki" }, { path: "/wiki/_timeline" }];
 let count = 0;
 for (const id of Object.keys(entries).sort()) {
   const e = entries[id] || {};

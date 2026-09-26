@@ -20,6 +20,9 @@
   --pg-gold-soft: rgba(201, 164, 92, 0.55);
   --pg-on-dark: #eef2fb;
   --pg-on-dark-muted: #b9c8ec;
+  /* Iguais nos dois temas (DESIGN.md): creme da carta e traço das constelações. */
+  --pg-tarot-cream: #f3e6c4;
+  --pg-constellation: #a9bff0;
   --pg-f-title: "Castoro Titling", "Castoro", Georgia, serif;
   --pg-f-serif: "Castoro", Georgia, serif;
   --pg-f-ui: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -57,6 +60,8 @@
   --color-pg-gold: var(--pg-gold);
   --color-pg-on-dark: var(--pg-on-dark);
   --color-pg-on-dark-muted: var(--pg-on-dark-muted);
+  --color-pg-tarot-cream: var(--pg-tarot-cream);
+  --color-pg-constellation: var(--pg-constellation);
   --font-pg-title: var(--pg-f-title);
   --font-pg-serif: var(--pg-f-serif);
   --font-pg-ui: var(--pg-f-ui);
