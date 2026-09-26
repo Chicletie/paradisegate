@@ -2,6 +2,7 @@ import { dailyKey, gmt3DateKey, seededShuffle } from "../lib/daily";
 import type { HomeEntry } from "../lib/home";
 
 export const isCharacter = (e: HomeEntry) => e.type === "Personagem" || e.type === "Lupino";
+export const isFaction = (e: HomeEntry) => e.type === "Facção";
 
 /**
  * Os rostos de "O mundo": personagens com capa, embaralhados pelo dia (todo visitante vê os
@@ -15,4 +16,12 @@ export function homeFaces(entries: HomeEntry[], skipId: string | null, now = Dat
   const withCover = shuffled.filter((e) => e.cover);
   const without = shuffled.filter((e) => !e.cover);
   return withCover.concat(without).slice(0, n);
+}
+
+/**
+ * As facções publicadas na wiki, por nome. Só o que o mestre já publicou como Facção — a
+ * lista cresce sozinha conforme ele publica mais (nada inventado aqui).
+ */
+export function homeFactions(entries: HomeEntry[]): HomeEntry[] {
+  return entries.filter(isFaction).sort((a, b) => (a.title || "").localeCompare(b.title || ""));
 }
