@@ -17,13 +17,19 @@ permitido (estrelas cintilando, poeira dourada, brilho na carta), parando fora d
 `prefers-reduced-motion`. Página toda escura, sem os painéis brancos da wiki.
 Pendências com o mestre: frase da marca (provisória), exceção de movimento no DESIGN.md, link da marca.
 
+Pivô de conteúdo (usuária, 2026-09-26): a home é uma landing page, não uma segunda wiki — a
+galeria de "Os personagens" virou "As facções" (só o tipo Facção já publicado; hoje é só
+"Hades", cresce sozinha conforme o mestre publica mais). No final entra "Quem joga": nome real
+de cada jogador da mesa + o personagem dele (nunca inventado — a lista vem da usuária em
+src/home/players.ts; vazia por enquanto, a seção não renderiza até ter dado real).
+
 ## Direction contract
 
 THESIS: Entrar em Paradise Gate é atravessar o portal: o scroll leva a câmera através do selo, pra dentro do mundo. Recusa o topo estático de imagem, frase e cartões, e a cara de portal de wiki.
 
 OWN-WORLD: Azul-noite de ponta a ponta com céu vivo (estrelas que cintilam, poeira dourada), o selo em ouro como porta, Castoro Titling em escala de cartaz, Castoro para nomes e leitura, cartas de tarô com fio dourado e brilho de folha que segue o ponteiro. Ouro só em fio, luz e estrela.
 
-STORY: A pessoa chega diante do portal, rola, atravessa, e do outro lado encontra a carta do dia; depois o mundo em texto, os personagens em cartas grandes, as escolhas reais da ficha, a mesa e as novidades.
+STORY: A pessoa chega diante do portal, rola, atravessa, e do outro lado encontra a carta do dia; depois o mundo em texto, as facções publicadas em cartas grandes, as escolhas reais da ficha, a mesa, as novidades e, no final, quem joga a campanha de verdade.
 
 FIRST VIEWPORT: Céu vivo de tela cheia. No centro o selo dourado a ~45vh, com brilho no vão do arco; abaixo "PARADISE GATE" em Titling até 120px escrevendo letra a letra, a frase em Castoro itálico e dois convites. Embaixo, "Role pra atravessar" com um fio que desce.
 

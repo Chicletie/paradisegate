@@ -1,29 +1,29 @@
-import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
+import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
 import { Link } from "react-router-dom";
 import { usePgBody } from "../lib/usePgBody";
 import { useWikiIndex, useWikiIndexFailed } from "../lib/wikiIndex";
-import { dailyHighlights, entriesFromIndex, recentEntries, recentNotes, type DailyHighlights, type HomeEntry } from "../lib/home";
-import { objPos, pgShortDate } from "../lib/format";
+import { dailyHighlights, entriesFromIndex, type DailyHighlights, type HomeEntry } from "../lib/home";
+import { objPos } from "../lib/format";
 import { quoteAttrKids, QuoteDialogue } from "../lib/quotes";
-import { kindLabel } from "../lib/escritos";
-import { arcanaInfo } from "../lib/arcana";
 import { useAccount } from "../lib/account";
 import { featuresOf, useJogoAccess } from "../jogo/access";
 import { PgHeader } from "../components/PgHeader";
 import { PgFooter } from "../components/PgFooter";
 import { ArcanaGlyph, PgConstellation, PgNoCover, PgSectionHead, PgStar, PgUserIcon } from "../components/PgIcons";
-import { TarotCard } from "../components/TarotCard";
-import { homeFaces, isCharacter } from "../home/content";
+import { homeFactions } from "../home/content";
 import { ARCANAS, GRUPOS, IMPULSOS, PERGUNTA_ARCANA, PERGUNTA_NOME, RACAS } from "../home/jogo";
 import { startSky } from "../home/sky";
 import { pinProgress, portalFrame, trackShift } from "../home/scroll";
 
 /*
- * Home da marca (/): entrar em Paradise Gate é atravessar o portal. O scroll leva a câmera
- * pelo vão do selo; do outro lado, a carta do dia. Depois o mundo, os personagens, as escolhas
- * reais da ficha, a mesa e as novidades. Só dado público: o índice da wiki e o sorteio do dia,
- * os mesmos da /wiki. Céu vivo e sutil (para fora da tela); em prefers-reduced-motion nada anda
- * e o portal vira uma página comum, de cima pra baixo.
+ * Home da marca (/home, ainda sem link): landing page, não uma segunda wiki. O scroll leva a
+ * câmera pelo vão do selo; do outro lado, o convite pra criar um personagem (o Livro de Regras
+ * ainda não existe, e a página não finge que existe). Depois o mundo, as facções publicadas
+ * (nunca a galeria de personagens — isso é wiki, não landing), as escolhas reais da ficha, a
+ * mesa (com o convite pra conhecer a campanha na wiki), a inscrição pra novidades (ainda sem
+ * serviço nenhum por trás — não finge que funciona) e, no final, quem criou Paradise Gate. Só
+ * dado público: o índice da wiki e o sorteio do dia, os mesmos da /wiki. Céu vivo e sutil (para
+ * fora da tela); em prefers-reduced-motion nada anda e o portal vira uma página comum.
  */
 
 const wikiHref = (id: string) => `/wiki/${encodeURIComponent(id)}`;
@@ -40,10 +40,7 @@ export function HomePage() {
   const loading = !index && !failed;
   const entries = useMemo(() => (index ? entriesFromIndex(index) : []), [index]);
   const daily = useMemo(() => (index ? dailyHighlights(entries) : null), [index, entries]);
-  const faces = useMemo(() => homeFaces(entries, daily?.char?.id ?? null, undefined, 10), [entries, daily]);
-  const characters = useMemo(() => entries.filter(isCharacter).length, [entries]);
-  // Quem já aparece no portal ou na galeria não se repete nas Novidades.
-  const shown = useMemo(() => new Set([daily?.char?.id, ...faces.map((f) => f.id)].filter((id): id is string => !!id)), [daily, faces]);
+  const factions = useMemo(() => homeFactions(entries), [entries]);
   useReveal(root);
 
   return (
@@ -51,12 +48,13 @@ export function HomePage() {
       <StarCursor root={root} />
       <PgHeader />
       <main>
-        <Portal daily={daily} />
+        <Portal />
         <World entries={entries} daily={daily} />
-        <Gallery faces={faces} characters={characters} loading={loading} failed={failed} />
+        <Factions items={factions} loading={loading} failed={failed} />
         <Game />
         <Mesa />
-        <Now entries={entries} skip={shown} loading={loading} failed={failed} />
+        <Subscribe />
+        <Creators />
       </main>
       <PgFooter />
     </div>
@@ -266,13 +264,12 @@ function SplitText({ text, as: Tag = "h2", className, id, now }: { text: string;
   );
 }
 
-function Portal({ daily }: { daily: DailyHighlights | null }) {
+function Portal() {
   const section = useRef<HTMLElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const sky = useRef<HTMLCanvasElement>(null);
   const skyCtl = useRef<ReturnType<typeof startSky> | null>(null);
   const primary = useMagnet<HTMLAnchorElement>();
-  const [crossed, setCrossed] = useState(() => reducedMotion());
 
   useEffect(() => {
     if (!sky.current || !stage.current) return;
@@ -295,7 +292,6 @@ function Portal({ daily }: { daily: DailyHighlights | null }) {
     el.style.setProperty("--reveal", f.reveal.toFixed(3));
     el.classList.toggle("is-through", f.reveal > 0.5);
     skyCtl.current?.setWarp(f.warp, 0.4);
-    if (f.reveal > 0.01) setCrossed(true);
   });
 
   return (
@@ -326,55 +322,35 @@ function Portal({ daily }: { daily: DailyHighlights | null }) {
           <span className="pg-hm-cue-line" />
         </p>
         <div className="pg-hm-flash" aria-hidden="true" />
-        <Beyond daily={daily} crossed={crossed} />
+        <Beyond />
       </div>
     </section>
   );
 }
 
-/** O outro lado do portal: a carta do dia, montada só quando a travessia começa (pra virar
- * na frente de quem chegou). */
-function Beyond({ daily, crossed }: { daily: DailyHighlights | null; crossed: boolean }) {
+/** O outro lado do portal: o Livro de Regras ainda não existe (nada de fingir que existe), então
+ * quem atravessa cai direto na única coisa real e pronta hoje: a ficha em branco. */
+function Beyond() {
   const card = useFoil<HTMLDivElement>(9);
-  const c = daily?.char ?? null;
   return (
     <div className="pg-hm-beyond">
-      {c?.cover && <div className="pg-hm-beyond-bg" style={{ backgroundImage: `url("${c.cover}")`, backgroundPosition: objPos(c.coverFocus) }} aria-hidden="true" />}
       <div className="pg-hm-beyond-inner">
         <div className="pg-hm-card pg-hm-foil" ref={card}>
-          {crossed && daily ? <TarotCard daily={daily} /> : <CardBack />}
+          <div className="pg-hm-book">
+            <span className="pg-hm-book-badge">Em breve</span>
+            <PgStar className="pg-hm-book-star" />
+            <p className="pg-hm-book-title">Livro de Regras</p>
+          </div>
         </div>
         <div className="pg-hm-beyond-text">
           <h2 className="pg-hm-beyond-title">Do outro lado</h2>
-          <p>
-            Todo dia uma carta nova sai do baralho, a mesma pra quem entrar hoje.
-            {c ? " A de hoje é " : ""}
-            {c ? <Link to={wikiHref(c.id)}>{c.title}</Link> : null}
-            {c ? "." : ""}
-          </p>
-          <Link className="pg-hm-btn is-primary" to="/wiki">
-            Entrar na wiki
-          </Link>
+          <p>O Livro de Regras completo de Paradise Gate ainda está sendo escrito. Enquanto isso, já dá pra criar seu personagem e começar a jogar.</p>
+          <a className="pg-hm-btn is-primary" href="/fichas.html">
+            Abrir uma ficha em branco
+          </a>
         </div>
       </div>
     </div>
-  );
-}
-
-function CardBack() {
-  return (
-    <figure className="pg-tarot-fig" aria-busy="true">
-      <div className="pg-tarot is-empty">
-        <div className="pg-tarot-inner">
-          <div className="pg-tarot-back">
-            <PgStar className="pg-tarot-back-star" />
-          </div>
-        </div>
-      </div>
-      <figcaption className="pg-caption">
-        <span>Personagem do dia</span>
-      </figcaption>
-    </figure>
   );
 }
 
@@ -438,9 +414,6 @@ function World({ entries, daily }: { entries: HomeEntry[]; daily: DailyHighlight
               </p>
             )}
             <div className="pg-hm-actions">
-              <Link className="pg-hm-btn is-primary" to="/wiki">
-                Abrir a wiki
-              </Link>
               <Link className="pg-hm-textlink" to="/wiki?aleatoria=1">
                 Página aleatória
               </Link>
@@ -452,9 +425,10 @@ function World({ entries, daily }: { entries: HomeEntry[]; daily: DailyHighlight
   );
 }
 
-/** Personagens numa trilha horizontal presa no scroll (telas largas); no celular, uma fileira
- * que se arrasta. */
-function Gallery({ faces, characters, loading, failed }: { faces: HomeEntry[]; characters: number; loading: boolean; failed: boolean }) {
+/** As facções publicadas na wiki, numa trilha horizontal presa no scroll (telas largas); no
+ * celular, uma fileira que se arrasta. Só o que o mestre já publicou — sem personagens, sem
+ * nada de fora da wiki: a lista cresce sozinha conforme ele publica mais. */
+function Factions({ items, loading, failed }: { items: HomeEntry[]; loading: boolean; failed: boolean }) {
   const section = useRef<HTMLElement>(null);
   const track = useRef<HTMLUListElement>(null);
   const [pinned, setPinned] = useState(false);
@@ -482,29 +456,35 @@ function Gallery({ faces, characters, loading, failed }: { faces: HomeEntry[]; c
     const p = pinProgress(r.top, r.height, vh);
     t.style.transform = `translate3d(${trackShift(p, t.scrollWidth + 48, vw).toFixed(1)}px, 0, 0)`;
     el.style.setProperty("--gp", p.toFixed(3));
-  }, [pinned, faces.length]);
+  }, [pinned, items.length]);
+
+  const note = items.length === 1 ? "1 facção publicada na wiki, com mais a caminho." : items.length > 1 ? `${items.length} facções publicadas na wiki, com mais a caminho.` : null;
 
   return (
     <section className={"pg-hm-gallery" + (pinned ? " is-pinned" : "")} ref={section} aria-labelledby="pg-hm-gallery-h">
       <div className="pg-hm-gallery-stage">
         <div className="pg-hm-wrap pg-hm-gallery-head">
-          <SplitText text="Os personagens" id="pg-hm-gallery-h" className="pg-hm-display" />
-          {characters > 0 && (
-            <p className="pg-hm-gallery-note">
-              {characters.toLocaleString("pt-BR")} já têm página na wiki. A ordem muda todo dia.
-            </p>
-          )}
+          <SplitText text="As facções" id="pg-hm-gallery-h" className="pg-hm-display" />
+          {note && <p className="pg-hm-gallery-note">{note}</p>}
         </div>
         {failed ? (
-          <p className="pg-hm-wrap pg-hm-state">Não consegui carregar os personagens agora. Atualize a página pra tentar de novo.</p>
+          <p className="pg-hm-wrap pg-hm-state">Não consegui carregar as facções agora. Atualize a página pra tentar de novo.</p>
+        ) : loading ? (
+          <ul className="pg-hm-track" ref={track} aria-busy="true" aria-label="Carregando facções">
+            {Array.from({ length: 3 }, (_, i) => (
+              <li key={i} className="pg-hm-gcard is-loading" />
+            ))}
+          </ul>
+        ) : items.length === 0 ? (
+          <p className="pg-hm-wrap pg-hm-state">Nenhuma facção publicada ainda.</p>
         ) : (
-          <ul className="pg-hm-track" ref={track} aria-busy={loading || undefined}>
-            {loading
-              ? Array.from({ length: 6 }, (_, i) => <li key={i} className="pg-hm-gcard is-loading" />)
-              : faces.map((e, i) => <GalleryCard key={e.id} e={e} i={i} />)}
+          <ul className="pg-hm-track" ref={track}>
+            {items.map((e, i) => (
+              <FactionCard key={e.id} e={e} i={i} />
+            ))}
           </ul>
         )}
-        {pinned && (
+        {pinned && items.length > 0 && (
           <div className="pg-hm-wrap" aria-hidden="true">
             <span className="pg-hm-progress" />
           </div>
@@ -514,22 +494,19 @@ function Gallery({ faces, characters, loading, failed }: { faces: HomeEntry[]; c
   );
 }
 
-function GalleryCard({ e, i }: { e: HomeEntry; i: number }) {
+function FactionCard({ e, i }: { e: HomeEntry; i: number }) {
   const foil = useFoil<HTMLAnchorElement>(8);
-  const arc = arcanaInfo(e.arcana);
   return (
     <li className="pg-hm-gcard" style={{ "--i": i } as CSSProperties}>
-      <Link className="pg-hm-gcard-link pg-hm-foil" to={wikiHref(e.id)} ref={foil} title={arc ? arc.label : undefined}>
+      <Link className="pg-hm-gcard-link pg-hm-foil" to={wikiHref(e.id)} ref={foil}>
         <span className="pg-hm-gcard-img">
           {e.cover ? <img src={e.cover} alt="" loading="lazy" style={{ objectPosition: objPos(e.coverFocus) }} /> : <PgNoCover title={e.title} />}
         </span>
         <span className="pg-hm-gcard-num" aria-hidden="true">
-          {arc ? arc.numeral : <PgStar className="pg-hm-gcard-star" />}
+          <PgStar className="pg-hm-gcard-star" />
         </span>
         <span className="pg-hm-gcard-plate">
-          {arc ? <ArcanaGlyph glyph={arc.glyph} className="pg-hm-gcard-glyph" /> : null}
           <span className="pg-hm-gcard-name">{e.title || "(sem título)"}</span>
-          {arc ? <span className="pg-sr">{", carta " + arc.label}</span> : null}
         </span>
       </Link>
     </li>
@@ -720,79 +697,11 @@ function Mesa() {
         <div className="pg-hm-mesa" data-reveal="rise">
           <MesaPanel />
         </div>
+        <p className="pg-hm-mesa-more" data-reveal="rise">
+          <Link to="/wiki">Conheça a campanha Paradise Gate para mais detalhes.</Link>
+        </p>
       </div>
     </section>
-  );
-}
-
-function Now({ entries, skip, loading, failed }: { entries: HomeEntry[]; skip: Set<string>; loading: boolean; failed: boolean }) {
-  const news = useMemo(() => recentEntries(entries.filter((e) => !skip.has(e.id))).slice(0, 6), [entries, skip]);
-  const notes = useMemo(() => recentNotes(entries).slice(0, 3), [entries]);
-  return (
-    <section className="pg-hm-now" aria-labelledby="pg-hm-news-h">
-      <div className="pg-hm-wrap">
-        <PgSectionHead text="Novidades" id="pg-hm-news-h" />
-        {failed ? (
-          <p className="pg-hm-state">Não consegui carregar as novidades agora.</p>
-        ) : loading ? (
-          <ul className="pg-hm-news" aria-busy="true" aria-label="Carregando novidades">
-            {Array.from({ length: 6 }, (_, i) => (
-              <li key={i} className="pg-hm-face is-loading" />
-            ))}
-          </ul>
-        ) : news.length === 0 ? (
-          <p className="pg-hm-state">Nenhuma página nova por enquanto.</p>
-        ) : (
-          <ul className="pg-hm-news" aria-labelledby="pg-hm-news-h">
-            {news.map((e, i) => (
-              <li key={e.id} data-reveal="face" style={{ "--i": i } as CSSProperties}>
-                <Portrait e={e} meta={e.updatedAt ? pgShortDate(e.updatedAt) : e.type || ""} />
-              </li>
-            ))}
-          </ul>
-        )}
-        {notes.length > 0 && (
-          <Notes>
-            {notes.map((n) => (
-              <li key={n.id}>
-                <Link to={n.href}>
-                  <span className="pg-hm-note-title">{n.title || "(sem título)"}</span>
-                  <span className="pg-hm-note-meta">
-                    {kindLabel(n.tipo) + (n.entryTitle ? " · " + n.entryTitle : "") + (n.date ? " · " + pgShortDate(n.date) : "")}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </Notes>
-        )}
-        <div className="pg-hm-actions">
-          <Link className="pg-hm-textlink" to="/wiki">
-            Ver tudo na wiki
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Notes({ children }: { children: ReactNode }) {
-  return (
-    <>
-      <h3 className="pg-hm-sub-h">Escritos recentes</h3>
-      <ul className="pg-hm-notes">{children}</ul>
-    </>
-  );
-}
-
-function Portrait({ e, meta }: { e: HomeEntry; meta?: string }) {
-  return (
-    <Link className="pg-hm-portrait" to={wikiHref(e.id)}>
-      <span className="pg-hm-portrait-img">
-        {e.cover ? <img src={e.cover} alt="" loading="lazy" style={{ objectPosition: objPos(e.coverFocus) }} /> : <PgNoCover title={e.title} />}
-      </span>
-      <span className="pg-hm-portrait-name">{e.title || "(sem título)"}</span>
-      {meta && <span className="pg-hm-portrait-meta">{meta}</span>}
-    </Link>
   );
 }
 
@@ -840,5 +749,65 @@ function MesaPanel() {
         </Link>
       </div>
     </>
+  );
+}
+
+/** Ainda não existe nenhum jeito de avisar novidade por e-mail (nem Brevo público, só os
+ * convites). O campo funciona (dá pra digitar), mas não envia pra lugar nenhum ainda — a nota
+ * abaixo diz isso, sem fingir sucesso. */
+function Subscribe() {
+  const [email, setEmail] = useState("");
+  const [sent, setSent] = useState(false);
+  return (
+    <section className="pg-hm-subscribe" aria-labelledby="pg-hm-subscribe-h">
+      <div className="pg-hm-wrap">
+        <PgSectionHead text="Novidades" id="pg-hm-subscribe-h" />
+        <p className="pg-hm-subscribe-lede">Ainda não temos um jeito de avisar por e-mail quando sair conteúdo novo — mas já estamos preparando um. Deixe o seu abaixo.</p>
+        <form
+          className="pg-hm-subscribe-form"
+          onSubmit={(ev) => {
+            ev.preventDefault();
+            setSent(true);
+          }}
+        >
+          <input
+            type="email"
+            required
+            placeholder="seu@email.com"
+            aria-label="Seu e-mail"
+            aria-describedby="pg-hm-subscribe-note"
+            value={email}
+            onChange={(ev) => setEmail(ev.target.value)}
+          />
+          <button className="pg-hm-btn is-primary" type="submit">
+            Avisem-me
+          </button>
+        </form>
+        <p id="pg-hm-subscribe-note" className="pg-hm-subscribe-note">
+          {sent ? "Essa parte ainda está em construção — seu e-mail não foi guardado em lugar nenhum." : "Ainda não está ligado a nada — em breve."}
+        </p>
+      </div>
+    </section>
+  );
+}
+
+/** Quem criou Paradise Gate. Só o que já é público (o mestre já assina o projeto com esse
+ * nome nos dois repositórios do site): nada de biografia ou link inventado. */
+function Creators() {
+  return (
+    <section className="pg-hm-creators" aria-labelledby="pg-hm-creators-h">
+      <div className="pg-hm-wrap">
+        <PgSectionHead text="Criadores" id="pg-hm-creators-h" />
+        <div className="pg-hm-creator" data-reveal="rise">
+          <span className="pg-hm-creator-mark" aria-hidden="true">
+            <PgStar />
+          </span>
+          <div>
+            <p className="pg-hm-creator-name">Chicletie</p>
+            <p className="pg-hm-creator-role">Criador e mestre de Paradise Gate.</p>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }

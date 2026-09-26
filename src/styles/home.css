@@ -238,10 +238,32 @@ body:not(.page-home),
 .pg-hm-beyond-text p a:hover { text-decoration-color: var(--pg-gold); }
 
 .pg-hm-card { position: relative; justify-self: center; width: 100%; max-width: 340px; }
-.pg-hm-card .pg-tarot { max-width: 340px; }
 .pg-hm-card .pg-caption { color: var(--pg-on-dark-muted); }
-/* Um brilho de folha dourada passa pela carta de tempos em tempos. */
-.pg-hm-anim .pg-hm-card .pg-tarot::after {
+
+/* O Livro de Regras: ainda não existe, então o card é claramente "em breve", não uma capa real. */
+.pg-hm-book {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  aspect-ratio: 7 / 11.4;
+  padding: 32px 22px;
+  border-radius: 14px;
+  overflow: hidden;
+  background-color: var(--pg-card-back);
+  background-image: var(--pg-stars);
+  background-size: 140px 120px;
+  box-shadow: inset 0 0 0 1px var(--pg-hm-gold-line), 0 2px 6px rgba(3, 8, 24, 0.35), 0 30px 60px -26px rgba(3, 8, 24, 0.85);
+  text-align: center;
+}
+.pg-hm-book-badge { padding: 5px 14px; border-radius: 999px; border: 1px solid var(--pg-hm-gold-line); background: color-mix(in srgb, var(--pg-gold) 16%, transparent); font-family: var(--pg-f-ui); font-size: 11.5px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--pg-tarot-cream); }
+.pg-hm-book-star { width: 34px; height: 34px; color: var(--pg-gold); }
+.pg-hm-book-title { margin: 0; font-family: var(--pg-f-title); font-size: 24px; letter-spacing: 0.05em; line-height: 1.2; color: #fff; }
+/* Um brilho de folha dourada passa pelo card de tempos em tempos. */
+.pg-hm-anim .pg-hm-card .pg-hm-book::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -261,7 +283,6 @@ body:not(.page-home),
 .pg-hm-foil { --rx: 0deg; --ry: 0deg; --gx: 50%; --gy: 50%; transform: perspective(1000px) rotateX(var(--rx)) rotateY(var(--ry)); transition: transform 0.6s var(--pg-hm-ease); }
 .pg-hm-foil::after { content: ""; position: absolute; inset: 0; z-index: 4; border-radius: 14px; pointer-events: none; background: radial-gradient(circle at var(--gx) var(--gy), color-mix(in srgb, var(--pg-tarot-cream) 60%, transparent), transparent 45%); mix-blend-mode: soft-light; opacity: 0; transition: opacity 0.3s ease-out; }
 .pg-hm-foil.is-lit::after { opacity: 1; }
-.pg-hm-card.pg-hm-foil::after { bottom: 36px; }
 
 /* ---------- Botões ---------- */
 
@@ -474,33 +495,33 @@ body:not(.page-home),
 .pg-hm-mesa-text p { margin: 0; }
 .pg-hm-mesa-text .pg-hm-mesa-note { margin-top: 6px; font-size: 13.5px; color: var(--pg-on-dark-muted); }
 .pg-hm-mesa-links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.pg-hm-mesa-more { margin: 18px 0 0; font-family: var(--pg-f-ui); font-size: 14.5px; color: var(--pg-on-dark-muted); }
+.pg-hm-mesa-more a { color: var(--pg-on-dark); text-decoration-color: var(--pg-gold-soft); text-underline-offset: 4px; }
+.pg-hm-mesa-more a:hover { color: #fff; text-decoration-color: var(--pg-gold); }
 
-/* ---------- Novidades ---------- */
+/* ---------- Novidades: inscrição (sem serviço nenhum por trás ainda) ---------- */
 
-.pg-hm-now { padding: 16px 0 72px; }
-.pg-hm-news { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; }
-.pg-hm-face.is-loading { aspect-ratio: 4 / 5.9; border-radius: 12px; background: var(--pg-card-back); opacity: 0.6; }
-.pg-hm-portrait { display: flex; flex-direction: column; height: 100%; border-radius: 12px; overflow: hidden; background: var(--pg-card-back); border: 1px solid rgba(255, 255, 255, 0.08); color: inherit; text-decoration: none; transition: transform 0.35s var(--pg-hm-ease), border-color 0.25s ease-out; }
-.pg-hm-portrait:hover { transform: translateY(-4px); border-color: var(--pg-gold-soft); }
-.pg-hm-portrait-img { position: relative; display: block; aspect-ratio: 4 / 5; overflow: hidden; background: var(--pg-night); }
-.pg-hm-portrait-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.8s var(--pg-hm-ease); }
-.pg-hm-portrait:hover .pg-hm-portrait-img img { transform: scale(1.05); }
-.pg-hm-portrait-img .pg-nocover { position: absolute; inset: 0; display: grid; place-items: center; width: auto; height: auto; margin: 0; border-radius: 0; }
-.pg-hm-portrait-name { min-height: 2.5em; padding: 11px 13px 2px; font-family: var(--pg-f-serif); font-size: 16.5px; line-height: 1.25; color: #fff; }
-.pg-hm-portrait-meta { padding: 0 13px 12px; font-family: var(--pg-f-ui); font-size: 12.5px; color: var(--pg-on-dark-muted); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pg-hm-sub-h { margin: 34px 0 8px; font-family: var(--pg-f-ui); font-size: 14px; font-weight: 600; color: #fff; }
-.pg-hm-notes { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--pg-hm-veil); }
-.pg-hm-notes a { display: flex; flex-direction: column; gap: 2px; min-height: 44px; padding: 11px 8px; margin: 0 -8px; border-bottom: 1px solid var(--pg-hm-veil); color: inherit; text-decoration: none; transition: background-color 0.2s ease-out; }
-.pg-hm-notes a:hover { background: rgba(255, 255, 255, 0.05); }
-.pg-hm-note-title { font-family: var(--pg-f-serif); font-size: 16.5px; color: #fff; }
-.pg-hm-note-meta { font-family: var(--pg-f-ui); font-size: 12.5px; color: var(--pg-on-dark-muted); }
+.pg-hm-subscribe { padding: 16px 0 72px; }
+.pg-hm-subscribe-lede { margin: 14px 0 22px; max-width: 56ch; font-family: var(--pg-f-ui); font-size: 15px; line-height: 1.6; color: var(--pg-on-dark-muted); }
+.pg-hm-subscribe-form { display: flex; flex-wrap: wrap; gap: 10px; max-width: 460px; }
+.pg-hm-subscribe-form input { flex: 1 1 220px; min-height: 48px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--pg-hm-gold-line); background: color-mix(in srgb, var(--pg-card-back) 60%, transparent); color: var(--pg-on-dark); font-family: var(--pg-f-ui); font-size: 15px; }
+.pg-hm-subscribe-form input::placeholder { color: var(--pg-on-dark-muted); }
+.pg-hm-subscribe-note { margin: 12px 0 0; font-family: var(--pg-f-ui); font-size: 13px; font-style: italic; color: var(--pg-on-dark-muted); }
 .pg-hm-state { margin: 0; font-family: var(--pg-f-ui); font-size: 14.5px; font-style: italic; color: var(--pg-on-dark-muted); }
+
+/* ---------- Criadores ---------- */
+
+.pg-hm-creators { padding: 16px 0 80px; }
+.pg-hm-creator { display: flex; align-items: center; gap: 18px; margin-top: 22px; }
+.pg-hm-creator-mark { display: grid; place-items: center; flex: none; width: 56px; height: 56px; border-radius: 50%; background-color: var(--pg-card-back); background-image: var(--pg-stars); background-size: 90px 70px; box-shadow: inset 0 0 0 1px var(--pg-hm-gold-line); color: var(--pg-gold); }
+.pg-hm-creator-mark svg { width: 20px; height: 20px; }
+.pg-hm-creator-name { margin: 0; font-family: var(--pg-f-title); font-size: 20px; letter-spacing: 0.04em; color: #fff; }
+.pg-hm-creator-role { margin: 4px 0 0; font-family: var(--pg-f-ui); font-size: 14px; color: var(--pg-on-dark-muted); }
 
 /* ---------- Tamanhos ---------- */
 
 @media (max-width: 960px) {
   .pg-hm-world-grid, .pg-hm-choices { grid-template-columns: minmax(0, 1fr); gap: 40px; }
-  .pg-hm-news { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .pg-hm-beyond-inner { grid-template-columns: 280px minmax(0, 1fr); gap: 40px; }
 }
 @media (max-width: 760px) {
@@ -511,7 +532,7 @@ body:not(.page-home),
   .pg-hm-sub { font-size: 15px; }
   .pg-hm-cta .pg-hm-btn { flex: 1 1 200px; }
   .pg-hm-beyond-inner { grid-template-columns: minmax(0, 1fr); gap: 24px; padding: 32px 16px; text-align: center; align-content: center; }
-  .pg-hm-card, .pg-hm-card .pg-tarot { max-width: 220px; }
+  .pg-hm-card { max-width: 220px; }
   .pg-hm-beyond-text p { font-size: 17px; margin: 12px 0 20px; }
   .pg-hm-world { padding: 72px 0 24px; }
   .pg-hm-track { padding: 10px 16px 18px; scroll-padding: 0 16px; gap: 14px; }
@@ -524,7 +545,6 @@ body:not(.page-home),
   .pg-hm-fan-glyph { width: 20px; height: 20px; margin: -8px 0 0 -10px; }
   .pg-hm-fan-num { top: 5px; left: 6px; font-size: 10.5px; }
   .pg-hm-mesa { grid-template-columns: minmax(0, 1fr); padding: 20px; }
-  .pg-hm-news { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 340px) {
   .pg-hm-names { columns: 1; }

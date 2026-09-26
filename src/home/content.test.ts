@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { HomeEntry } from "../lib/home";
-import { homeFaces } from "./content";
+import { homeFaces, homeFactions } from "./content";
 
 const DAY = Date.parse("2026-09-25T15:00:00Z");
 
@@ -41,5 +41,16 @@ describe("rostos da home", () => {
 
   it("sem personagens, lista vazia", () => {
     expect(homeFaces([entry("lugar", "Lugar", null)], null, DAY)).toEqual([]);
+  });
+});
+
+describe("facções da home", () => {
+  it("só o tipo Facção, em ordem alfabética", () => {
+    const list = [entry("hades", "Facção", null), entry("igreja", "Facção", null), entry("thomas", "Personagem", null)];
+    expect(homeFactions(list).map((f) => f.id)).toEqual(["hades", "igreja"]);
+  });
+
+  it("sem facção publicada, lista vazia", () => {
+    expect(homeFactions([entry("thomas", "Personagem", null)])).toEqual([]);
   });
 });
