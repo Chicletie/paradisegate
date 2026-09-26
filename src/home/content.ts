@@ -1,7 +1,7 @@
 import { dailyKey, gmt3DateKey, seededShuffle } from "../lib/daily";
 import type { HomeEntry } from "../lib/home";
 
-const isCharacter = (e: HomeEntry) => e.type === "Personagem" || e.type === "Lupino";
+export const isCharacter = (e: HomeEntry) => e.type === "Personagem" || e.type === "Lupino";
 
 /**
  * Os rostos de "O mundo": personagens com capa, embaralhados pelo dia (todo visitante vê os

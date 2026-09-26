@@ -24,8 +24,11 @@ export default function App() {
     <>
       <ScrollToTop />
       <Routes>
-        {/* Home da marca: o verso da caixa do jogo (o mundo, o jogo, a mesa, as novidades). */}
-        <Route path="/" element={<HomePage />} />
+        {/* Home da marca (em construção, revisão do mestre pendente): o verso da caixa do jogo
+            (o mundo, o jogo, a mesa, as novidades), por enquanto em /home, sem link nenhum
+            apontando pra ela. A raiz do site continua indo pra wiki. */}
+        <Route path="/" element={<Navigate to="/wiki" replace />} />
+        <Route path="/home" element={<HomePage />} />
         <Route path="/wiki" element={<HomeRoute />} />
         <Route path="/wiki/_timeline" element={<TimelinePage />} />
         <Route path="/wiki/_perfil" element={<ProfilePage />} />

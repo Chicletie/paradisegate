@@ -11,20 +11,22 @@ Modo: Persuade. Visitante: quem nunca ouviu falar de Paradise Gate, fã que veio
 Ação: entrar na wiki (principal); saber do jogo; jogador entrar/abrir fichas; ver novidades.
 Prova: só dado público (índice da wiki, sorteio do dia, listas reais da ficha). Nada de `wikiPublic`,
 `wikiRestrito` ou texto de spoiler. Arte: só as capas já publicadas na wiki.
-Movimento (decisão da usuária, 2026-09-25): rico, mas reativo. Tudo responde a scroll, ponteiro ou
-toque e para quando a pessoa para; nada em loop. Tudo desligado em `prefers-reduced-motion`.
-Pendências com o mestre: frase da marca (provisória), link da marca no cabeçalho continuar em `/wiki`.
+Movimento (decisões da usuária, 2026-09-25): primeira versão "rica, mas reativa" foi rejeitada
+("não tá chique o suficiente, cadê as animações, detalhes"). Agora: movimento contínuo sutil
+permitido (estrelas cintilando, poeira dourada, brilho na carta), parando fora da tela e em
+`prefers-reduced-motion`. Página toda escura, sem os painéis brancos da wiki.
+Pendências com o mestre: frase da marca (provisória), exceção de movimento no DESIGN.md, link da marca.
 
 ## Direction contract
 
-THESIS: A home é o verso da caixa do jogo: o mundo, o jogo, a mesa e as novidades, nessa ordem, cada parte provada com conteúdo real. Recusa o topo genérico com imagem, frase e três cartões iguais.
+THESIS: Entrar em Paradise Gate é atravessar o portal: o scroll leva a câmera através do selo, pra dentro do mundo. Recusa o topo estático de imagem, frase e cartões, e a cara de portal de wiki.
 
-OWN-WORLD: O sistema da wiki inteiro: azul-noite com poeira de estrelas só nas faixas escuras, papel azulado com painéis brancos de fio fino, ouro só em fio, foco e estrela, Castoro Titling / Castoro / Hanken, estrela de quatro pontas como marcador, a carta de tarô como único objeto elevado.
+OWN-WORLD: Azul-noite de ponta a ponta com céu vivo (estrelas que cintilam, poeira dourada), o selo em ouro como porta, Castoro Titling em escala de cartaz, Castoro para nomes e leitura, cartas de tarô com fio dourado e brilho de folha que segue o ponteiro. Ouro só em fio, luz e estrela.
 
-STORY: Em segundos a pessoa entende que Paradise Gate é um mundo de fantasia urbana sombria e um RPG de mesa, vê personagens reais, as escolhas reais da ficha (raça, classe, impulso, arcana), e sabe onde clicar: a wiki, a ficha, entrar na mesa.
+STORY: A pessoa chega diante do portal, rola, atravessa, e do outro lado encontra a carta do dia; depois o mundo em texto, os personagens em cartas grandes, as escolhas reais da ficha, a mesa e as novidades.
 
-FIRST VIEWPORT: Céu azul-noite de ponta a ponta sob o PgHeader. À esquerda, "Paradise Gate" em Castoro Titling grande, a frase da marca em Castoro, dois botões (Conhecer o mundo, primário; Sou da mesa). À direita, a carta do dia a 300px virando ao carregar e inclinando com o ponteiro. Estrelas em três camadas com paralaxe; o ponteiro deixa um rastro que se apaga.
+FIRST VIEWPORT: Céu vivo de tela cheia. No centro o selo dourado a ~45vh, com brilho no vão do arco; abaixo "PARADISE GATE" em Titling até 120px escrevendo letra a letra, a frase em Castoro itálico e dois convites. Embaixo, "Role pra atravessar" com um fio que desce.
 
-FORM: "O verso da caixa", posição 7 da minha lista ordenada, seed 8e0333fa. Movimento: rastro de estrelas do ponteiro (doação do mar bioluminescente), carta com inclinação, cartas de impulso que viram no scroll, revelações por seção uma vez.
+FORM: "O verso da caixa" refeito como travessia, seed 8e0333fa (overdrive: "Atravessar o portal"). Assinatura: zoom pelo vão do selo com as estrelas em dobra (warp) e revelação da carta do dia do outro lado; galeria horizontal presa no scroll; cursor de estrela; títulos letra a letra.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
