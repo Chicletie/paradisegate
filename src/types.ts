@@ -387,7 +387,7 @@ export interface WikiSuggestion {
 
 /** wikiRestrito/{wikiId}/itens/{id} — cada item diz em `permitidos` quais e-mails podem lê-lo. */
 export interface WikiRestritoItem {
-  kind: "campo" | "campo-confidencial" | "secao" | "tag" | "alias" | "galeria" | "sessao" | "post" | string;
+  kind: "campo" | "campo-confidencial" | "secao" | "tag" | "alias" | "galeria" | "sessao" | "escrito" | "post" | string;
   key?: string;
   value?: string;
   title?: string;

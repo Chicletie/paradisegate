@@ -62,8 +62,8 @@ function UnlockedRow({ item }: { item: WikiRestritoItem }) {
   );
 }
 
-/** Blocos (notas, seções, posts, sessões) que entram antes do item público `index`. */
-export function RestritoBlocks({ area, index }: { area: "notas" | "secoes" | "posts" | "tax-notas" | "sessoes"; index: number }) {
+/** Blocos (notas, seções, escritos, sessões) que entram antes do item público `index`. */
+export function RestritoBlocks({ area, index }: { area: "notas" | "secoes" | "escritos" | "posts" | "tax-notas" | "sessoes"; index: number }) {
   const items = useRestritoAt(area, index);
   return (
     <>
@@ -77,7 +77,8 @@ function UnlockedBlock({ item, area }: { item: WikiRestritoItem; area: string })
   const [guest, setGuest] = useState(false);
   const text = item.kind === "campo" ? item.value : item.kind === "sessao" ? item.recap : item.body;
   let heading: ReactNode;
-  if (area === "posts") heading = (item.date ? item.date + " · " : "") + (item.title || "(sem título)");
+  const isWriting = area === "escritos" || area === "posts";
+  if (isWriting) heading = (item.date ? item.date + " · " : "") + (item.title || "(sem título)");
   else if (area === "sessoes") heading = (item.title || "Sessão") + (item.date ? " · " + item.date : "");
   else heading = item.kind === "campo" ? item.key : item.title || "Seção";
   const body = (
@@ -97,7 +98,7 @@ function UnlockedBlock({ item, area }: { item: WikiRestritoItem; area: string })
       </div>
     );
   return (
-    <details className={"wiki-section pg-unlocked" + (area === "posts" ? " post" : "")} open>
+    <details className={"wiki-section pg-unlocked" + (isWriting ? " post" : "")} open>
       <summary className={area === "secoes" ? "cathead" : "post-summary"}>
         {heading}
         <Badge />

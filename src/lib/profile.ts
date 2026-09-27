@@ -13,8 +13,8 @@ export function accessLabel(it: WikiRestritoItem): string {
         ? "Versão confidencial de " + q(it.key)
         : it.kind === "secao"
           ? "Seção " + q(it.title)
-          : it.kind === "post"
-            ? "Nota " + q(it.title)
+          : it.kind === "escrito" || it.kind === "post"
+            ? "Escrito " + q(it.title)
             : it.kind === "sessao"
               ? "Sessão " + q(it.title)
               : it.kind === "tag"

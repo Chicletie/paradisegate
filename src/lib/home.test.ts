@@ -57,12 +57,14 @@ describe("busca e filtros", () => {
   const list = [
     e("alucard", { tags: ["renegado"], search: "Herdeiro caído marcado pelo pacto de sangue." }),
     e("ordem", { type: "Facção", posts: [{ id: "p", title: "Édito da Ordem" }] }),
+    e("vel", { type: "Local", escritos: [{ id: "w", page: "escrito-w", title: "Conto de teste", date: "2026-09-20", vis: "publico" }] }),
   ];
   it("busca no título, tipo, tags, título das notas e no texto", () => {
     expect(filterEntries(list, "RENEGADO", null, null).map((x) => x.id)).toEqual(["alucard"]);
     expect(filterEntries(list, "édito", null, null).map((x) => x.id)).toEqual(["ordem"]);
     expect(filterEntries(list, "facção", null, null).map((x) => x.id)).toEqual(["ordem"]);
     expect(filterEntries(list, "pacto", null, null).map((x) => x.id)).toEqual(["alucard"]);
+    expect(filterEntries(list, "conto de teste", null, null).map((x) => x.id)).toEqual(["vel"]);
   });
   it("filtro por tipo e por tag", () => {
     expect(filterEntries(list, "", "Facção", null).map((x) => x.id)).toEqual(["ordem"]);
