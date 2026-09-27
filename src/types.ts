@@ -210,6 +210,10 @@ export interface WikiLink {
   coverStyle?: LinkStyle;
   /** Spoiler por obra: id da temporada em que a relação é revelada. */
   at?: string;
+  /** Árvore genealógica: quem é quem (k = apelido da pessoa na árvore; via = de qual pai é o avô,
+   * qual pai o meio-irmão divide, de qual filho é o neto; with = com quem o filho foi tido; bk =
+   * ordem de nascimento). Página publicada antes de 2026-09-27 não traz. */
+  fam?: { k: string; via?: string | string[]; with?: string; bk?: number };
 }
 
 export interface WikiGalleryItem {
@@ -262,6 +266,8 @@ export interface WikiEntryDoc extends WikiArticleBundle {
   variants?: WikiVariant[];
   events?: WikiIndexEvent[];
   restritoSlots?: RestritoSlotMark[];
+  /** Ordem de nascimento da própria pessoa (só quando o ano aparece), pra árvore genealógica. */
+  birthKey?: number;
 }
 
 export interface WikiSeasonSession {

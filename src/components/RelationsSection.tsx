@@ -29,7 +29,7 @@ export function RelationsSection({ data }: { data: WikiEntryDoc }) {
 
   const panels: { label: string; content: ReactNode }[] = [];
   if (hasRel) panels.push({ label: "Relações", content: <RelationGroups title={data.title} links={links} backlinks={backlinks} /> });
-  if (hasFamilyData(links)) panels.push({ label: "Genealogia", content: <FamilyTree title={data.title} links={links} /> });
+  if (hasFamilyData(links)) panels.push({ label: "Genealogia", content: <FamilyTree title={data.title} links={links} birthKey={data.birthKey} /> });
   if (eventsSorted.length) panels.push({ label: "Linha do tempo", content: <EntryTimeline events={eventsSorted} links={[...links, ...backlinks]} /> });
 
   return (

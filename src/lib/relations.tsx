@@ -1,12 +1,12 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { WikiIndexEvent, WikiLink, LinkStyle } from "../types";
 import { fmtEventDate, eventSortKey } from "./events";
 import { RenderMarkdown, WikiLinkUpgrade } from "./markdown";
 import { LinkCard } from "../components/LinkCard";
-import { FT_MIN_W, familyLayout, type FtItem } from "./familyLayout";
+import { familyHasAny, familyInputFromLinks, familyTreeLayout, ftMinWidth, type FtBox } from "./familyLayout.js";
 
-// Porta de FAMILY_LABEL_BUCKET/familyOf/buildFamilyTree, EDGE_STYLE/affinitiesOf/
+// Porta de buildFamilyTree, EDGE_STYLE/affinitiesOf/
 // relNeighbors/buildRelGroups e buildTimelineViz na wiki original.
 
 export const EDGE_STYLE: Record<LinkStyle, string> = {
@@ -22,129 +22,59 @@ export const EDGE_STYLE: Record<LinkStyle, string> = {
   neutral: "var(--pg-line-strong)",
 };
 
-const FAMILY_LABEL_BUCKET: Record<string, keyof FamilyBuckets> = {
-  "é filho(a) de": "parents",
-  "é filho(a) adotivo(a) de": "parents",
-  "é filho(a) de criação de": "parents",
-  "é pai/mãe de": "children",
-  "é pai/mãe adotivo(a) de": "children",
-  "é pai/mãe de criação de": "children",
-  "irmão/irmã de": "siblings",
-  "gêmeo(a) de": "siblings",
-  "meio-irmão/meia-irmã de": "halfSiblings",
-  "casado(a) com": "spouses",
-  "avô/avó de": "grandchildren",
-  "neto(a) de": "grandparents",
-};
-
-interface FamilyBuckets {
-  parents: WikiLink[];
-  children: WikiLink[];
-  siblings: WikiLink[];
-  halfSiblings: WikiLink[];
-  spouses: WikiLink[];
-  grandparents: WikiLink[];
-  grandchildren: WikiLink[];
-}
-
-function familyOf(links: WikiLink[] = []): FamilyBuckets {
-  const fam: FamilyBuckets = {
-    parents: [],
-    children: [],
-    siblings: [],
-    halfSiblings: [],
-    spouses: [],
-    grandparents: [],
-    grandchildren: [],
-  };
-  links.forEach((lk) => {
-    // Parentesco escondido (spoiler ou disfarce) nunca entra na árvore: ela revelaria o segredo.
-    if (lk.spoiler) return;
-    const bucket = lk.label && FAMILY_LABEL_BUCKET[lk.label];
-    if (bucket) fam[bucket].push(lk);
-  });
-  return fam;
-}
-
 // Nó clicável sem <a> dentro do SVG (o próprio wiki-core.js navega no clique do <g>, não com
 // um link envolvendo — um <a> do react-router com display:contents dentro de <svg> não
 // pinta os filhos em todo navegador).
-function TreeNode({ it, y, label, self, targetId }: { it: FtItem; y: number; label: string; self?: boolean; targetId?: string }) {
+function TreeNode({ b }: { b: FtBox }) {
   const navigate = useNavigate();
-  const clickable = !self && !!targetId;
+  const targetId = b.self ? undefined : (b.ref as WikiLink | null)?.targetId;
   return (
     <g
-      transform={`translate(${it.x},${y})`}
-      style={{ cursor: clickable ? "pointer" : undefined }}
-      onClick={clickable ? () => navigate(`/wiki/${encodeURIComponent(targetId!)}`) : undefined}
+      transform={`translate(${b.x},${b.y})`}
+      style={{ cursor: targetId ? "pointer" : undefined }}
+      onClick={targetId ? () => navigate(`/wiki/${encodeURIComponent(targetId)}`) : undefined}
     >
-      {it.short !== label && <title>{label}</title>}
+      {b.short !== b.label && <title>{b.label}</title>}
       <rect
-        x={-it.w / 2}
+        x={-b.w / 2}
         y={-13}
-        width={it.w}
+        width={b.w}
         height={26}
         rx={7}
-        fill={self ? "var(--accent-wash)" : "var(--surface)"}
-        stroke={self ? "var(--gold)" : "var(--border-strong)"}
+        fill={b.self ? "var(--accent-wash)" : "var(--surface)"}
+        stroke={b.self ? "var(--gold)" : "var(--border-strong)"}
       />
       <text className="wb-ft-label" y={4}>
-        {it.short}
+        {b.short}
       </text>
     </g>
   );
 }
 
 export function hasFamilyData(links: WikiLink[] = []): boolean {
-  const fam = familyOf(links);
-  return !!(
-    fam.parents.length ||
-    fam.children.length ||
-    fam.grandparents.length ||
-    fam.grandchildren.length ||
-    fam.siblings.length ||
-    fam.halfSiblings.length ||
-    fam.spouses.length
-  );
+  return familyHasAny(familyInputFromLinks("", null, links));
 }
 
-/** Porta de buildFamilyTree — mesmo layout de 5 níveis. */
-export function FamilyTree({ title, links }: { title: string; links?: WikiLink[] }) {
-  const fam = familyOf(links);
-  const sibs = [...fam.siblings, ...fam.halfSiblings];
-  if (!hasFamilyData(links)) return null;
-  return <FamilyTreeSvg title={title} fam={fam} sibs={sibs} />;
-}
+// Tracejado = adoção/criação; pontilhado = ligação que não dá pra situar (página publicada
+// antes da árvore saber quem é quem, ou parente não publicado).
+const DASH: Record<string, string | undefined> = { adocao: "5 3", incerto: "1 3" };
 
-function FamilyTreeSvg({ title, fam, sibs }: { title: string; fam: FamilyBuckets; sibs: WikiLink[] }) {
+/** Árvore genealógica na notação de genealogia (conta em familyLayout.js, igual à wiki original). */
+export function FamilyTree({ title, links, birthKey }: { title: string; links?: WikiLink[]; birthKey?: number | null }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
-
-  const nm = (lk: WikiLink) => lk.targetTitle;
-  const L = familyLayout(title, {
-    gp: fam.grandparents.map(nm),
-    p: fam.parents.map(nm),
-    sibs: sibs.map(nm),
-    sp: fam.spouses.map(nm),
-    c: fam.children.map(nm),
-    gc: fam.grandchildren.map(nm),
-  });
-  const { W, cx } = L;
-  const GP_Y = 20,
-    P_Y = 82,
-    SELF_Y = 144,
-    C_Y = 206,
-    GC_Y = 264,
-    H = 284;
-  // Árvore grande rola pro lado (a moldura já tem overflow-x) em vez de encolher até ficar ilegível.
-  const wide = W > FT_MIN_W;
-  const style = wide ? { minWidth: Math.round(Math.max(FT_MIN_W, W * 0.75)), maxWidth: Math.max(540, W) } : undefined;
+  const inp = familyInputFromLinks(title, birthKey ?? null, links || []);
+  const has = familyHasAny(inp);
+  const L = has ? familyTreeLayout(inp) : null;
+  const W = L ? L.W : 0,
+    cx = L ? L.cx : 0;
+  const minW = L ? ftMinWidth(W) : null;
   // Árvore larga rola por dentro (sem exigir espaço ao lado da ficha, senão descia pra baixo
   // dela e deixava um buraco) e abre com a pessoa no meio.
   useLayoutEffect(() => {
     const wrap = wrapRef.current,
       svg = svgRef.current;
-    if (!wide || !wrap || !svg) return;
+    if (!minW || !wrap || !svg) return;
     // Centra na primeira vez que aparece com largura (ela pode nascer na aba Genealogia escondida).
     const go = () => {
       if (!wrap.clientWidth) return false;
@@ -160,36 +90,23 @@ function FamilyTreeSvg({ title, fam, sibs }: { title: string; fam: FamilyBuckets
     });
     ro.observe(wrap);
     return () => ro.disconnect();
-  }, [wide, cx, W]);
-
-  // Linhas primeiro, caixas por cima (senão a linha de um cônjuge riscava a caixa do outro).
-  const lines: ReactNode[] = [];
-  const boxes: ReactNode[] = [];
-  function tier(list: WikiLink[], items: FtItem[], y: number, fromY: number, toY: number, dashed: boolean, key: string) {
-    list.forEach((lk, i) => {
-      lines.push(<line key={key + i} x1={items[i].x} y1={fromY} x2={cx} y2={toY} stroke="var(--border-strong)" strokeDasharray={dashed ? "2 3" : undefined} />);
-      boxes.push(<TreeNode key={key + i} it={items[i]} y={y} label={lk.targetTitle} targetId={lk.targetId} />);
-    });
-  }
-  tier(fam.grandparents, L.rows.gp, GP_Y, GP_Y + 13, P_Y - 13, true, "gp");
-  tier(fam.parents, L.rows.p, P_Y, P_Y + 13, SELF_Y - 13, false, "p");
-  sibs.forEach((lk, i) => {
-    lines.push(<line key={"s" + i} x1={L.rows.sibs[i].x} y1={SELF_Y} x2={cx} y2={SELF_Y} stroke="var(--border-strong)" />);
-    boxes.push(<TreeNode key={"s" + i} it={L.rows.sibs[i]} y={SELF_Y} label={lk.targetTitle} targetId={lk.targetId} />);
-  });
-  boxes.push(<TreeNode key="self" it={L.rows.self} y={SELF_Y} label={title} self />);
-  fam.spouses.forEach((lk, i) => {
-    lines.push(<line key={"sp" + i} x1={cx} y1={SELF_Y} x2={L.rows.sp[i].x} y2={SELF_Y} stroke="var(--border-strong)" strokeDasharray="2 3" />);
-    boxes.push(<TreeNode key={"sp" + i} it={L.rows.sp[i]} y={SELF_Y} label={lk.targetTitle} targetId={lk.targetId} />);
-  });
-  tier(fam.children, L.rows.c, C_Y, C_Y - 13, SELF_Y + 13, false, "c");
-  tier(fam.grandchildren, L.rows.gc, GC_Y, GC_Y - 13, C_Y + 13, true, "gc");
+  }, [minW, cx, W]);
+  if (!L) return null;
+  const style = minW ? { minWidth: minW, maxWidth: Math.max(540, W) } : undefined;
 
   return (
-    <div className="wb-famtree-wrap" ref={wrapRef} style={wide ? { contain: "inline-size" } : undefined}>
-      <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" className="wb-famtree" style={style}>
-        <g>{lines}</g>
-        <g>{boxes}</g>
+    <div className="wb-famtree-wrap" ref={wrapRef} style={minW ? { contain: "inline-size" } : undefined}>
+      <svg ref={svgRef} viewBox={`0 ${L.y0} ${W} ${L.y1 - L.y0}`} width="100%" className="wb-famtree" style={style}>
+        <g>
+          {L.lines.map((l, i) => (
+            <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} stroke="var(--border-strong)" strokeDasharray={DASH[l.dash]} />
+          ))}
+        </g>
+        <g>
+          {L.boxes.map((b, i) => (
+            <TreeNode key={i} b={b} />
+          ))}
+        </g>
       </svg>
     </div>
   );

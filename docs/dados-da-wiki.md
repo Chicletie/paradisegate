@@ -101,6 +101,24 @@ ligado a várias páginas: vem no `escritos` do índice de cada uma, e o site ju
 - **Spoiler** vem no índice sem trecho e com `at`: a lista mostra fechado ("Escrito com spoiler"),
   e a home nunca sorteia um.
 
+## Árvore genealógica (desde 2026-09-27)
+
+Desenhada na notação de genealogia pela conta em `src/lib/familyLayout.js` (o mesmo arquivo no editor e na
+wiki). Cada ligação de família publicada (pais, avós, irmãos, meio-irmãos, cônjuges, filhos,
+netos) traz `fam`:
+
+| Campo | Tipo | Uso |
+|---|---|---|
+| `k` | string | apelido da pessoa nesta árvore (`f1`, `f2`…; nunca o id interno) |
+| `via` | string (avô, neto) ou string[] (meio-irmão) | de qual pai é o avô; qual pai/mãe o meio-irmão divide; de qual filho é o neto |
+| `with` | string | com qual cônjuge o filho foi tido |
+| `bk` | number | ordem de nascimento (AAAAMMDD), só quando o ano aparece na página |
+
+A página traz também `birthKey` (a mesma ordem, da própria pessoa). Parentesco em spoiler ou
+disfarce não ganha `fam` e nunca serve de ponte (`via`/`with`) pra outro. Ponte pra alguém
+que não está publicado não vai: a árvore desenha essa ligação pontilhada ("não dá pra situar").
+Página publicada antes de 2026-09-27 não traz `fam` e cai nesse desenho até ser republicada.
+
 ## Texto dentro da página (markdown da casa)
 
 Lido por `src/lib/markdown.tsx`:
