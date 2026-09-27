@@ -6,6 +6,8 @@ describe("seus acessos", () => {
   it("rótulo de cada tipo de trecho, sem o prefixo tax:", () => {
     expect(accessLabel({ kind: "campo-confidencial", key: "tax:Habitat" })).toBe("Versão confidencial de “Habitat”");
     expect(accessLabel({ kind: "secao", title: "Diário", variant: "Antes do pacto" })).toBe("Seção “Diário” · Antes do pacto");
+    expect(accessLabel({ kind: "escrito", title: "Conto de teste" })).toBe("Escrito “Conto de teste”");
+    expect(accessLabel({ kind: "post", title: "Nota velha" })).toBe("Escrito “Nota velha”");
     expect(accessLabel({ kind: "galeria" })).toBe("Imagem da galeria");
     expect(accessLabel({ kind: "galeria", caption: "Retrato" })).toBe("Imagem da galeria “Retrato”");
     expect(accessLabel({ kind: "outro" })).toBe("Trecho restrito");

@@ -264,6 +264,7 @@ export function RestritoSlot({ items }: { items: WikiRestritoItem[] }) {
                 <RenderMarkdown text={it.recap} />
               </Fragment>
             );
+          case "escrito":
           case "post":
             return (
               <Fragment key={i}>

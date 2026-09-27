@@ -198,7 +198,7 @@ export function filterEntries(entries: HomeEntry[], query: string, type: string 
   return entries.filter((e) => {
     if (type && e.type !== type) return false;
     if (tag && (e.tags || []).indexOf(tag) === -1) return false;
-    const postTitles = (e.posts || []).map((p) => p.title).join(" ");
+    const postTitles = [...(e.escritos || []), ...(e.posts || [])].map((p) => p.title).join(" ");
     const hay = e.title + " " + e.type + " " + e.universe + " " + (e.tags || []).join(" ") + " " + postTitles + " " + (e.search || "");
     return !q || hay.toLowerCase().indexOf(q) !== -1;
   });

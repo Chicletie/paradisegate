@@ -20,6 +20,18 @@ describe("placeRestrito", () => {
     expect(p.placed.has(semMarca)).toBe(false);
   });
 
+  it("escrito restrito vai pra área escritos; o de página antiga, pra posts", () => {
+    const novo: WikiRestritoItem = { kind: "escrito", title: "Conto de teste", body: "z", slot: "re" };
+    const velho: WikiRestritoItem = { kind: "post", title: "Nota velha", body: "w", slot: "rp" };
+    const p = placeRestrito([novo, velho], [
+      { slot: "re", area: "escritos", before: 1 },
+      { slot: "rp", area: "posts", before: 0 },
+    ]);
+    expect(p.at.escritos?.[1]).toEqual([novo]);
+    expect(p.at.posts?.[0]).toEqual([velho]);
+    expect(countIn(p, "escritos") + countIn(p, "posts")).toBe(2);
+  });
+
   it("marca sem item liberado não desenha nada (leitor sem acesso)", () => {
     const p = placeRestrito([], [{ slot: "ra", area: "ficha", before: 0 }]);
     expect(countIn(p, "ficha")).toBe(0);

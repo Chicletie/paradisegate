@@ -120,7 +120,7 @@ export function scoreEntry(e: HomeEntry, query: string, ts: string[]): SearchRes
   const title = fold(e.title);
   const type = fold(e.type);
   const tags = (e.tags || []).map(fold);
-  const posts = fold((e.posts || []).map((p) => p.title).join(" "));
+  const posts = fold([...(e.escritos || []), ...(e.posts || [])].map((p) => p.title).join(" "));
   const text = fold(e.search);
   const q = fold(query).trim();
   let score = 0;

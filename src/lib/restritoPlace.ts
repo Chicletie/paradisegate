@@ -8,7 +8,7 @@ import type { RestritoSlotMark, WikiRestritoItem } from "../types";
  * components/RestritoPlace.tsx.
  */
 
-export type RestritoArea = "ficha" | "notas" | "secoes" | "posts" | "tags" | "aliases" | "tax-ficha" | "tax-notas" | "sessoes";
+export type RestritoArea = "ficha" | "notas" | "secoes" | "escritos" | "posts" | "tags" | "aliases" | "tax-ficha" | "tax-notas" | "sessoes";
 
 export interface Placement {
   at: Partial<Record<string, WikiRestritoItem[][]>>;

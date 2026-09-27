@@ -65,7 +65,7 @@ Como ler (já feito em `src/lib/wikiIndex.tsx`):
 | `updatedAt` | `AAAA-MM-DD` | "atualizado em" e desempate de partes |
 | `firstPublishedAt` | `AAAA-MM-DD` | fora dos sorteios do dia até o reset seguinte (00h de Brasília) |
 | `cover`, `coverFocus` | URL/null, `{x,y}`/null | miniatura |
-| `wordCount`, `linkCount`, `postsCount` | number | números da home |
+| `wordCount`, `linkCount`, `postsCount` | number | números da home (`postsCount` só em página publicada antes dos Escritos) |
 | `membros` | string[] | usernames citados com `[@nome](membro:nome)` fora de spoiler ("Personagens que interpreta" no perfil `/@nome`) |
 | `birthdayMD` | `MM-DD`/null | aniversariante do dia |
 | `arcana` | objeto/null | carta de tarô do Personagem do dia |
@@ -94,8 +94,10 @@ ligado a várias páginas: vem no `escritos` do índice de cada uma, e o site ju
 - **Página própria**: `wikiPublic/escrito-<id>`, com `kind: "escrito"` (tipo `WikiWritingDoc`),
   aberta em `/wiki/_escritos/<id>`. Só escrito público ou spoiler tem. Lista geral:
   `/wiki/_escritos` (filtros `?tipo=&canone=&origem=&tag=&pagina=`).
-- **Na página do personagem**: `escritos` (cartões, na mesma ordem de `posts`, que ainda traz o
-  texto inteiro). Restrito continua como `post` em `wikiRestrito`, na área `posts`.
+- **Na página do personagem**: `escritos` (cartões). O texto inteiro fica só na página própria
+  do escrito; `posts` (texto inteiro) só existe em página publicada antes de 2026-09-27.
+- **Restrito**: `kind: "escrito"` em `wikiRestrito`, na área `escritos` dos `restritoSlots`
+  (página publicada antes de 2026-09-27: `kind: "post"`, área `posts`). O site aceita os dois.
 - **Spoiler** vem no índice sem trecho e com `at`: a lista mostra fechado ("Escrito com spoiler"),
   e a home nunca sorteia um.
 

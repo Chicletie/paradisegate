@@ -35,7 +35,8 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
   const [activeTab, setActiveTab] = useState(0);
   const restrito = useRestrito(wikiId);
   const place = placeRestrito(restrito, data.restritoSlots);
-  const nPostsR = countIn(place, "posts"), nTagsR = countIn(place, "tags");
+  // Escrito restrito: área "escritos" (desde 2026-09-27) ou "posts" (publicado antes).
+  const nPostsR = countIn(place, "escritos") + countIn(place, "posts"), nTagsR = countIn(place, "tags");
   const [mine, toggleMine] = useMineToggle();
   const epigraph = quoteNorm(data.featuredQuote, data.title);
   // Itens do índice que valem pra página toda (só entram na aba Geral), na ordem do original.
@@ -125,11 +126,13 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
                   const p = (data.posts || []).find((x) => x.id === w.id);
                   return (
                     <Fragment key={w.id}>
+                      <RestritoBlocks area="escritos" index={i} />
                       <RestritoBlocks area="posts" index={i} />
                       {w.page ? <WritingCard w={{ ...w, entries: [] }} hidePages /> : p ? <PostBlock p={p} /> : null}
                     </Fragment>
                   );
                 })}
+                <RestritoBlocks area="escritos" index={data.escritos.length} />
                 <RestritoBlocks area="posts" index={data.escritos.length} />
               </div>
             ) : (
