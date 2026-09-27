@@ -10,9 +10,10 @@ export interface FtInput {
   parents: (FtPerson & { adopt?: boolean })[];
   gps: (FtPerson & { via?: string | null })[];
   sibs: (FtPerson & { half?: boolean; via?: string[]; bk?: number | null })[];
-  spouses: FtPerson[];
+  spouses: (FtPerson & { status?: "" | "ex" | "viuvo" })[];
   kids: (FtPerson & { with?: string | null; bk?: number | null; adopt?: boolean })[];
   gks: (FtPerson & { via?: string | null })[];
+  others?: (FtPerson & { term?: string })[];
 }
 export interface FtBox {
   x: number;
@@ -21,6 +22,8 @@ export interface FtBox {
   short: string;
   label: string;
   self: boolean;
+  /** Texto pequeno embaixo da caixa (termo do parente distante). */
+  term?: string;
   ref: unknown;
 }
 export interface FtLine {
@@ -38,6 +41,8 @@ export interface FtLayout {
   cx: number;
   boxes: FtBox[];
   lines: FtLine[];
+  /** Legendas soltas (ex.: a da faixa de outros parentes). */
+  notes: { x: number; y: number; text: string }[];
 }
 
 export const FT_MIN_W: number;
