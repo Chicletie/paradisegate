@@ -214,6 +214,8 @@ export interface WikiLink {
    * qual pai o meio-irmão divide, de qual filho é o neto; with = com quem o filho foi tido; bk =
    * ordem de nascimento). Página publicada antes de 2026-09-27 não traz. */
   fam?: { k: string; via?: string | string[]; with?: string; bk?: number };
+  /** Parente distante ("prima distante", "ancestral distante"): vai pra faixa de outros parentes da árvore; `term` já vem pronto. */
+  distant?: boolean;
 }
 
 export interface WikiGalleryItem {

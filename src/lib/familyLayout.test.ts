@@ -184,6 +184,18 @@ describe("árvore genealógica: casamentos desfeitos e parentes distantes", func
     expect(overlaps(L)).toBe(0);
     expect(inside(L)).toBe(true);
   });
+  it("ligação marcada como distante vai pra faixa mesmo sendo de avô, e não vira ponte", function () {
+    var inp = familyInputFromLinks("Pessoa", null, [
+      { label: "é filho(a) de", targetTitle: "Mãe", targetId: "mae", style: "family", fam: { k: "f1" } },
+      { label: "neto(a) de", targetTitle: "Fundadora", targetId: "fund", style: "family", term: "ancestral distante", distant: true },
+      { label: "primo(a) de", targetTitle: "Prima", targetId: "prima", style: "family", term: "prima distante", distant: true }
+    ]);
+    expect(inp.gps.length).toBe(0);
+    expect(inp.others.map(function (o) { return o.label + ": " + o.term; })).toEqual(["Fundadora: ancestral distante", "Prima: prima distante"]);
+    var L = familyTreeLayout(inp);
+    expect(boxOf(L, "Fundadora").y).toBe(boxOf(L, "Prima").y);
+    expect(overlaps(L)).toBe(0);
+  });
   it("só parentes distantes já dá árvore", function () {
     var inp = familyInputFromLinks("Pessoa", null, [{ label: "primo(a) de", targetTitle: "Prima", style: "family", term: "prima distante" }]);
     expect(familyHasAny(inp)).toBe(true);

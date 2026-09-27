@@ -125,6 +125,11 @@ parentes com `style: "family"` que não cabem nas 5 gerações (primos, tios, bi
 menos `alma-irmã de`) vão numa faixa embaixo, com o `term` da ligação (ex.: "prima distante") e
 pontilhado: parentesco sem caminho na árvore.
 
+Parente distante: ligação com `distant: true` (caixa "parente distante" no editor; vale pra avô/neto,
+bisavô/bisneto, tio/sobrinho e primo). O `term` já vem pronto: "prima distante", "tio distante", e
+nos avós/bisavós "ancestral distante" (do outro lado, "descendente distante"). Sempre vai pra faixa
+de outros parentes, nunca pro lugar de avô/neto na árvore.
+
 ## Texto dentro da página (markdown da casa)
 
 Lido por `src/lib/markdown.tsx`:
