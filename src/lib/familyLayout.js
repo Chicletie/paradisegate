@@ -12,8 +12,9 @@
 // - cônjuge ao lado, ligado por uma linha em U embaixo das caixas; cada casamento tem a sua
 //   linha, e os filhos de cada casamento descem dela; casamento desfeito (ex-cônjuge) leva duas
 //   barrinhas cortando a linha (//); viuvez é casamento normal (o cônjuge morreu, não se separou);
-// - outros parentes (primos, tios, bisavós, cunhados…) ficam numa faixa embaixo, cada um com o
-//   seu termo ("prima distante"), presos por pontilhado: parentesco sem caminho na árvore;
+// - outros parentes (primos, tios, bisavós, cunhados…) e quem é marcado como parente distante
+//   ficam numa faixa embaixo, cada um com o seu termo ("prima distante", "ancestral distante"),
+//   presos por pontilhado: parentesco sem caminho na árvore;
 // - adoção e criação em tracejado; ligação que não dá pra situar (dado antigo ou parente não
 //   publicado) em pontilhado até o lugar mais provável.
 //
@@ -290,6 +291,8 @@ export function familyInputFromLinks(title, birthKey, links) {
   (links || []).forEach(function (lk, i) {
     if (lk.spoiler) return; // parentesco escondido nunca entra na árvore: ela revelaria o segredo
     var f = lk.fam || {}, key = f.k != null ? f.k : (lk.targetId || "l" + i), label = lk.targetTitle, bk = f.bk == null ? null : f.bk;
+    // parente distante ("prima distante", "ancestral distante"): sempre na faixa, nunca na árvore
+    if (lk.distant) { inp.others.push({ key: key, label: label, term: lk.term || "", ref: lk }); return; }
     if (PARENT_LABELS.indexOf(lk.label) !== -1) inp.parents.push({ key: key, label: label, adopt: lk.label !== PARENT_LABELS[0], ref: lk });
     else if (lk.label === "neto(a) de") inp.gps.push({ label: label, via: f.via == null ? null : f.via, ref: lk });
     else if (SIB_LABELS.indexOf(lk.label) !== -1) inp.sibs.push({ label: label, half: false, via: [], bk: bk, ref: lk });
