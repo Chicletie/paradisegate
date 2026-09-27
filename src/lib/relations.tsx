@@ -47,6 +47,11 @@ function TreeNode({ b }: { b: FtBox }) {
       <text className="wb-ft-label" y={4}>
         {b.short}
       </text>
+      {b.term && (
+        <text className="wb-ft-label" y={27} style={{ fontSize: 10, opacity: 0.75 }}>
+          {b.term}
+        </text>
+      )}
     </g>
   );
 }
@@ -107,6 +112,11 @@ export function FamilyTree({ title, links, birthKey }: { title: string; links?: 
             <TreeNode key={i} b={b} />
           ))}
         </g>
+        {L.notes.map((n, i) => (
+          <text key={i} className="wb-ft-label" x={n.x} y={n.y} style={{ fontSize: 10, opacity: 0.75 }}>
+            {n.text}
+          </text>
+        ))}
       </svg>
     </div>
   );

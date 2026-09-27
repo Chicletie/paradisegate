@@ -1,6 +1,6 @@
 // @ts-nocheck -- cópia do teste do editor do autor, em JS puro (os tipos da conta estão em familyLayout.d.ts)
 import { describe, expect, it } from "vitest";
-import { familyInputFromLinks, familyTreeLayout, ftBirthKey, ftMinWidth, ftShort } from "./familyLayout.js";
+import { familyHasAny, familyInputFromLinks, familyTreeLayout, ftBirthKey, ftMinWidth, ftShort } from "./familyLayout.js";
 
 // Mesmo teste no editor e no site (a conta é o mesmo arquivo nos dois).
 function P(label, extra) { return Object.assign({ key: label, label: label }, extra || {}); }
@@ -142,5 +142,53 @@ describe("árvore genealógica: ligações publicadas", function () {
     expect(ftBirthKey({ year: 1998, month: 3, day: 14, display: "ymd" })).toBe(19980314);
     expect(ftBirthKey({ year: 1998, month: 3, day: 14, display: "md" })).toBeNull();
     expect(ftBirthKey({ year: null, month: 3, day: 14, display: null })).toBeNull();
+  });
+});
+
+describe("árvore genealógica: casamentos desfeitos e parentes distantes", function () {
+  it("ex-cônjuge: casamento com as duas barrinhas, filhos embaixo da união certa, atual colado na pessoa", function () {
+    var inp = empty();
+    inp.spouses = [P("Ex", { status: "ex" }), P("Atual", { status: "" })];
+    inp.kids = [P("Filho do ex", { with: "Ex" }), P("Filho atual", { with: "Atual" })];
+    var L = familyTreeLayout(inp);
+    var eu = boxOf(L, "Pessoa"), atual = boxOf(L, "Atual"), ex = boxOf(L, "Ex");
+    expect(Math.abs(atual.x - eu.x)).toBeLessThan(Math.abs(ex.x - eu.x));
+    var slashes = L.lines.filter(function (l) { return l.x1 !== l.x2 && l.y1 !== l.y2; });
+    expect(slashes.length).toBe(2);
+    expect(boxOf(L, "Filho atual").x).toBeLessThan(boxOf(L, "Filho do ex").x);
+    expect(overlaps(L)).toBe(0);
+  });
+  it("viuvez é casamento normal (sem barrinhas)", function () {
+    var inp = empty();
+    inp.spouses = [P("Falecido", { status: "viuvo" })];
+    var L = familyTreeLayout(inp);
+    expect(L.lines.filter(function (l) { return l.x1 !== l.x2 && l.y1 !== l.y2; }).length).toBe(0);
+  });
+  it("parente distante vai pra faixa de baixo, com o termo e o pontilhado", function () {
+    var inp = familyInputFromLinks("Pessoa", null, [
+      { label: "é filho(a) de", targetTitle: "Mãe", targetId: "mae", style: "family" },
+      { label: "primo(a) de", targetTitle: "Prima", targetId: "prima", style: "family", term: "prima distante" },
+      { label: "tio/tia de", targetTitle: "Mãe", targetId: "mae", style: "family", term: "tia" },
+      { label: "alma-irmã de", targetTitle: "Alma", targetId: "alma", style: "family" },
+      { label: "primo(a) de", targetTitle: "Segredo", targetId: "seg", style: "family", spoiler: true },
+      { label: "ex-cônjuge de", targetTitle: "Ex", targetId: "ex", style: "family" }
+    ]);
+    expect(inp.others.map(function (o) { return o.label; })).toEqual(["Prima"]);
+    expect(inp.spouses[0].status).toBe("ex");
+    var L = familyTreeLayout(inp);
+    var prima = boxOf(L, "Prima");
+    expect(prima.term).toBe("prima distante");
+    expect(prima.y).toBeGreaterThan(boxOf(L, "Pessoa").y);
+    expect(L.notes.length).toBe(1);
+    expect(L.lines.some(function (l) { return l.dash === "incerto" && Math.abs(l.x1 - prima.x) < 0.01; })).toBe(true);
+    expect(overlaps(L)).toBe(0);
+    expect(inside(L)).toBe(true);
+  });
+  it("só parentes distantes já dá árvore", function () {
+    var inp = familyInputFromLinks("Pessoa", null, [{ label: "primo(a) de", targetTitle: "Prima", style: "family", term: "prima distante" }]);
+    expect(familyHasAny(inp)).toBe(true);
+    var L = familyTreeLayout(inp);
+    expect(boxOf(L, "Prima")).toBeTruthy();
+    expect(inside(L)).toBe(true);
   });
 });

@@ -10,20 +10,24 @@
 // - meio-irmão desce só do pai/mãe que divide com a pessoa;
 // - cada par de avós fica em cima do filho deles;
 // - cônjuge ao lado, ligado por uma linha em U embaixo das caixas; cada casamento tem a sua
-//   linha, e os filhos de cada casamento descem dela;
+//   linha, e os filhos de cada casamento descem dela; casamento desfeito (ex-cônjuge) leva duas
+//   barrinhas cortando a linha (//); viuvez é casamento normal (o cônjuge morreu, não se separou);
+// - outros parentes (primos, tios, bisavós, cunhados…) ficam numa faixa embaixo, cada um com o
+//   seu termo ("prima distante"), presos por pontilhado: parentesco sem caminho na árvore;
 // - adoção e criação em tracejado; ligação que não dá pra situar (dado antigo ou parente não
 //   publicado) em pontilhado até o lugar mais provável.
 //
 // Entrada: { self: {label, bk}, parents: [{key, label, adopt, ref}], gps: [{label, via, ref}],
-//   sibs: [{label, half, via: [keys], bk, ref}], spouses: [{key, label, ref}],
-//   kids: [{key, label, with, bk, adopt, ref}], gks: [{label, via, ref}] }
+//   sibs: [{label, half, via: [keys], bk, ref}], spouses: [{key, label, status: ""|"ex"|"viuvo", ref}],
+//   kids: [{key, label, with, bk, adopt, ref}], gks: [{label, via, ref}], others: [{key, label, term, ref}] }
 // (key = identificador de uma pessoa nesta árvore; via/with apontam pra ele; bk = número
 // pra ordenar por nascimento, ou null).
-// Saída: { W, y0, y1, cx, boxes: [{x, y, w, short, label, self, ref}], lines: [{x1, y1, x2, y2, dash}] }
+// Saída: { W, y0, y1, cx, boxes: [{x, y, w, short, label, self, term, ref}], lines: [{x1, y1, x2, y2, dash}],
+//   notes: [{x, y, text}] } (term = texto pequeno embaixo da caixa; notes = legendas soltas)
 // (dash: "" linha cheia, "adocao" tracejado, "incerto" pontilhado).
 
 export var FT_MIN_W = 460, FT_PAD = 12, FT_GAP = 14, FT_GROUP_GAP = 30;
-var GP_Y = 20, P_Y = 100, SELF_Y = 190, C_Y = 290, GC_Y = 380, HALF_H = 13;
+var GP_Y = 20, P_Y = 100, SELF_Y = 190, C_Y = 290, GC_Y = 380, HALF_H = 13, OTHER_GAP = 110;
 
 export function ftShort(label) { label = label || ""; return label.length > 16 ? label.slice(0, 15) + "…" : label; }
 export function ftNodeW(label) { return Math.max(60, ftShort(label).length * 6.4 + 14); }
@@ -82,7 +86,9 @@ export function familyTreeLayout(inp) {
     else if (rightKey != null && b.via.indexOf(rightKey) !== -1 && b.via.indexOf(leftKey) === -1) halfR.push(b);
     else halfL.push(b);
   });
-  var spouses = (inp.spouses || []).map(function (s, i) { return box(s.label, SELF_Y, { key: s.key, union: i + 1, ref: s.ref }); });
+  // casamento atual colado na pessoa; os anteriores (desfeito, viuvez) mais pra fora
+  var spouseIn = (inp.spouses || []).filter(function (s) { return !s.status; }).concat((inp.spouses || []).filter(function (s) { return s.status; }));
+  var spouses = spouseIn.map(function (s, i) { return box(s.label, SELF_Y, { key: s.key, union: i + 1, status: s.status || "", ref: s.ref }); });
   var sibship = byBirth(full.concat([self]));
   var row = [].concat(halfL);
   sibship.forEach(function (b) { row.push(b); if (b === self) row = row.concat(spouses); });
@@ -146,8 +152,14 @@ export function familyTreeLayout(inp) {
   gpGroups.sort(function (a, b) { return a.anchor - b.anchor; });
   place(gpGroups);
 
+  // ---- outros parentes: faixa embaixo de tudo, sem caminho na árvore
+  var lastY = (inp.gks || []).length ? GC_Y : kids.length ? C_Y : SELF_Y;
+  var OTHER_Y = lastY + OTHER_GAP;
+  var others = (inp.others || []).map(function (o) { return box(o.label, OTHER_Y, { term: o.term || "", ref: o.ref }); });
+  place([{ items: others, anchor: self.x }]);
+
   // ---- tudo pra dentro da área (e centrado quando sobra espaço)
-  var boxes = [].concat(gpGroups.reduce(function (a, g) { return a.concat(g.items); }, []), bio, extraP, row, kids, gkGroups.reduce(function (a, g) { return a.concat(g.items); }, []));
+  var boxes = [].concat(gpGroups.reduce(function (a, g) { return a.concat(g.items); }, []), bio, extraP, row, kids, gkGroups.reduce(function (a, g) { return a.concat(g.items); }, []), others);
   var min = Infinity, max = -Infinity;
   boxes.forEach(function (b) { min = Math.min(min, b.x - b.w / 2); max = Math.max(max, b.x + b.w / 2); });
   var W = Math.max(FT_MIN_W, Math.ceil(max - min + 2 * FT_PAD));
@@ -212,6 +224,11 @@ export function familyTreeLayout(inp) {
     var uy = SELF_Y + HALF_H + 9 + 7 * i;
     ln(sx, SELF_Y + HALF_H, sx, uy); ln(sx, uy, s.x, uy); ln(s.x, uy, s.x, SELF_Y + HALF_H);
     unionAt[s.union] = { x: (sx + s.x) / 2, y: uy };
+    if (s.status === "ex") {
+      // casamento desfeito: duas barrinhas cortando a linha do casal
+      var xm = sx + (s.x - sx) * 0.72;
+      ln(xm - 5, uy + 5, xm - 1, uy - 5); ln(xm + 1, uy + 5, xm + 5, uy - 5);
+    }
   });
   var kY = C_Y - HALF_H - 14;
   kidGroups.forEach(function (g, gi) {
@@ -238,9 +255,19 @@ export function familyTreeLayout(inp) {
     }
   });
 
+  // faixa de outros parentes: pontilhado por cima, uma descida pra cada um, legenda acima
+  var notes = [];
+  if (others.length) {
+    var oy = OTHER_Y - HALF_H - 12;
+    hline(others.map(function (b) { return b.x; }), oy, "incerto");
+    others.forEach(function (b) { ln(b.x, oy, b.x, OTHER_Y - HALF_H, "incerto"); });
+    var os = span(others);
+    notes.push({ x: (os[0] + os[1]) / 2, y: oy - 9, text: "outros parentes (sem caminho na árvore)" });
+  }
+
   var y0 = ((inp.gps || []).length ? GP_Y : bio.length || extraP.length ? P_Y : SELF_Y) - 22;
-  var y1 = ((inp.gks || []).length ? GC_Y : kids.length ? C_Y : spouses.length ? SELF_Y + 20 : SELF_Y) + 22;
-  return { W: W, y0: y0, y1: y1, cx: self.x, boxes: boxes, lines: lines };
+  var y1 = others.length ? OTHER_Y + HALF_H + 26 : ((inp.gks || []).length ? GC_Y : kids.length ? C_Y : spouses.length ? SELF_Y + 20 : SELF_Y) + 22;
+  return { W: W, y0: y0, y1: y1, cx: self.x, boxes: boxes, lines: lines, notes: notes };
 }
 
 // Largura mínima em tela: árvore grande rola pro lado em vez de encolher até ficar ilegível
@@ -253,21 +280,31 @@ export function ftMinWidth(W) { return W > FT_MIN_W ? Math.round(Math.max(FT_MIN
 var PARENT_LABELS = ["é filho(a) de", "é filho(a) adotivo(a) de", "é filho(a) de criação de"];
 var CHILD_LABELS = ["é pai/mãe de", "é pai/mãe adotivo(a) de", "é pai/mãe de criação de"];
 var SIB_LABELS = ["irmão/irmã de", "gêmeo(a) de"];
+// casamentos: "" = atual, "ex" = desfeito, "viuvo" = um dos dois morreu
+var SPOUSE_STATUS = { "casado(a) com": "", "ex-cônjuge de": "ex", "viúvo(a) de": "viuvo", "cônjuge falecido(a) de": "viuvo" };
+// marcados como família no editor, mas não são parentesco
+var NOT_KIN = ["alma-irmã de"];
 export function familyInputFromLinks(title, birthKey, links) {
-  var inp = { self: { label: title, bk: birthKey == null ? null : birthKey }, parents: [], gps: [], sibs: [], spouses: [], kids: [], gks: [] };
+  var inp = { self: { label: title, bk: birthKey == null ? null : birthKey }, parents: [], gps: [], sibs: [], spouses: [], kids: [], gks: [], others: [] };
+  var inTree = {};
   (links || []).forEach(function (lk, i) {
     if (lk.spoiler) return; // parentesco escondido nunca entra na árvore: ela revelaria o segredo
-    var f = lk.fam || {}, key = f.k != null ? f.k : "l" + i, label = lk.targetTitle, bk = f.bk == null ? null : f.bk;
+    var f = lk.fam || {}, key = f.k != null ? f.k : (lk.targetId || "l" + i), label = lk.targetTitle, bk = f.bk == null ? null : f.bk;
     if (PARENT_LABELS.indexOf(lk.label) !== -1) inp.parents.push({ key: key, label: label, adopt: lk.label !== PARENT_LABELS[0], ref: lk });
     else if (lk.label === "neto(a) de") inp.gps.push({ label: label, via: f.via == null ? null : f.via, ref: lk });
     else if (SIB_LABELS.indexOf(lk.label) !== -1) inp.sibs.push({ label: label, half: false, via: [], bk: bk, ref: lk });
     else if (lk.label === "meio-irmão/meia-irmã de") inp.sibs.push({ label: label, half: true, via: [].concat(f.via || []), bk: bk, ref: lk });
-    else if (lk.label === "casado(a) com") inp.spouses.push({ key: key, label: label, ref: lk });
+    else if (SPOUSE_STATUS[lk.label] != null) inp.spouses.push({ key: key, label: label, status: SPOUSE_STATUS[lk.label], ref: lk });
     else if (CHILD_LABELS.indexOf(lk.label) !== -1) inp.kids.push({ key: key, label: label, with: f.with == null ? null : f.with, bk: bk, adopt: lk.label !== CHILD_LABELS[0], ref: lk });
     else if (lk.label === "avô/avó de") inp.gks.push({ label: label, via: f.via == null ? null : f.via, ref: lk });
+    else if (lk.style === "family" && NOT_KIN.indexOf(lk.label) === -1) { inp.others.push({ key: key, label: label, term: lk.term || "", ref: lk }); return; }
+    else return;
+    inTree[key] = true;
   });
+  // quem já está na árvore não se repete na faixa de outros parentes
+  inp.others = inp.others.filter(function (o) { return !inTree[o.key]; });
   return inp;
 }
 export function familyHasAny(inp) {
-  return !!(inp.parents.length || inp.gps.length || inp.sibs.length || inp.spouses.length || inp.kids.length || inp.gks.length);
+  return !!(inp.parents.length || inp.gps.length || inp.sibs.length || inp.spouses.length || inp.kids.length || inp.gks.length || (inp.others || []).length);
 }

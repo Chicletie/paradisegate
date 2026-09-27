@@ -119,6 +119,12 @@ disfarce não ganha `fam` e nunca serve de ponte (`via`/`with`) pra outro. Ponte
 que não está publicado não vai: a árvore desenha essa ligação pontilhada ("não dá pra situar").
 Página publicada antes de 2026-09-27 não traz `fam` e cai nesse desenho até ser republicada.
 
+Casamentos: `casado(a) com` (atual, colado na pessoa), `ex-cônjuge de` (desfeito: duas barrinhas
+na linha do casal) e `viúvo(a) de`/`cônjuge falecido(a) de` (viuvez: casamento normal). Outros
+parentes com `style: "family"` que não cabem nas 5 gerações (primos, tios, bisavós, cunhados…,
+menos `alma-irmã de`) vão numa faixa embaixo, com o `term` da ligação (ex.: "prima distante") e
+pontilhado: parentesco sem caminho na árvore.
+
 ## Texto dentro da página (markdown da casa)
 
 Lido por `src/lib/markdown.tsx`:
