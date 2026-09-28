@@ -27,6 +27,12 @@ legível no banco. Então, com username, o site chama a função `usernameSignIn
 site entra pelo e-mail como sempre. 5 erros seguidos em 15 minutos travam aquele nome (o login
 por e-mail continua).
 
+**Esqueci minha senha:** o site chama a função `requestPasswordReset` do autor
+(`sendPasswordReset` em `src/lib/auth.ts`), que manda a carta da Academia de
+`conta@paradisegate.com.br` com o link pro `public/reset-senha.html` (ou pro `cadastro.html`, se
+a pessoa foi convidada e nunca criou a senha). Ela responde "enviado" exista a conta ou não, e
+limita os pedidos por e-mail e por endereço de rede.
+
 **Escolher ou trocar o @username:** a regra toda (forma, nomes proibidos, prazo de 30 dias entre
 trocas) mora só no servidor, em `functions/username.js` (repo do autor). O site nunca decide isso
 sozinho:

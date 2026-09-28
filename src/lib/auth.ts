@@ -1,4 +1,4 @@
-import { onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth, functionUrl } from "./firebaseApp";
 import { isEmailLogin } from "./username";
 import type { AuthUser } from "../types";
@@ -54,12 +54,13 @@ export function signOutUser(): Promise<void> {
 }
 
 /**
- * O link do e-mail aponta direto pra `reset-senha.html` (handleCodeInApp), pulando a página
- * padrão do Firebase — o domínio precisa estar nos autorizados do Authentication (ver o
- * comentário equivalente em wiki-core.js).
+ * "Esqueci minha senha": quem manda o e-mail é a função `requestPasswordReset` do autor (a carta
+ * da Academia, de conta@paradisegate.com.br, com o link pro `reset-senha.html`), não o envio
+ * padrão do Firebase. Ela responde "enviado" exista a conta ou não; erro aqui é só e-mail
+ * inválido ou servidor fora do ar.
  */
-export function sendPasswordReset(email: string): Promise<void> {
-  return sendPasswordResetEmail(auth, email, { url: "https://paradisegate.com.br/reset-senha.html", handleCodeInApp: true });
+export async function sendPasswordReset(email: string): Promise<void> {
+  await callFunction<{ ok: boolean }>("requestPasswordReset", { email });
 }
 
 /**
