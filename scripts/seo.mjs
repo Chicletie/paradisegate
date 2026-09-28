@@ -110,11 +110,29 @@ export function describeMember(name, card) {
   return { title, description: bio || "Perfil de @" + name + " no acervo de " + SITE_NAME + ".", image: photo };
 }
 
+/**
+ * Foto do perfil guardada embutida no cartão (data:image/…;base64): vira um arquivo pra prévia de
+ * link, que só aceita endereço. O nome leva um pedaço do conteúdo, pra foto nova ter endereço novo
+ * (WhatsApp e Discord guardam a prévia pelo endereço). Sem foto, formato estranho ou mais de 5 MB: null.
+ */
+export function memberPhotoFile(name, photo) {
+  if (typeof photo !== "string") return null;
+  const m = /^data:image\/(jpeg|jpg|png|webp|gif);base64,([A-Za-z0-9+/=\s]+)$/.exec(photo);
+  if (!m) return null;
+  const bytes = Buffer.from(m[2].replace(/\s/g, ""), "base64");
+  if (!bytes.length || bytes.length > 5 * 1024 * 1024) return null;
+  let h = 2166136261;
+  for (const b of bytes) h = Math.imul(h ^ b, 16777619) >>> 0;
+  const ext = m[1] === "jpeg" ? "jpg" : m[1];
+  return { rel: `perfil/${name}-${h.toString(36)}.${ext}`, bytes };
+}
+
 const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
 export function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ESC[c]); }
 
 /** Tags de <head> de uma página: descrição, canônico e a prévia de link (Open Graph/Twitter). */
-export function headTags({ title, description, path, image, noindex, type = "website" }) {
+// squareImage: foto pequena e quadrada (a do perfil) vai como miniatura, sem esticar em faixa larga.
+export function headTags({ title, description, path, image, noindex, squareImage, type = "website" }) {
   const url = SITE + path;
   const t = [
     `<meta name="description" content="${esc(description)}" />`,
@@ -125,7 +143,7 @@ export function headTags({ title, description, path, image, noindex, type = "web
     `<meta property="og:title" content="${esc(title)}" />`,
     `<meta property="og:description" content="${esc(description)}" />`,
     `<meta property="og:url" content="${esc(url)}" />`,
-    `<meta name="twitter:card" content="${image ? "summary_large_image" : "summary"}" />`,
+    `<meta name="twitter:card" content="${image && !squareImage ? "summary_large_image" : "summary"}" />`,
     `<meta name="twitter:title" content="${esc(title)}" />`,
     `<meta name="twitter:description" content="${esc(description)}" />`,
   ];

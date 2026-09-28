@@ -92,4 +92,17 @@ describe("perfil público na prévia de link", () => {
     expect(n.description).toBe("Perfil de @caio no acervo de Paradise Gate.");
     expect(n.image).toBeNull();
   });
+  it("foto embutida no cartão vira arquivo com endereço que muda junto com a foto", async () => {
+    const { memberPhotoFile } = await import("./seo.mjs");
+    const png = "data:image/png;base64," + Buffer.from("foto-um").toString("base64");
+    const f = memberPhotoFile("caio", png);
+    expect(f.rel).toMatch(/^perfil\/caio-[0-9a-z]+\.png$/);
+    expect(f.bytes.toString()).toBe("foto-um");
+    const g = memberPhotoFile("caio", "data:image/jpeg;base64," + Buffer.from("foto-dois").toString("base64"));
+    expect(g.rel).toMatch(/\.jpg$/);
+    expect(g.rel).not.toBe(f.rel.replace(".png", ".jpg"));
+    expect(memberPhotoFile("caio", "https://x/y.png")).toBeNull();
+    expect(memberPhotoFile("caio", "data:image/svg+xml;base64,PHN2Zz4=")).toBeNull();
+    expect(memberPhotoFile("caio", undefined)).toBeNull();
+  });
 });

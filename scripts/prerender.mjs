@@ -6,7 +6,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import {
-  fieldsToObject, mergeEntries, describeEntry, describeMember, describeWriting, headTags, injectHead, membersOf, safeSlug, sitemap, writingsOf, SITE, SITE_NAME,
+  fieldsToObject, mergeEntries, describeEntry, describeMember, memberPhotoFile, describeWriting, headTags, injectHead, membersOf, safeSlug, sitemap, writingsOf, SITE, SITE_NAME,
 } from "./seo.mjs";
 
 const DIST = path.resolve(process.argv[2] || "dist");
@@ -113,7 +113,11 @@ for (const name of membersOf(entries)) {
   try { card = await getDoc(`wikiUsernames/${name}`); } catch { card = null; }
   if (!card) continue;
   const m = describeMember(name, card);
-  write(`@${name}.html`, page(m.title, headTags({ title: m.title, description: m.description, path: `/@${name}`, image: m.image || DEFAULT_IMAGE, type: "profile", noindex: true })));
+  // Foto embutida no cartão vira arquivo em dist/perfil/ (a prévia de link só aceita endereço).
+  const foto = m.image ? null : memberPhotoFile(name, card.photo);
+  if (foto) write(foto.rel, foto.bytes);
+  const image = m.image || (foto ? `${SITE}/${foto.rel}` : DEFAULT_IMAGE);
+  write(`@${name}.html`, page(m.title, headTags({ title: m.title, description: m.description, path: `/@${name}`, image, squareImage: image !== DEFAULT_IMAGE, type: "profile", noindex: true })));
   mcount++;
 }
 write("sitemap.xml", sitemap(urls));
