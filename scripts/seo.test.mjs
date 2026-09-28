@@ -71,3 +71,25 @@ describe("escritos na prévia de link", () => {
     expect(describeWriting(w2)).toBe("Um escrito de Paradise Gate.");
   });
 });
+
+describe("perfil público na prévia de link", () => {
+  it("junta citados e intérpretes, uma vez cada, só @ válido", async () => {
+    const { membersOf } = await import("./seo.mjs");
+    const list = membersOf({
+      a: { membros: ["bia", "x", "Maiuscula"], interpretes: [{ membro: "caio" }, { membro: "bia" }] },
+      b: { membros: ["bia"], interpretes: [null, { membro: "../hack" }] },
+    });
+    expect(list).toEqual(["bia", "caio"]);
+  });
+  it("título com apelido, bio limpa e foto só se for endereço https", async () => {
+    const { describeMember } = await import("./seo.mjs");
+    const m = describeMember("bia", { nickname: "Bia", bio: "Joga **Anytsa** ||segredo||", photo: "https://x/y.png" });
+    expect(m.title).toBe("Bia (@bia) · Paradise Gate");
+    expect(m.description).not.toContain("segredo");
+    expect(m.image).toBe("https://x/y.png");
+    const n = describeMember("caio", { photo: "data:image/png;base64,xx" });
+    expect(n.title).toBe("@caio · Paradise Gate");
+    expect(n.description).toBe("Perfil de @caio no acervo de Paradise Gate.");
+    expect(n.image).toBeNull();
+  });
+});
