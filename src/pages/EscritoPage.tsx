@@ -44,8 +44,8 @@ export function EscritoPage() {
     if (title !== null) document.title = (title || "Escrito") + " · Paradise Gate";
   }, [title]);
 
-  if (state.status === "not-found") return <ErrorPage message="Esse escrito não existe mais (o link pode ter sido despublicado)." />;
-  if (state.status === "error") return <ErrorPage message="Não consegui abrir esse escrito agora. Tente de novo daqui a pouco, ou volte pro início." />;
+  if (state.status === "not-found") return <ErrorPage message="Este escrito não existe mais. O link pode ter sido despublicado." />;
+  if (state.status === "error") return <ErrorPage message="Não foi possível abrir este escrito agora. Tente novamente em alguns instantes ou volte para o início!" />;
 
   return (
     <>

@@ -56,7 +56,7 @@ export function WikiHomePage() {
   // com falha, a ErrorPage põe as dela.
   usePgBody(!index && !failed ? "loading" : null);
 
-  if (failed) return <ErrorPage message="Não consegui carregar a wiki agora. Tente de novo mais tarde." />;
+  if (failed) return <ErrorPage message="Não foi possível carregar a wiki agora. Tente novamente mais tarde." />;
   if (!index || redirecting) {
     return (
       <div className="page">

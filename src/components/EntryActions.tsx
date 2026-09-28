@@ -28,7 +28,7 @@ export function FavoriteButton({ wikiId }: { wikiId: string }) {
         if (!user) return;
         setBusy(true);
         save({ favorite: { id: wikiId, on: !on } })
-          .catch(() => window.alert("Não consegui salvar o favorito agora. Tenta de novo daqui a pouco."))
+          .catch(() => window.alert("Não foi possível favoritar agora. Tente novamente em alguns instantes."))
           .then(() => setBusy(false));
       }}
     >
@@ -76,7 +76,7 @@ function SuggestModal({ wikiId, pageTitle, tab, onClose }: { wikiId: string; pag
   function doSubmit() {
     const t = text.trim();
     if (!t) {
-      setErr("Escreve alguma coisa antes de enviar.");
+      setErr("Escreva sua sugestão antes de enviar!");
       return;
     }
     if (!user) return;
@@ -95,7 +95,7 @@ function SuggestModal({ wikiId, pageTitle, tab, onClose }: { wikiId: string; pag
       () => setSent(true),
       () => {
         setBusy(false);
-        setErr("Não consegui enviar. Tenta de novo em instantes.");
+        setErr("Não foi possível enviar agora. Tente novamente em alguns instantes.");
       },
     );
   }
@@ -104,7 +104,7 @@ function SuggestModal({ wikiId, pageTitle, tab, onClose }: { wikiId: string; pag
     return (
       <Modal onClose={onClose}>
         <h3>Enviado!</h3>
-        <div>Obrigado! Sua sugestão vai aparecer pro autor da wiki.</div>
+        <div>Obrigado pela contribuição! Sua sugestão foi enviada para o autor da wiki.</div>
         <button className="submit" type="button" style={{ marginTop: 10 }} onClick={onClose}>
           Fechar
         </button>
@@ -116,7 +116,7 @@ function SuggestModal({ wikiId, pageTitle, tab, onClose }: { wikiId: string; pag
       <h3>Sugerir alteração</h3>
       <div style={{ fontSize: "12.5px", color: "var(--faint)", marginBottom: 8 }}>{pageTitle + (tab && tab !== "Geral" ? " · " + tab : "")}</div>
       <textarea
-        placeholder="O que você acha que devia mudar ou ser adicionado?"
+        placeholder="O que você acha que deveria mudar ou ser adicionado nesta página?"
         autoFocus
         value={text}
         onChange={(ev) => setText(ev.target.value)}
@@ -168,7 +168,7 @@ export function MySuggestionsHere({ wikiId, open }: { wikiId: string; open: numb
 
   let content: ReactNode = null;
   if (state === "loading") content = <div className="empty">carregando…</div>;
-  else if (state === "error") content = <div className="empty">Não consegui carregar suas sugestões agora.</div>;
+  else if (state === "error") content = <div className="empty">Não foi possível carregar suas sugestões agora.</div>;
   else if (state && !state.length) content = <div className="empty">Você ainda não enviou nenhuma sugestão nesta página.</div>;
   else if (state)
     content = (
@@ -216,13 +216,13 @@ const NONE: WikiRestritoItem[] = [];
 
 const SUB_HEAD = { fontSize: 11, marginTop: 14 };
 
-/** "🔐 Desbloqueado pra você": o que não é troca de campo vira uma lista no fim da página. */
+/** "🔐 Desbloqueado para você": o que não é troca de campo vira uma lista no fim da página. */
 export function RestritoSlot({ items }: { items: WikiRestritoItem[] }) {
   const placed = usePlacedSet();
   const extra = items.filter((it) => it.kind !== "campo-confidencial" && !placed.has(it));
   return (
     <div className="restrito-wrap">
-      {extra.length > 0 && <div className="cathead">🔐 Desbloqueado pra você</div>}
+      {extra.length > 0 && <div className="cathead">🔐 Desbloqueado para você</div>}
       {extra.map((it, i) => {
         const heading = (it.key || it.title || "Seção") + (it.variant ? " (" + it.variant + ")" : "");
         switch (it.kind) {

@@ -59,7 +59,7 @@ export function SpoilerProgressBar() {
   if (inAccount || !obras.length) return null;
   return (
     <aside className="pg-prog-bar" aria-label="Até onde você já viu">
-      <span className="pg-prog-lead">Esta página tem spoilers. Até onde você já viu?</span>
+      <span className="pg-prog-lead">Esta página tem spoilers! Até onde você já acompanhou?</span>
       <div className="pg-prog-list">
         {obras.map((o) => (
           <ProgressPicker key={o.id} obra={o} />

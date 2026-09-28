@@ -55,7 +55,7 @@ function InlineSpoiler({ children, at }: { children: ReactNode; at?: string }) {
       className={"md-spoiler" + (on ? " on" : "")}
       tabIndex={0}
       role="button"
-      title={sp.label ? "Spoiler de " + sp.label + " — toque pra revelar" : "Spoiler — toque pra revelar"}
+      title={sp.label ? "Spoiler de " + sp.label + ". Toque para revelar" : "Spoiler. Toque para revelar"}
       aria-label={sp.label ? "spoiler de " + sp.label + ", toque para revelar" : "spoiler, toque para revelar"}
       onClickCapture={(ev) => {
         if (!on) {
@@ -88,7 +88,7 @@ export function SpoilerSpan({ text, at }: { text: string; at?: string }) {
       className={"md-spoiler" + (on ? " on" : "")}
       tabIndex={0}
       role="button"
-      title={sp.label ? "Spoiler de " + sp.label + " — toque pra revelar" : "Spoiler — toque pra revelar"}
+      title={sp.label ? "Spoiler de " + sp.label + ". Toque para revelar" : "Spoiler. Toque para revelar"}
       onClick={() => setOn((v) => !v)}
     >
       {text}
@@ -112,7 +112,7 @@ export function RevealSpoiler({ children, preview, at }: { children: ReactNode; 
       className="md-spoiler"
       tabIndex={0}
       role="button"
-      title={sp.label ? "Spoiler de " + sp.label + " — toque pra revelar" : "Spoiler — toque pra revelar"}
+      title={sp.label ? "Spoiler de " + sp.label + ". Toque para revelar" : "Spoiler. Toque para revelar"}
       onClick={reveal}
       onKeyDown={(ev) => {
         if (ev.key === "Enter" || ev.key === " ") reveal(ev);

@@ -54,7 +54,7 @@ function MemberLoader({ name }: { name: string }) {
         <div className="empty">Carregando…</div>
       </div>
     );
-  if (card === "error") return <ErrorPage message="Não consegui abrir este perfil agora. Tente de novo daqui a pouco." />;
+  if (card === "error") return <ErrorPage message="Não foi possível abrir este perfil agora. Tente novamente em alguns instantes." />;
   if (!card) return <ErrorPage message={"Ninguém assina com o nome @" + name + " no acervo."} />;
   return <MemberView name={name} card={card} />;
 }
@@ -105,7 +105,7 @@ function MemberView({ name, card }: { name: string; card: MemberCard }) {
           )}
         </section>
 
-        <Roles roles={pages} empty={mine ? "Quando o autor puser você como intérprete de um personagem na wiki, ele aparece aqui." : null} />
+        <Roles roles={pages} empty={mine ? "Os personagens que você interpretar nas campanhas oficiais vão aparecer aqui!" : null} />
         {writings.length > 0 && (
           <section className="pg-panel pg-member-sec" id="escritos" aria-labelledby="pg-member-escritos">
             <PgSectionHead text="Escritos" id="pg-member-escritos" />
@@ -118,7 +118,7 @@ function MemberView({ name, card }: { name: string; card: MemberCard }) {
             </PageObrasProvider>
           </section>
         )}
-        {card.showFavorites && <Block id="favoritos" title="Favoritos na wiki" pages={favs} empty="Nenhuma página favorita ainda." />}
+        {card.showFavorites && <Block id="favoritos" title="Favoritos na wiki" pages={favs} empty="Nenhuma página favoritada ainda." />}
       </main>
       <PgFooter />
     </>

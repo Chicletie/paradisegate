@@ -242,18 +242,18 @@ function LoginModal({ onClose }: { onClose: () => void }) {
     setBusy(true);
     signIn(email.trim(), pass).then(onClose, (e) => {
       setBusy(false);
-      setErr(e instanceof LoginError ? e.message : isEmailLogin(email) ? "Não consegui entrar. Confira email e senha." : "Não consegui entrar. Confira username e senha.");
+      setErr(e instanceof LoginError ? e.message : isEmailLogin(email) ? "Não foi possível entrar. Confira seu e-mail e sua senha." : "Não foi possível entrar. Confira seu username e sua senha.");
     });
   }
 
   function doForgot() {
     const addr = email.trim();
     if (!addr) {
-      setErr("Digite seu email ali em cima primeiro.");
+      setErr("Digite seu e-mail no campo acima primeiro.");
       return;
     }
     if (!isEmailLogin(addr)) {
-      setErr("Pra recuperar a senha, digite o email da conta (não o username).");
+      setErr("Para recuperar a senha, digite o e-mail da conta, e não o username.");
       return;
     }
     setErr("");
@@ -262,7 +262,7 @@ function LoginModal({ onClose }: { onClose: () => void }) {
       () => setForgot("sent"),
       () => {
         setForgot("idle");
-        setErr("Não consegui enviar. Confira o email digitado.");
+        setErr("Não foi possível enviar. Confira o e-mail digitado.");
       },
     );
   }
@@ -304,7 +304,7 @@ function LoginModal({ onClose }: { onClose: () => void }) {
         {busy ? "entrando…" : "Entrar"}
       </button>
       <button className="cancel" type="button" style={{ marginTop: 6 }} disabled={forgot !== "idle"} onClick={doForgot}>
-        {forgot === "sending" ? "enviando…" : forgot === "sent" ? "Email enviado! Confira sua caixa de entrada." : "esqueci minha senha"}
+        {forgot === "sending" ? "enviando…" : forgot === "sent" ? "E-mail enviado! Confira sua caixa de entrada." : "esqueci minha senha"}
       </button>
       <button className="cancel" type="button" onClick={onClose}>
         cancelar

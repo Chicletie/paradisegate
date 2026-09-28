@@ -74,7 +74,7 @@ export function UsernameDialog({ onClose }: { onClose: () => void }) {
       (e) => {
         setStep("edit");
         setCheck(null);
-        setErr(e instanceof FunctionError ? e.message : "Não deu pra salvar agora. Tente de novo.");
+        setErr(e instanceof FunctionError ? e.message : "Não foi possível salvar agora. Tente novamente.");
       },
     );
   }
@@ -85,7 +85,7 @@ export function UsernameDialog({ onClose }: { onClose: () => void }) {
   if (!raw.trim()) status = "";
   else if (checking) status = "Conferindo…";
   else if (checkFailed) {
-    status = "Não consegui conferir agora.";
+    status = "Não foi possível verificar agora.";
     tone = " is-bad";
   } else if (fresh?.problem) {
     status = fresh.problem;
@@ -95,7 +95,7 @@ export function UsernameDialog({ onClose }: { onClose: () => void }) {
     status = `@${fresh.name} já está em uso.`;
     tone = " is-bad";
   } else if (fresh?.free) {
-    status = `@${fresh.name} está livre.`;
+    status = `@${fresh.name} está disponível!`;
     tone = " is-ok";
   }
   const canGo = !!fresh && !fresh.problem && !fresh.same && fresh.free === true;
@@ -107,7 +107,7 @@ export function UsernameDialog({ onClose }: { onClose: () => void }) {
       <>
         <h3 id="pg-un-title">Trocar username</h3>
         <p className="pg-un-text">
-          Você trocou há pouco tempo. Dá pra trocar de novo a partir de <strong>{lockedText}</strong>.
+          Você trocou de username há pouco tempo. Você poderá trocar novamente a partir de <strong>{lockedText}</strong>.
         </p>
         <button className="submit" type="button" onClick={onClose}>
           Entendi
@@ -140,8 +140,8 @@ export function UsernameDialog({ onClose }: { onClose: () => void }) {
               Seu username vai ser <strong>@{fresh.name}</strong>.{" "}
             </>
           )}
-          Depois disso, você só vai poder trocar de novo em <strong>{fresh.nextIfChangedText}</strong>.
-          {current && " O nome antigo fica livre pra outra pessoa."}
+          Depois disso, você só poderá trocar novamente em <strong>{fresh.nextIfChangedText}</strong>.
+          {current && " O nome antigo ficará disponível para outras pessoas."}
         </p>
         <button className="submit" type="button" disabled={step === "saving"} onClick={save}>
           {step === "saving" ? "Salvando…" : current ? "Confirmar a troca" : "Confirmar"}
@@ -156,7 +156,7 @@ export function UsernameDialog({ onClose }: { onClose: () => void }) {
       <>
         <h3 id="pg-un-title">{current ? "Trocar username" : "Escolha seu username"}</h3>
         <p className="pg-un-text">
-          É o seu nome único na wiki (o apelido pode repetir, o username não).
+          É o seu nome único na wiki! Apelidos podem se repetir, mas o username é só seu.
           {current && (
             <>
               {" "}

@@ -80,7 +80,7 @@
     <!-- Formulário -->
     <form id="stForm" hidden novalidate>
       <h1>Nova senha</h1>
-      <p class="rs-lead">Pra entrar na wiki com <strong id="emailOut"></strong>.</p>
+      <p class="rs-lead">Para entrar na wiki com <strong id="emailOut"></strong>.</p>
       <input type="email" id="user" autocomplete="username" hidden />
       <label class="rs-field">
         <span class="rs-label">Nova senha</span>
@@ -105,15 +105,15 @@
     <div id="stDone" hidden>
       <span class="rs-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
       <h1 tabindex="-1" id="doneTitle">Senha salva</h1>
-      <p class="rs-lead">Agora é só entrar na wiki com o seu e-mail e a senha nova, pelo botão <strong>Entrar</strong> no alto da página.</p>
-      <a class="rs-btn" href="/wiki">Ir pra wiki</a>
+      <p class="rs-lead">Agora é só entrar na wiki com o seu e-mail e a nova senha, pelo botão <strong>Entrar</strong> no alto da página!</p>
+      <a class="rs-btn" href="/wiki">Ir para a wiki</a>
     </div>
 
     <!-- Link que não vale -->
     <div id="stBad" hidden>
       <h1 tabindex="-1" id="badTitle">Esse link não vale mais</h1>
-      <p class="rs-lead" id="badMsg">Ele expirou ou já foi usado. Na wiki, clique em <strong>Entrar</strong> e depois em <strong>esqueci minha senha</strong> pra receber um link novo.</p>
-      <a class="rs-btn" href="/wiki">Ir pra wiki</a>
+      <p class="rs-lead" id="badMsg">Ele expirou ou já foi usado. Na wiki, clique em <strong>Entrar</strong> e depois em <strong>esqueci minha senha</strong> para receber um novo link.</p>
+      <a class="rs-btn" href="/wiki">Ir para a wiki</a>
     </div>
   </section>
 </main>
@@ -147,7 +147,7 @@
 
   if (mode !== "resetPassword" || !oobCode) {
     document.getElementById("badTitle").textContent = "Link incompleto";
-    document.getElementById("badMsg").innerHTML = "Abra o link direto do e-mail, sem cortar nada. Se não der, na wiki clique em <strong>Entrar</strong> e depois em <strong>esqueci minha senha</strong> pra receber um novo.";
+    document.getElementById("badMsg").innerHTML = "Abra o link direto do e-mail, sem cortar nada. Se não funcionar, clique em <strong>Entrar</strong> na wiki e depois em <strong>esqueci minha senha</strong> para receber um novo link.";
     show("bad");
   } else {
     firebase.auth().verifyPasswordResetCode(oobCode).then(function (email) {
@@ -180,7 +180,7 @@
       submitBtn.disabled = false; submitBtn.textContent = "Salvar senha";
       if (e && e.code === "auth/weak-password") errEl.textContent = "Essa senha é fraca demais. Tente uma mais longa.";
       else if (e && (e.code === "auth/expired-action-code" || e.code === "auth/invalid-action-code")) show("bad");
-      else errEl.textContent = "Não consegui salvar agora. Confira a internet e tente de novo.";
+      else errEl.textContent = "Não foi possível salvar agora. Confira sua conexão e tente novamente.";
     });
   });
 </script>
