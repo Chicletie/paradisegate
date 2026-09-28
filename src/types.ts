@@ -346,6 +346,8 @@ export interface MemberCard {
   ordem?: string[];
   /** Personagens que a pessoa escondeu do perfil. */
   ocultos?: string[];
+  /** A carta do tarô do membro na mesa (até duas), marcada pelo autor. */
+  cartas?: WikiArcana[];
 }
 
 /** Onde a pessoa interpretou: a temporada (com a página dela, se publicada) e, se foi só uma, a sessão. */

@@ -4,6 +4,7 @@
  * apelido, foto e favoritos vêm do perfil; bio e "mostrar meus favoritos" só existem no cartão.
  */
 import type { MemberCard, WikiIndex, WikiIndexEntry, WikiInterpreteOnde, WikiProfile } from "../types";
+import { arcanaInfo, type ArcanaInfo } from "./arcana";
 
 export const BIO_MAX = 300;
 
@@ -97,6 +98,14 @@ export function orderRoles<T extends MemberPage>(list: T[], ordem: string[] | un
 export function shownRoles<T extends MemberPage>(list: T[], card: Pick<MemberCard, "ordem" | "ocultos">): T[] {
   const hidden = new Set(card.ocultos || []);
   return orderRoles(list, card.ordem).filter((p) => !hidden.has(p.id));
+}
+
+/** As cartas do membro que dá pra desenhar (até duas; carta inválida fica de fora). */
+export function memberCards(card: Pick<MemberCard, "cartas">): ArcanaInfo[] {
+  return (Array.isArray(card.cartas) ? card.cartas : [])
+    .map((a) => arcanaInfo(a))
+    .filter((x): x is ArcanaInfo => !!x)
+    .slice(0, 2);
 }
 
 /** Quantos personagens o perfil mostra antes do "ver todos". */
