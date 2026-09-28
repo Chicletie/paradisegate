@@ -42,7 +42,7 @@ async function emailForUsername(username: string, password: string): Promise<str
       body: JSON.stringify({ data: { username, password } }),
     });
   } catch {
-    throw new LoginError("Não consegui conferir agora. Tente de novo ou entre com o e-mail.");
+    throw new LoginError("Não foi possível verificar agora. Tente novamente ou entre com o seu e-mail.");
   }
   const body = (await res.json().catch(() => ({}))) as { result?: { email?: string }; error?: { message?: string } };
   if (res.ok && body.result?.email) return body.result.email;
@@ -94,9 +94,9 @@ export async function callFunction<T>(name: string, data: unknown): Promise<T> {
   try {
     res = await fetch(functionUrl(name), { method: "POST", headers, body: JSON.stringify({ data }) });
   } catch {
-    throw new FunctionError("Não consegui falar com o servidor agora. Tente de novo.", "unavailable");
+    throw new FunctionError("Não foi possível falar com o servidor agora. Tente novamente.", "unavailable");
   }
   const body = (await res.json().catch(() => ({}))) as { result?: T; error?: { message?: string; status?: string } };
   if (res.ok && "result" in body) return body.result as T;
-  throw new FunctionError(body.error?.message || "Não deu certo agora. Tente de novo.", (body.error?.status || "internal").toLowerCase());
+  throw new FunctionError(body.error?.message || "Algo deu errado. Tente novamente.", (body.error?.status || "internal").toLowerCase());
 }

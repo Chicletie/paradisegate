@@ -25,7 +25,7 @@ export function EscritosPage() {
   const index = useWikiIndex();
   const failed = useWikiIndexFailed();
   usePgBody(!index && !failed ? "loading" : null);
-  if (failed) return <ErrorPage message="Não consegui carregar os escritos agora. Tente de novo mais tarde." />;
+  if (failed) return <ErrorPage message="Não foi possível carregar os escritos agora. Tente novamente mais tarde." />;
   if (!index)
     return (
       <div className="page">

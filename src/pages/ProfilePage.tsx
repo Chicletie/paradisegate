@@ -48,7 +48,7 @@ export function ProfilePage() {
         {ready && <h1 className="pg-profile-title">Seu perfil</h1>}
         {ready && !user && (
           <section className="pg-panel pg-profile-empty">
-            <p>Entre com a conta que você recebeu por convite pra ver seu perfil, suas sugestões e seus favoritos.</p>
+            <p>Entre com a conta que você recebeu por convite para ver seu perfil, suas sugestões e seus favoritos!</p>
             <SignInButton className="pg-signin pg-signin-light" />
           </section>
         )}
@@ -63,9 +63,9 @@ export function ProfilePage() {
 
 /** A frase embaixo do username no perfil, com o que o servidor disse (presa até quando, a regra). */
 function unHint(username: string | undefined, info: { locked: string; hint: string } | null): string {
-  if (!username) return "Nome único da sua conta (o apelido pode repetir, o username não).";
-  if (info?.locked) return "Dá pra trocar de novo a partir de " + info.locked + ".";
-  return "Nome único da sua conta." + (info?.hint ? " " + info.hint : "");
+  if (!username) return "Seu nome único na wiki! Apelidos podem se repetir, mas o username é só seu.";
+  if (info?.locked) return "Você poderá trocar novamente a partir de " + info.locked + ".";
+  return "Seu nome único na wiki! Apelidos podem se repetir, mas o username é só seu." + (info?.hint ? " " + info.hint : "");
 }
 
 function Panel({ id, title, children }: { id: string; title: string; children: ReactNode }) {
@@ -116,7 +116,7 @@ function PublicProfile() {
     let alive = true;
     loadCard().then(
       (c) => alive && setPrefs({ bio: c?.bio || "", showFavorites: !!c?.showFavorites, ordem: c?.ordem || [], ocultos: c?.ocultos || [] }),
-      () => alive && setStatus({ msg: "Não consegui ler seu perfil público agora.", bad: true }),
+      () => alive && setStatus({ msg: "Não foi possível carregar seu perfil público agora. Tente novamente mais tarde.", bad: true }),
     );
     return () => {
       alive = false;
@@ -147,8 +147,8 @@ function PublicProfile() {
     const ordem = roles.map((p) => p.id);
     saveCard({ bio: prefs.bio.trim(), showFavorites: prefs.showFavorites, ordem, ocultos: prefs.ocultos.filter((id) => ordem.includes(id)) })
       .then(
-        () => setStatus({ msg: "Perfil público salvo." }),
-        () => setStatus({ msg: "Não consegui salvar agora. Tenta de novo daqui a pouco.", bad: true }),
+        () => setStatus({ msg: "Perfil público salvo!" }),
+        () => setStatus({ msg: "Não foi possível salvar agora. Tente novamente em alguns instantes.", bad: true }),
       )
       .then(() => setBusy(false));
   }
@@ -159,14 +159,14 @@ function PublicProfile() {
         <p className="pg-empty">Carregando…</p>
       ) : !name ? (
         <p className="pg-profile-note">
-          Quem tem username ganha uma página pública, com endereço próprio, que o autor pode citar na wiki.{" "}
-          <a href="#username">Escolha seu username</a> pra ter a sua.
+          Com um username, você ganha uma página pública com endereço próprio, que pode ser citada na wiki!{" "}
+          <a href="#username">Escolha seu username</a> para ter a sua.
         </p>
       ) : (
         <div className="pg-profile-fields">
           <p className="pg-profile-note">
-            Seu endereço é <Link to={memberHref(name)}>paradisegate.com.br/@{name}</Link>. Lá aparecem sua foto, seu apelido, a bio abaixo e os
-            personagens que você interpreta na wiki. Seu e-mail nunca aparece.
+            Seu endereço é <Link to={memberHref(name)}>paradisegate.com.br/@{name}</Link>. Lá aparecem sua foto, seu apelido e a bio selecionados, e também os
+            personagens que você interpreta nas campanhas oficiais. Seu endereço de e-mail não é revelado!
           </p>
           <div className="pg-field">
             <label className="pg-field-label" htmlFor="pg-bio">
@@ -177,7 +177,7 @@ function PublicProfile() {
               className="pg-bio-input"
               maxLength={BIO_MAX}
               rows={3}
-              placeholder="Umas linhas sobre você, se quiser."
+              placeholder="Escreva um pouco sobre você!"
               disabled={!prefs}
               value={prefs?.bio ?? ""}
               onChange={(ev) => prefs && setPrefs({ ...prefs, bio: ev.target.value })}
@@ -197,7 +197,7 @@ function PublicProfile() {
             <div className="pg-field">
               <span className="pg-field-label">Personagens no perfil</span>
               <p className="pg-un-hint">
-                A ordem aqui é a do seu perfil. Os {ROLES_SHOWN} primeiros aparecem de cara; o resto fica em “ver todos”. Desmarque pra esconder um personagem.
+                Organize seu perfil! Os {ROLES_SHOWN} primeiros listados aparecem de cara; o restante, fica em “ver todos”. Desmarque para esconder um personagem.
               </p>
               <ol className="pg-roles-edit">
                 {roles.map((p, i) => {
@@ -247,7 +247,7 @@ function SpoilerSettings() {
     <Panel id="spoilers" title="Até onde você já viu">
       {obras.length ? (
         <>
-          <p className="pg-profile-note">Os spoilers das temporadas que você já viu aparecem abertos em toda a wiki. Os outros continuam tampados.</p>
+          <p className="pg-profile-note">Marque até onde você já acompanhou cada campanha! Os spoilers das temporadas que você já viu ficam abertos em toda a wiki, e o restante continua escondido.</p>
           <div className="pg-prog-list">
             {obras.map((o) => (
               <ProgressPicker key={o.id} obra={o} />
@@ -255,7 +255,7 @@ function SpoilerSettings() {
           </div>
         </>
       ) : (
-        <p className="pg-profile-note">Nenhuma página tem spoiler marcado por temporada ainda.</p>
+        <p className="pg-profile-note">Ainda não há spoilers marcados por temporada na wiki.</p>
       )}
     </Panel>
   );
@@ -295,10 +295,10 @@ function Identity({ user }: { user: AuthUser }) {
     say("Salvando…");
     save({ nickname: value })
       .then(
-        () => say("Apelido salvo."),
+        () => say("Apelido salvo!"),
         // Quem recusa apelido proibido é a regra do banco (a lista mora no servidor, não aqui).
         (e: { code?: string }) =>
-          say(e?.code === "permission-denied" ? "Esse apelido não é permitido. Escolha outro." : "Não consegui salvar agora. Tenta de novo daqui a pouco.", true),
+          say(e?.code === "permission-denied" ? "Esse apelido não é permitido. Escolha outro." : "Não foi possível salvar agora. Tente novamente em alguns instantes.", true),
       )
       .then(() => setBusy(false));
   }
@@ -321,8 +321,8 @@ function Identity({ user }: { user: AuthUser }) {
               resizePhoto(f)
                 .then((url) => save({ photo: url }))
                 .then(
-                  () => say("Foto salva."),
-                  () => say("Não consegui usar essa imagem. Tenta outra (JPG ou PNG).", true),
+                  () => say("Foto salva!"),
+                  () => say("Não foi possível usar essa imagem. Tente outra, em JPG ou PNG.", true),
                 );
             }}
           />
@@ -337,7 +337,7 @@ function Identity({ user }: { user: AuthUser }) {
               say("Removendo…");
               save({ photo: null }).then(
                 () => say("Foto removida."),
-                () => say("Não consegui remover agora. Tenta de novo daqui a pouco.", true),
+                () => say("Não foi possível remover agora. Tente novamente em alguns instantes.", true),
               );
             }}
           >
@@ -431,9 +431,9 @@ function Suggestions({ user }: { user: AuthUser }) {
     <Panel id="sugestoes" title="Suas sugestões">
       <div className="pg-sug-list">
         {state === "loading" && <p className="pg-empty">Carregando…</p>}
-        {state === "error" && <p className="pg-empty">Não consegui carregar suas sugestões agora. Tenta de novo daqui a pouco.</p>}
+        {state === "error" && <p className="pg-empty">Não foi possível carregar suas sugestões agora. Tente novamente em alguns instantes.</p>}
         {typeof state === "object" && state.list.length === 0 && (
-          <p className="pg-empty">Você ainda não enviou nenhuma sugestão. Dá pra sugerir alterações em qualquer página da wiki.</p>
+          <p className="pg-empty">Você ainda não enviou nenhuma sugestão, tente contribuir com sugestões em qualquer página da wiki!</p>
         )}
         {typeof state === "object" && newestFirst(state.list).map((s, i) => <SuggestionItem key={i} s={s} isNew={isNewSuggestion(s, state.seen)} />)}
       </div>
@@ -472,7 +472,7 @@ function SuggestionItem({ s, isNew }: { s: WikiSuggestion; isNew: boolean }) {
           <p>{s.reply}</p>
         </div>
       ) : (
-        <p className="pg-sug-none">Ainda sem resposta.</p>
+        <p className="pg-sug-none">Aguardando resposta.</p>
       )}
     </article>
   );
@@ -490,7 +490,7 @@ function Favorites() {
         {!favs || !index ? (
           <p className="pg-empty">Carregando…</p>
         ) : favs.length === 0 ? (
-          <p className="pg-empty">Nenhuma página favorita ainda. Use o botão “Favoritar”, com a estrela, no alto de qualquer página.</p>
+          <p className="pg-empty">Você não marcou nenhuma página como favorita ainda. Tente usar o botão “Favoritar”, com a estrela, no alto de qualquer página.</p>
         ) : (
           favs.map((id) => {
             const e = index[id];
@@ -559,14 +559,14 @@ function Accesses({ user }: { user: AuthUser }) {
   const groups = Array.isArray(rows) && index ? groupAccesses(rows, index) : null;
   return (
     <Panel id="acessos" title="Seus acessos">
-      <p className="pg-profile-note">Trechos restritos que o autor liberou pra sua conta. Eles aparecem dentro das próprias páginas.</p>
+      <p className="pg-profile-note">Aqui ficam os trechos restritos que o autor liberou para você! Eles também aparecem dentro das próprias páginas.</p>
       <div className="pg-acc-list">
         {rows === "error" ? (
-          <p className="pg-empty">Não consegui carregar seus acessos agora. Tenta de novo daqui a pouco.</p>
+          <p className="pg-empty">Não foi possível carregar seus acessos agora. Tente novamente em alguns instantes.</p>
         ) : !groups || !index ? (
           <p className="pg-empty">Carregando…</p>
         ) : groups.length === 0 ? (
-          <p className="pg-empty">Nenhum conteúdo restrito liberado pra sua conta ainda.</p>
+          <p className="pg-empty">Você ainda não tem nenhum conteúdo restrito liberado.</p>
         ) : (
           groups.map((g) => (
             <div key={g.pageId} className="pg-acc-row">

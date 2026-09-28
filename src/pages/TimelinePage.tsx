@@ -19,7 +19,7 @@ export function TimelinePage() {
   const failed = useWikiIndexFailed();
   // Carregando: só o pg-theme, como a home. Pronta, TimelineLoaded põe as classes da página.
   usePgBody(!index && !failed ? "loading" : null);
-  if (failed) return <ErrorPage message="Não consegui carregar a linha do tempo agora. Tente de novo mais tarde." />;
+  if (failed) return <ErrorPage message="Não foi possível carregar a linha do tempo agora. Tente novamente mais tarde." />;
   if (!index)
     return (
       <div className="page">

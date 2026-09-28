@@ -115,8 +115,8 @@ export function dailyHighlights(entries: HomeEntry[], now = Date.now()): DailyHi
     char: dailyPick(charPool, "personagem", now),
     isBirthday,
     charEmptyMsg: personagens.length
-      ? "Todo mundo publicado está no próprio mês de aniversário — ninguém elegível pro sorteio de hoje."
-      : "Ainda sem personagens publicados.",
+      ? "Todos os personagens publicados estão no mês de aniversário, então ninguém entrou no sorteio de hoje."
+      : "Ainda não há personagens publicados.",
     note: dailyPick(notesOf(eligible).filter((n) => !n.noDaily), "nota", now),
     entrada: dailyPick(
       eligible.filter((e) => !isCharacter(e)),

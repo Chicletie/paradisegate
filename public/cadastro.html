@@ -79,7 +79,7 @@
 
     <form id="stForm" hidden novalidate>
       <h1>Criar sua conta</h1>
-      <p class="rs-lead">Bem-vindo à wiki de Paradise Gate. Sua conta é <strong id="emailOut"></strong>.</p>
+      <p class="rs-lead">Boas-vindas à wiki de Paradise Gate! Sua conta é <strong id="emailOut"></strong>.</p>
       <input type="email" id="user" autocomplete="username" hidden />
       <label class="rs-field">
         <span class="rs-label">Username</span>
@@ -87,7 +87,7 @@
           <span class="rs-at" aria-hidden="true">@</span>
           <input class="rs-input has-at" type="text" id="uname" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="21" required aria-describedby="unHint" />
         </span>
-        <span class="rs-hint" id="unHint" aria-live="polite">Seu nome único na wiki: 3 a 20 caracteres, letras sem acento, números e _. Dá pra trocar depois, uma vez a cada 30 dias.</span>
+        <span class="rs-hint" id="unHint" aria-live="polite">Seu nome único na wiki! Use de 3 a 20 caracteres: letras sem acento, números e _. Você poderá trocá-lo depois, uma vez a cada 30 dias.</span>
       </label>
       <div id="passFields">
         <label class="rs-field">
@@ -113,15 +113,15 @@
     <div id="stDone" hidden>
       <span class="rs-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
       <h1 tabindex="-1" id="doneTitle">Conta criada</h1>
-      <p class="rs-lead">Você já está dentro como <strong id="doneName"></strong>. Da próxima vez, dá pra entrar com esse nome ou com o email. Foto e apelido você escolhe no seu perfil.</p>
-      <a class="rs-btn" href="/wiki">Ir pra wiki</a>
+      <p class="rs-lead">Você já entrou como <strong id="doneName"></strong>! Da próxima vez, você pode entrar com esse username ou com o seu e-mail. A foto e o apelido podem ser escolhidos no seu perfil.</p>
+      <a class="rs-btn" href="/wiki">Ir para a wiki</a>
       <p class="rs-foot"><a href="/wiki/_perfil">Abrir meu perfil</a></p>
     </div>
 
     <div id="stBad" hidden>
       <h1 tabindex="-1" id="badTitle">Esse convite não vale mais</h1>
-      <p class="rs-lead" id="badMsg">O link expirou ou já foi usado. Se você já criou a conta, é só entrar na wiki. Se não, peça um convite novo a quem te convidou, ou use <strong>esqueci minha senha</strong> na tela de entrar.</p>
-      <a class="rs-btn" href="/wiki">Ir pra wiki</a>
+      <p class="rs-lead" id="badMsg">O link expirou ou já foi usado. Se você já criou a conta, é só entrar na wiki! Se ainda não criou, peça um novo convite a quem convidou você, ou use <strong>esqueci minha senha</strong> na tela de entrar.</p>
+      <a class="rs-btn" href="/wiki">Ir para a wiki</a>
     </div>
   </section>
 </main>
@@ -158,12 +158,12 @@
     }).then(function (res) {
       return res.json().catch(function () { return {}; }).then(function (body) {
         if (res.ok && "result" in body) return body.result;
-        var err = new Error((body.error && body.error.message) || "Não deu certo agora. Tente de novo.");
+        var err = new Error((body.error && body.error.message) || "Algo deu errado. Tente novamente.");
         err.code = (body.error && body.error.status || "internal").toLowerCase();
         throw err;
       });
     }, function () {
-      throw new Error("Não consegui falar com o servidor agora. Tente de novo.");
+      throw new Error("Não foi possível falar com o servidor agora. Tente novamente.");
     });
   }
 
@@ -186,7 +186,7 @@
 
   if (mode !== "resetPassword" || !oobCode) {
     document.getElementById("badTitle").textContent = "Link incompleto";
-    document.getElementById("badMsg").textContent = "Abra o link direto do e-mail de convite, sem cortar nada. Se não der, peça um convite novo a quem te convidou.";
+    document.getElementById("badMsg").textContent = "Abra o link direto do e-mail de convite, sem cortar nada. Se não funcionar, peça um novo convite a quem convidou você.";
     show("bad");
   } else {
     auth.verifyPasswordResetCode(oobCode).then(function (em) {
@@ -223,7 +223,7 @@
         if (r.problem) hint(r.problem, "bad");
         else hint(r.free ? "@" + r.name + " está livre." : "@" + r.name + " já está em uso.", r.free ? "ok" : "bad");
       }, function () {
-        if (my === unSeq) hint("Não consegui conferir agora. Tente de novo.", "bad");
+        if (my === unSeq) hint("Não foi possível verificar agora. Tente novamente.", "bad");
       });
     }, 350);
   });
@@ -231,7 +231,7 @@
   st.form.addEventListener("submit", function (ev) {
     ev.preventDefault();
     errEl.textContent = "";
-    if (!unFree) { errEl.textContent = "Escolha um username livre."; unameEl.focus(); return; }
+    if (!unFree) { errEl.textContent = "Escolha um username disponível!"; unameEl.focus(); return; }
     if (!passwordSaved) {
       if (pass1.value.length < 6) { errEl.textContent = "A senha precisa ter pelo menos 6 caracteres."; pass1.focus(); return; }
       if (pass1.value !== pass2.value) { errEl.textContent = "As duas senhas não são iguais."; pass2.focus(); return; }
@@ -249,14 +249,14 @@
       if (!passwordSaved) {
         if (e && e.code === "auth/weak-password") errEl.textContent = "Essa senha é fraca demais. Tente uma mais longa.";
         else if (e && (e.code === "auth/expired-action-code" || e.code === "auth/invalid-action-code")) show("bad");
-        else errEl.textContent = "Não consegui criar a conta agora. Confira a internet e tente de novo.";
+        else errEl.textContent = "Não foi possível criar a conta agora. Confira sua conexão e tente novamente.";
         return;
       }
       // Senha já salva e login feito: só o username falhou (provavelmente pego agora mesmo).
       document.getElementById("passFields").hidden = true;
       unFree = false;
       hint(e && e.message ? e.message : "Esse nome acabou de ser pego. Escolha outro.", "bad");
-      errEl.textContent = "Sua senha já foi salva. Falta só o username.";
+      errEl.textContent = "Sua senha já foi salva! Agora só falta o username.";
       unameEl.focus();
     });
   });

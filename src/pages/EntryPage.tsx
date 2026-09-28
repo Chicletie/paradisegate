@@ -51,11 +51,11 @@ export function EntryPage() {
     return <Navigate to={"/wiki/_escritos/" + encodeURIComponent(state.data.id)} replace />;
   }
   if (state.status === "not-found") {
-    return <ErrorPage message="Essa página não existe mais (o link pode ter sido despublicado)." />;
+    return <ErrorPage message="Esta página não existe mais. O link pode ter sido despublicado." />;
   }
   if (state.status === "error") {
     return (
-      <ErrorPage message="Não consegui abrir essa página. Pode ser um link inválido ou removido, ou uma falha temporária — tenta de novo, ou volta pro início." />
+      <ErrorPage message="Não foi possível abrir esta página. O link pode estar errado ou ter sido removido. Tente novamente ou volte para o início!" />
     );
   }
 

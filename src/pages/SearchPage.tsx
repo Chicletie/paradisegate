@@ -28,7 +28,7 @@ export function SearchPage() {
   const index = useWikiIndex();
   const failed = useWikiIndexFailed();
   usePgBody(!index && !failed ? "loading" : null);
-  if (failed) return <ErrorPage message="Não consegui carregar a busca agora. Tente de novo mais tarde." />;
+  if (failed) return <ErrorPage message="Não foi possível carregar a busca agora. Tente novamente mais tarde." />;
   if (!index)
     return (
       <div className="page">
@@ -109,7 +109,7 @@ function SearchLoaded({ index }: { index: WikiIndex }) {
           </form>
 
           {!q.trim() ? (
-            <p className="pg-sp-hint">Digite um nome, um lugar, uma tag ou qualquer palavra do texto das páginas.</p>
+            <p className="pg-sp-hint">Busque por um nome, um lugar, uma tag ou qualquer palavra do texto das páginas!</p>
           ) : (
             <>
               <div className="pg-sp-bar">

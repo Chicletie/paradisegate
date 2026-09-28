@@ -9,7 +9,7 @@ describe("destaques do dia", () => {
     const entries = [e("nova", { firstPublishedAt: "2026-09-24", updatedAt: "2026-09-24" })];
     const d = dailyHighlights(entries, NOW);
     expect(d.char).toBeNull();
-    expect(d.charEmptyMsg).toBe("Ainda sem personagens publicados.");
+    expect(d.charEmptyMsg).toBe("Ainda não há personagens publicados.");
     expect(recentEntries(entries)[0].id).toBe("nova");
   });
 
@@ -22,7 +22,7 @@ describe("destaques do dia", () => {
   it("quem está na própria janela de aniversário fica fora do sorteio normal", () => {
     const d = dailyHighlights([e("setembro", { birthdayMD: "09-02" })], NOW);
     expect(d.char).toBeNull();
-    expect(d.charEmptyMsg).toMatch(/próprio mês de aniversário/);
+    expect(d.charEmptyMsg).toMatch(/estão no mês de aniversário/);
   });
 
   it("Entrada do dia nunca é Personagem nem Lupino", () => {

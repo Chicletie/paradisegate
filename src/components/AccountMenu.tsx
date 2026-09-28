@@ -18,7 +18,7 @@ export function LoginBar() {
         {user ? (
           <AccountMenu user={user} />
         ) : (
-          <button className="pg-signin" type="button" title="Entrar pra ver conteúdo restrito" onClick={openLogin}>
+          <button className="pg-signin" type="button" title="Entre para ver o conteúdo restrito" onClick={openLogin}>
             <PgUserIcon />
             <span>Entrar</span>
           </button>

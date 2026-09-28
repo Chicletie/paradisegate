@@ -8,7 +8,7 @@ import { PlaceContext, useRestritoAt, type Placement } from "../lib/restritoPlac
  * (`restritoSlots`: área + quantos itens públicos vêm antes, com um código embaralhado) e cada
  * item restrito liberado pro leitor traz o mesmo código em `slot`. Aqui os dois se encontram:
  * cada área da página pergunta "o que entra antes do meu item i?" e desenha no lugar, marcado
- * "🔐 desbloqueado pra você", com "ver como convidado" pra comparar com o que o público vê.
+ * "🔐 desbloqueado para você", com "ver como convidado" pra comparar com o que o público vê.
  * Itens sem marca (páginas publicadas antes disto, variantes de obra, galeria) continuam indo
  * pro fim da página, em RestritoSlot.
  */
@@ -20,7 +20,7 @@ export function RestritoPlaceProvider({ value, children }: { value: Placement; c
 function Badge() {
   return (
     <span className="pg-unlocked-badge" title="Só você e quem o autor liberou veem isto">
-      🔐 desbloqueado pra você
+      🔐 desbloqueado para você
     </span>
   );
 }
@@ -33,7 +33,7 @@ function GuestSwitch({ guest, onToggle }: { guest: boolean; onToggle: () => void
     </button>
   );
 }
-const GUEST_NOTE = "Convidados não veem este trecho: pra eles, a página segue como se ele não existisse.";
+const GUEST_NOTE = "Convidados não veem este trecho. Para eles, a página segue como se ele não existisse.";
 
 /** Linhas da ficha (infobox ou taxonomia) que entram antes do fato público `index`. */
 export function RestritoRows({ area, index }: { area: "ficha" | "tax-ficha"; index: number }) {
@@ -115,12 +115,12 @@ export function RestritoInline({ area, index }: { area: "tags" | "aliases"; inde
     <>
       {items.map((it, i) =>
         area === "tags" ? (
-          <span key={i} className="tag pg-unlocked-tag" title="🔐 desbloqueado pra você">
+          <span key={i} className="tag pg-unlocked-tag" title="🔐 desbloqueado para você">
             {"🔐 #" + it.text}
           </span>
         ) : (
           <Fragment key={i}>
-            <div className="alias-line pg-unlocked-alias" title="🔐 desbloqueado pra você">
+            <div className="alias-line pg-unlocked-alias" title="🔐 desbloqueado para você">
               {"🔐 " + it.text}
             </div>
           </Fragment>
