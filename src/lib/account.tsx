@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { claimUsername, fetchMemberCard, fetchMySuggestions, fetchProfile, LoginError, saveMemberCard, saveProfile, sendPasswordReset, signIn, watchAuth } from "./api";
+import { claimUsername, fetchMemberCard, FunctionError, fetchMySuggestions, fetchProfile, LoginError, saveMemberCard, saveProfile, sendPasswordReset, signIn, watchAuth } from "./api";
 import { cardFields, cardOutdated, type CardPrefs } from "./member";
 import { mergeProfile, unreadCount } from "./profile";
 import { isEmailLogin } from "./username";
@@ -260,9 +260,9 @@ function LoginModal({ onClose }: { onClose: () => void }) {
     setForgot("sending");
     sendPasswordReset(addr).then(
       () => setForgot("sent"),
-      () => {
+      (e) => {
         setForgot("idle");
-        setErr("Não foi possível enviar. Confira o e-mail digitado.");
+        setErr(e instanceof FunctionError ? e.message : "Não foi possível enviar. Confira o e-mail digitado.");
       },
     );
   }
