@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { claimUsername, fetchMemberCard, fetchMySuggestions, fetchProfile, LoginError, saveMemberCard, saveProfile, sendPasswordReset, signIn, watchAuth } from "./api";
-import { cardFields, cardOutdated } from "./member";
+import { cardFields, cardOutdated, type CardPrefs } from "./member";
 import { mergeProfile, unreadCount } from "./profile";
 import { isEmailLogin } from "./username";
 import type { AuthUser, MemberCard, WikiProfile, WikiProfilePatch } from "../types";
@@ -52,7 +52,7 @@ interface AccountState {
    * ele estiver atrás do perfil (quem escolheu o nome antes do perfil público existir). */
   loadCard: () => Promise<MemberCard | null>;
   /** Grava bio e "mostrar meus favoritos" no cartão público. */
-  saveCard: (prefs: { bio?: string; showFavorites?: boolean }) => Promise<void>;
+  saveCard: (prefs: CardPrefs) => Promise<void>;
   clearUnread: () => void;
   openLogin: () => void;
 }
@@ -128,11 +128,13 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   // O cartão público acompanha o perfil: apelido, foto e favoritos vêm dele; bio e "mostrar
   // favoritos" são do próprio cartão. Só grava quando algo mudou.
   const syncCard = useCallback(
-    async (u: AuthUser, d: WikiProfile, prefs?: { bio?: string; showFavorites?: boolean }): Promise<MemberCard | null> => {
+    async (u: AuthUser, d: WikiProfile, prefs?: CardPrefs): Promise<MemberCard | null> => {
       if (!d.username) return null;
       const card = await fetchMemberCard(d.username);
       if (!card || card.uid !== u.uid) return card;
-      const want = cardFields(d, prefs ?? { bio: card.bio, showFavorites: card.showFavorites }, card.since || u.since);
+      // o que não veio em prefs fica como está no cartão (bio, favoritos, ordem dos personagens…)
+      const cur: CardPrefs = { bio: card.bio, showFavorites: card.showFavorites, ordem: card.ordem, ocultos: card.ocultos };
+      const want = cardFields(d, { ...cur, ...prefs }, card.since || u.since);
       if (!cardOutdated(card, want)) return card;
       await saveMemberCard(d.username, want);
       return { uid: u.uid, ...want };
@@ -172,7 +174,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   }, [user, loadProfile, syncCard]);
 
   const saveCard = useCallback(
-    async (prefs: { bio?: string; showFavorites?: boolean }) => {
+    async (prefs: CardPrefs) => {
       if (!user) return;
       await syncCard(user, await loadProfile(user), prefs);
     },

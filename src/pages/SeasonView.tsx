@@ -57,7 +57,9 @@ export function SeasonView({ data, wikiId }: { data: WikiSeasonDoc; wikiId: stri
           <Fragment key={i}>
           <RestritoBlocks area="sessoes" index={i} />
           <div>
-            <h2 className="cathead" id={`s${i}`}>
+            {/* âncora fixa da sessão (#sessao-<id>, usada no perfil /@nome); #s<n> continua valendo */}
+            {sx.id && <span id={`s${i}`} aria-hidden="true" />}
+            <h2 className="cathead" id={sx.id ? `sessao-${sx.id}` : `s${i}`}>
               {(sx.title || `Sessão ${i + 1}`) + (sx.date ? ` · ${sx.date}` : "")}
             </h2>
             {sx.vis === "spoiler" ? (

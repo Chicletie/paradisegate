@@ -14,7 +14,7 @@ e cada jogador logado só recebe o que foi liberado pro e-mail dele.
 | `wikiPublic/{slug}` | Página completa (entrada, temporada ou escrito) | qualquer um lê |
 | `wikiRestrito/{wikiId}/itens/{itemId}` | Trechos liberados por pessoa (`permitidos: [e-mails]`) | jogador logado cujo e-mail está na lista |
 | `wikiProfiles/{uid}` | Perfil do leitor: apelido, foto, favoritos, `seenAt`, `progress` (até onde viu cada obra), `username` e `usernameChangedAt` | o próprio leitor lê e grava (o username só pela função `claimUsername`, ver abaixo) |
-| `wikiUsernames/{nome}` | `{ uid, at }` + o **cartão público** do membro (`nickname`, `photo`, `bio`, `since`, `showFavorites`, `favorites` só se mostrar; nunca o e-mail), lido pela página `/@nome`. Um documento por @username tomado (único por conta). Escolher/trocar acontece só na função `claimUsername`, que cria o novo (com o cartão), apaga o antigo e grava no perfil numa transação só; troca no máximo a cada 30 dias (a regra em `functions/username.js`, no repo do autor). O cartão acompanha o perfil a cada gravação | qualquer um lê um nome (não lista); edita o cartão o próprio dono; criar/apagar o documento é só pela função; o autor modera o cartão |
+| `wikiUsernames/{nome}` | `{ uid, at }` + o **cartão público** do membro (`nickname`, `photo`, `bio`, `since`, `showFavorites`, `favorites` só se mostrar, `ordem` e `ocultos`: ids das páginas dos personagens na ordem escolhida e os escondidos do perfil; nunca o e-mail), lido pela página `/@nome`. Um documento por @username tomado (único por conta). Escolher/trocar acontece só na função `claimUsername`, que cria o novo (com o cartão), apaga o antigo e grava no perfil numa transação só; troca no máximo a cada 30 dias (a regra em `functions/username.js`, no repo do autor). O cartão acompanha o perfil a cada gravação | qualquer um lê um nome (não lista); edita o cartão o próprio dono; criar/apagar o documento é só pela função; o autor modera o cartão |
 | `wikiSuggestions/{id}` | Sugestões do leitor ao autor | o leitor cria e lê as próprias |
 
 `lotus` é o nome interno do mundo Paradise Gate nos dados (histórico, não aparece pro leitor).
@@ -66,7 +66,8 @@ Como ler (já feito em `src/lib/wikiIndex.tsx`):
 | `firstPublishedAt` | `AAAA-MM-DD` | fora dos sorteios do dia até o reset seguinte (00h de Brasília) |
 | `cover`, `coverFocus` | URL/null, `{x,y}`/null | miniatura |
 | `wordCount`, `linkCount`, `postsCount` | number | números da home (`postsCount` só em página publicada antes dos Escritos) |
-| `membros` | string[] | usernames citados com `[@nome](membro:nome)` fora de spoiler ("Personagens que interpreta" no perfil `/@nome`) |
+| `membros` | string[] | usernames citados com `[@nome](membro:nome)` fora de spoiler |
+| `interpretes` | `{ membro, em: [{ titulo, id, sessao? }] }[]` | quem interpreta (campo Intérprete) e onde: `titulo` "Campanha: Temporada", `id` a página da temporada (ou `null`), `sessao` `{ titulo, id }` quando foi só uma sessão (link `/wiki/<id>#sessao-<id da sessão>`). "Personagens que interpreta" no perfil `/@nome` vem daqui; página sem o campo (publicada antes de 2026-09-27) vale pela menção em `membros` |
 | `birthdayMD` | `MM-DD`/null | aniversariante do dia |
 | `arcana` | objeto/null | carta de tarô do Personagem do dia |
 | `excerpt` | string | trecho curto da "Entrada do dia" |
@@ -75,7 +76,7 @@ Como ler (já feito em `src/lib/wikiIndex.tsx`):
 | `events` | `{familyId,label,y,m,d,note,major}[]` | linha do tempo e "Ano em foco" |
 | `citacoes` | lista | "Citação do dia" |
 
-Temporadas aparecem no índice com `type: "Temporada"`. Os tipos da página completa
+Temporadas aparecem no índice com `type: "Temporada"`. Cada sessão da temporada publicada tem `id` (âncora `#sessao-<id>` na página; as antigas, sem `id`, ficam em `#s<n>`). Os tipos da página completa
 (`wikiPublic/{slug}`) estão em `src/types.ts`.
 
 ## Escritos

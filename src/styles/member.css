@@ -99,6 +99,16 @@
 .pg-member-tile:hover .pg-member-tile-title { color: var(--pg-link); }
 .pg-member-tile:hover .pg-member-cover { border-color: var(--pg-gold-soft); }
 .pg-member-tile:focus-visible { outline: 2px solid var(--pg-link); outline-offset: 4px; border-radius: 10px; }
+/* Personagem: a página (retrato + nome) e, embaixo, onde a pessoa interpretou, com links próprios. */
+.pg-member-role { display: flex; flex-direction: column; gap: 4px; }
+.pg-member-tile-where { font-family: var(--pg-f-ui); font-size: 12.5px; line-height: 1.4; color: var(--pg-muted); }
+.pg-member-tile-where a { color: var(--pg-link); }
+.pg-member-more {
+  margin-top: 16px; padding: 9px 16px; border-radius: 999px; border: 1px solid var(--pg-line-strong);
+  background: transparent; color: var(--pg-link); font-family: var(--pg-f-ui); font-size: 14px; cursor: pointer;
+}
+.pg-member-more:hover { border-color: var(--pg-link); background: var(--pg-link-wash); }
+.pg-member-more:focus-visible { outline: 2px solid var(--pg-link); outline-offset: 3px; }
 
 @media (max-width: 600px) {
   .pg-member { padding: 28px 16px 8px; }
@@ -126,3 +136,20 @@
 .pg-bio-input::placeholder { color: var(--pg-muted); opacity: 1; }
 .pg-check { display: flex; align-items: center; gap: 10px; font-family: var(--pg-f-ui); font-size: 15px; color: var(--pg-ink); cursor: pointer; }
 .pg-check input { width: 18px; height: 18px; accent-color: var(--pg-link); }
+
+/* "Personagens no perfil" no /wiki/_perfil: marcar pra mostrar e subir/descer. */
+.pg-roles-edit { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.pg-roles-edit li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 10px; border: 1px solid var(--pg-line); border-radius: 10px; background: var(--pg-panel); }
+.pg-roles-edit li.is-hidden .pg-check span { color: var(--pg-muted); text-decoration: line-through; }
+.pg-roles-move { display: flex; gap: 6px; flex: none; }
+.pg-roles-move .pg-btn-line { min-width: 40px; min-height: 36px; padding: 4px 10px; }
+
+/* Carta(s) do tarô do membro, embaixo do @: o símbolo da carta (o mesmo do Personagem do dia) e o nome. */
+.pg-member-cards { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.pg-member-arcana {
+  display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px 5px 6px;
+  border: 1px solid var(--pg-gold-soft); border-radius: 999px; background: rgba(255, 255, 255, 0.04);
+  font-family: var(--pg-f-ui); font-size: 13.5px; color: var(--pg-tarot-cream);
+}
+.pg-member-arcana-glyph { width: 24px; height: 24px; flex: none; color: var(--pg-gold); }
+@media (max-width: 600px) { .pg-member-cards { justify-content: center; } }
