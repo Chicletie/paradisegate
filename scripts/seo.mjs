@@ -89,6 +89,27 @@ export function describeWriting(w) {
   return text || "Um escrito de Paradise Gate.";
 }
 
+// Membros do acervo com perfil público (/@nome): os citados nas páginas (`membros`) e os que
+// estão no campo Intérprete (`interpretes`). Só nomes no formato do @username.
+export const MEMBER_RE = /^[a-z0-9][a-z0-9_]{2,19}$/;
+export function membersOf(entries) {
+  const out = new Set();
+  for (const e of Object.values(entries)) {
+    for (const m of (e && e.membros) || []) if (typeof m === "string" && MEMBER_RE.test(m)) out.add(m);
+    for (const it of (e && e.interpretes) || []) if (it && typeof it.membro === "string" && MEMBER_RE.test(it.membro)) out.add(it.membro);
+  }
+  return [...out].sort();
+}
+
+/** Prévia de link do perfil público: apelido e @, a bio (ou uma frase padrão) e a foto, se for um endereço de imagem. */
+export function describeMember(name, card) {
+  const nick = card && typeof card.nickname === "string" ? card.nickname.trim() : "";
+  const title = (nick ? nick + " (@" + name + ")" : "@" + name) + " · " + SITE_NAME;
+  const bio = card && typeof card.bio === "string" ? clip(cleanText(card.bio)) : "";
+  const photo = card && typeof card.photo === "string" && /^https:\/\//.test(card.photo) ? card.photo : null;
+  return { title, description: bio || "Perfil de @" + name + " no acervo de " + SITE_NAME + ".", image: photo };
+}
+
 const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
 export function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ESC[c]); }
 

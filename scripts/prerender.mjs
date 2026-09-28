@@ -6,7 +6,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import {
-  fieldsToObject, mergeEntries, describeEntry, describeWriting, headTags, injectHead, safeSlug, sitemap, writingsOf, SITE, SITE_NAME,
+  fieldsToObject, mergeEntries, describeEntry, describeMember, describeWriting, headTags, injectHead, membersOf, safeSlug, sitemap, writingsOf, SITE, SITE_NAME,
 } from "./seo.mjs";
 
 const DIST = path.resolve(process.argv[2] || "dist");
@@ -104,5 +104,17 @@ for (const w of writings) {
   urls.push({ path: `/wiki/_escritos/${slug}`, lastmod: /^\d{4}-\d{2}-\d{2}$/.test(w.date || "") ? w.date : null });
   wcount++;
 }
+// Perfil público de cada membro citado na wiki (/@nome): só a prévia de link (apelido, bio, foto).
+// Fora do sitemap e com noindex: é uma pessoa de verdade, não precisa aparecer no Google. O cartão
+// é lido um a um (a lista de @usernames não é pública); quem não tem cartão fica de fora.
+let mcount = 0;
+for (const name of membersOf(entries)) {
+  let card = null;
+  try { card = await getDoc(`wikiUsernames/${name}`); } catch { card = null; }
+  if (!card) continue;
+  const m = describeMember(name, card);
+  write(`@${name}.html`, page(m.title, headTags({ title: m.title, description: m.description, path: `/@${name}`, image: m.image || DEFAULT_IMAGE, type: "profile", noindex: true })));
+  mcount++;
+}
 write("sitemap.xml", sitemap(urls));
-console.log(`Páginas prontas: ${count} páginas da wiki, ${wcount} escritos + home, linha do tempo, perfil e sitemap.xml.`);
+console.log(`Páginas prontas: ${count} páginas da wiki, ${wcount} escritos, ${mcount} perfis + home, linha do tempo, perfil e sitemap.xml.`);
