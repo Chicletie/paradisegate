@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cardFields, cardOutdated, favoritePages, memberHandle, pagesOfMember, sinceLabel } from "./member";
+import { cardFields, cardOutdated, favoritePages, memberHandle, orderRoles, pagesOfMember, shownRoles, sinceLabel } from "./member";
 import type { WikiIndex } from "../types";
 
 describe("perfil público /@nome", () => {
@@ -38,6 +38,34 @@ describe("perfil público /@nome", () => {
     expect(pagesOfMember(index, "ninguem")).toEqual([]);
     expect(favoritePages(index, { uid: "u", showFavorites: true, favorites: ["c", "sumiu"] }).map((p) => p.id)).toEqual(["c"]);
     expect(favoritePages(index, { uid: "u", showFavorites: false, favorites: ["c"] })).toEqual([]);
+  });
+
+  it("personagens: vale o campo Intérprete; página antiga (sem ele) vale pela menção", () => {
+    const g = { titulo: "Paradise Gate: Genesis", id: "pg-genesis" };
+    const index: WikiIndex = {
+      a: { title: "Alucard", type: "Personagem", membros: ["ania"], interpretes: [{ membro: "outra", em: [] }] },
+      d: { title: "Daphne", type: "Personagem", membros: [], interpretes: [{ membro: "ania", em: [{ ...g, sessao: { titulo: "A Testemunha", id: "x1" } }] }] },
+      v: { title: "Velho", type: "Personagem", membros: ["ania"] },
+    };
+    const roles = pagesOfMember(index, "ania");
+    expect(roles.map((p) => p.id)).toEqual(["d", "v"]);
+    expect(roles[0].em[0].sessao?.id).toBe("x1");
+    expect(roles[1].em).toEqual([]);
+  });
+
+  it("ordem escolhida primeiro, o resto por título; escondidos saem", () => {
+    const list = ["a", "b", "c", "d"].map((id) => ({ id, e: { title: id, type: "" } }));
+    expect(orderRoles(list, ["c", "a", "sumiu"]).map((p) => p.id)).toEqual(["c", "a", "b", "d"]);
+    expect(shownRoles(list, { ordem: ["d"], ocultos: ["b"] }).map((p) => p.id)).toEqual(["d", "a", "c"]);
+  });
+
+  it("o cartão guarda a ordem e os escondidos, e percebe quando mudam", () => {
+    const want = cardFields({}, { ordem: ["b", "a"], ocultos: ["c"] }, undefined);
+    expect(want.ordem).toEqual(["b", "a"]);
+    expect(want.ocultos).toEqual(["c"]);
+    expect(cardOutdated({ uid: "u", ...want }, want)).toBe(false);
+    expect(cardOutdated({ uid: "u", ...want, ordem: ["a", "b"] }, want)).toBe(true);
+    expect("ordem" in cardFields({}, { ordem: [] }, undefined)).toBe(false);
   });
 
   it("escreve a data de entrada", () => {

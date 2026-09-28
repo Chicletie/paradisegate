@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { usePgBody } from "../lib/usePgBody";
 import { useAccount } from "../lib/account";
@@ -7,13 +7,13 @@ import { useWikiIndex, useWikiObras } from "../lib/wikiIndex";
 import { writingsBy, writingsFromIndex } from "../lib/escritos";
 import { PageObrasProvider } from "../components/SpoilerProgress";
 import { WritingCard } from "./EscritosPage";
-import { favoritePages, memberHandle, pagesOfMember, sinceLabel, type MemberPage as Page } from "../lib/member";
+import { favoritePages, memberHandle, pagesOfMember, ROLES_SHOWN, shownRoles, sinceLabel, type MemberPage as Page, type MemberRole } from "../lib/member";
 import { objPos } from "../lib/format";
 import { PgHeader } from "../components/PgHeader";
 import { PgFooter } from "../components/PgFooter";
 import { PgSectionHead } from "../components/PgIcons";
 import { ErrorPage } from "./ErrorPage";
-import type { MemberCard } from "../types";
+import type { MemberCard, WikiInterpreteOnde } from "../types";
 
 /**
  * Perfil público de um membro do acervo (`/@nome`): quem tem username ganha uma página que o
@@ -63,7 +63,7 @@ function MemberView({ name, card }: { name: string; card: MemberCard }) {
   const index = useWikiIndex();
   const { user } = useAccount();
   const mine = !!user && user.uid === card.uid;
-  const pages = index ? pagesOfMember(index, name) : null;
+  const pages = index ? shownRoles(pagesOfMember(index, name), card) : null;
   const favs = index ? favoritePages(index, card) : null;
   const obras = useWikiObras();
   const writings = index ? writingsBy(writingsFromIndex(index), name) : [];
@@ -93,7 +93,7 @@ function MemberView({ name, card }: { name: string; card: MemberCard }) {
           )}
         </section>
 
-        <Block id="personagens" title="Personagens que interpreta" pages={pages} empty={mine ? "Quando o autor citar você numa página da wiki como [[@" + name + "]], ela aparece aqui." : null} grid />
+        <Roles roles={pages} empty={mine ? "Quando o autor puser você como intérprete de um personagem na wiki, ele aparece aqui." : null} />
         {writings.length > 0 && (
           <section className="pg-panel pg-member-sec" id="escritos" aria-labelledby="pg-member-escritos">
             <PgSectionHead text="Escritos" id="pg-member-escritos" />
@@ -110,6 +110,74 @@ function MemberView({ name, card }: { name: string; card: MemberCard }) {
       </main>
       <PgFooter />
     </>
+  );
+}
+
+/** "em Paradise Gate: Genesis & Paradise Gate: Apocalipse", "em …: Genesis (durante A Testemunha)",
+ * com link pra página da temporada e pra sessão (#sessao-<id>) quando publicadas. */
+function RoleWhere({ em }: { em: WikiInterpreteOnde[] }) {
+  const list = em.filter((o) => o && o.titulo);
+  if (!list.length) return null;
+  const href = (id: string) => "/wiki/" + encodeURIComponent(id);
+  return (
+    <span className="pg-member-tile-where">
+      {"em "}
+      {list.map((o, i) => (
+        <Fragment key={i}>
+          {i > 0 && " & "}
+          {o.id ? <Link to={href(o.id)}>{o.titulo}</Link> : o.titulo}
+          {o.sessao && (
+            <>
+              {" (durante "}
+              {o.id ? <Link to={href(o.id) + "#sessao-" + encodeURIComponent(o.sessao.id)}>{o.sessao.titulo}</Link> : o.sessao.titulo}
+              {")"}
+            </>
+          )}
+        </Fragment>
+      ))}
+    </span>
+  );
+}
+
+/** Personagens que interpreta: os primeiros na ordem escolhida e "ver todos" pro resto. */
+function Roles({ roles, empty }: { roles: MemberRole[] | null; empty: string | null }) {
+  const [all, setAll] = useState(false);
+  if (roles && !roles.length && !empty) return null;
+  const shown = roles && !all ? roles.slice(0, ROLES_SHOWN) : roles;
+  return (
+    <section className="pg-panel pg-member-sec" id="personagens" aria-labelledby="pg-member-personagens">
+      <PgSectionHead text="Personagens que interpreta" id="pg-member-personagens" />
+      {!roles || !shown ? (
+        <p className="pg-empty">Carregando…</p>
+      ) : !roles.length ? (
+        <p className="pg-empty">{empty}</p>
+      ) : (
+        <>
+          <ul className="pg-member-grid">
+            {shown.map(({ id: pid, e, em }) => (
+              <li key={pid} className="pg-member-role">
+                <Link className="pg-member-tile" to={"/wiki/" + encodeURIComponent(pid)}>
+                  {e.cover ? (
+                    <img className="pg-member-cover" src={e.cover} alt="" loading="lazy" style={{ objectPosition: objPos(e.coverFocus) }} />
+                  ) : (
+                    <span className="pg-member-cover is-empty" aria-hidden="true">
+                      {(e.title || "?").charAt(0)}
+                    </span>
+                  )}
+                  <span className="pg-member-tile-title">{e.title || "(sem título)"}</span>
+                </Link>
+                <RoleWhere em={em} />
+              </li>
+            ))}
+          </ul>
+          {roles.length > ROLES_SHOWN && (
+            <button className="pg-member-more" type="button" aria-expanded={all} onClick={() => setAll(!all)}>
+              {all ? "Mostrar menos" : "Ver todos (" + roles.length + ")"}
+            </button>
+          )}
+        </>
+      )}
+    </section>
   );
 }
 

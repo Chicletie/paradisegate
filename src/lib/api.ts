@@ -141,7 +141,7 @@ export async function fetchMemberCard(name: string): Promise<MemberCard | null> 
  * (uid e data de quando o nome foi tomado ficam). A regra do banco confere dono e limites. */
 export function saveMemberCard(name: string, want: Omit<MemberCard, "uid">): Promise<void> {
   const data: Record<string, unknown> = {};
-  (["nickname", "photo", "bio", "since", "favorites", "showFavorites"] as const).forEach((k) => {
+  (["nickname", "photo", "bio", "since", "favorites", "showFavorites", "ordem", "ocultos"] as const).forEach((k) => {
     data[k] = want[k] === undefined ? deleteField() : want[k];
   });
   return setDoc(doc(db, "wikiUsernames", name), data, { merge: true });

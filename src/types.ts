@@ -34,6 +34,8 @@ export interface WikiIndexEntry {
   postsCount?: number;
   /** Membros do acervo citados com [[@nome]] no que a página mostra (perfil público /@nome). */
   membros?: string[];
+  /** Quem interpreta (campo Intérprete) e em que temporadas/sessões (docs/dados-da-wiki.md). */
+  interpretes?: WikiInterprete[];
   birthdayMD?: string | null;
   arcana?: WikiArcana | null;
   excerpt?: string;
@@ -273,6 +275,8 @@ export interface WikiEntryDoc extends WikiArticleBundle {
 }
 
 export interface WikiSeasonSession {
+  /** Âncora fixa da sessão na página da temporada (#sessao-<id>); páginas antigas não têm. */
+  id?: string;
   title?: string;
   date?: string;
   recap: string;
@@ -338,6 +342,21 @@ export interface MemberCard {
   /** Só quando `showFavorites`. */
   favorites?: string[];
   showFavorites?: boolean;
+  /** Personagens no perfil: ids de página na ordem que a pessoa escolheu (os outros vêm depois). */
+  ordem?: string[];
+  /** Personagens que a pessoa escondeu do perfil. */
+  ocultos?: string[];
+}
+
+/** Onde a pessoa interpretou: a temporada (com a página dela, se publicada) e, se foi só uma, a sessão. */
+export interface WikiInterpreteOnde {
+  titulo: string;
+  id: string | null;
+  sessao?: { titulo: string; id: string };
+}
+export interface WikiInterprete {
+  membro: string;
+  em: WikiInterpreteOnde[];
 }
 
 /** wikiProfiles/{uid}. `photo` é um data URL JPEG 256×256 reduzido no navegador. */

@@ -8,7 +8,7 @@ import { ProgressPicker } from "../components/SpoilerProgress";
 import { UsernameDialog } from "../components/UsernameDialog";
 import { objPos } from "../lib/format";
 import { resizePhoto } from "../lib/photo";
-import { BIO_MAX, memberHref } from "../lib/member";
+import { BIO_MAX, memberHref, orderRoles, pagesOfMember, ROLES_SHOWN } from "../lib/member";
 import { accessLabel, groupAccesses, isNewSuggestion, newestFirst, suggestionStatus } from "../lib/profile";
 import { PgHeader } from "../components/PgHeader";
 import { PgFooter } from "../components/PgFooter";
@@ -107,14 +107,15 @@ function ProfileSections({ user }: { user: AuthUser }) {
 function PublicProfile() {
   const { profile, loadCard, saveCard } = useAccount();
   const name = profile?.username || "";
-  const [prefs, setPrefs] = useState<{ bio: string; showFavorites: boolean } | null>(null);
+  const [prefs, setPrefs] = useState<{ bio: string; showFavorites: boolean; ordem: string[]; ocultos: string[] } | null>(null);
+  const index = useWikiIndex();
   const [status, setStatus] = useState<{ msg: string; bad?: boolean }>({ msg: "" });
   const [busy, setBusy] = useState(false);
   useEffect(() => {
     if (!name) return;
     let alive = true;
     loadCard().then(
-      (c) => alive && setPrefs({ bio: c?.bio || "", showFavorites: !!c?.showFavorites }),
+      (c) => alive && setPrefs({ bio: c?.bio || "", showFavorites: !!c?.showFavorites, ordem: c?.ordem || [], ocultos: c?.ocultos || [] }),
       () => alive && setStatus({ msg: "Não consegui ler seu perfil público agora.", bad: true }),
     );
     return () => {
@@ -122,11 +123,29 @@ function PublicProfile() {
     };
   }, [name, loadCard]);
 
+  // Personagens que a pessoa interpreta, na ordem escolhida (os novos vão pro fim).
+  const roles = index && name && prefs ? orderRoles(pagesOfMember(index, name), prefs.ordem) : [];
+  function move(i: number, d: number) {
+    if (!prefs) return;
+    const ids = roles.map((p) => p.id);
+    const j = i + d;
+    if (j < 0 || j >= ids.length) return;
+    [ids[i], ids[j]] = [ids[j], ids[i]];
+    setPrefs({ ...prefs, ordem: ids });
+  }
+  function toggle(id: string, show: boolean) {
+    if (!prefs) return;
+    const ocultos = prefs.ocultos.filter((x) => x !== id);
+    setPrefs({ ...prefs, ocultos: show ? ocultos : ocultos.concat(id) });
+  }
+
   function doSave() {
     if (!prefs) return;
     setBusy(true);
     setStatus({ msg: "Salvando…" });
-    saveCard({ bio: prefs.bio.trim(), showFavorites: prefs.showFavorites })
+    // a ordem salva é a da lista inteira que a pessoa vê (inclui os que ela ainda não mexeu)
+    const ordem = roles.map((p) => p.id);
+    saveCard({ bio: prefs.bio.trim(), showFavorites: prefs.showFavorites, ordem, ocultos: prefs.ocultos.filter((id) => ordem.includes(id)) })
       .then(
         () => setStatus({ msg: "Perfil público salvo." }),
         () => setStatus({ msg: "Não consegui salvar agora. Tenta de novo daqui a pouco.", bad: true }),
@@ -174,6 +193,35 @@ function PublicProfile() {
             />
             <span>Mostrar meus favoritos no perfil público</span>
           </label>
+          {roles.length > 0 && (
+            <div className="pg-field">
+              <span className="pg-field-label">Personagens no perfil</span>
+              <p className="pg-un-hint">
+                A ordem aqui é a do seu perfil. Os {ROLES_SHOWN} primeiros aparecem de cara; o resto fica em “ver todos”. Desmarque pra esconder um personagem.
+              </p>
+              <ol className="pg-roles-edit">
+                {roles.map((p, i) => {
+                  const shown = !prefs?.ocultos.includes(p.id);
+                  return (
+                    <li key={p.id} className={shown ? "" : "is-hidden"}>
+                      <label className="pg-check">
+                        <input type="checkbox" checked={shown} onChange={(ev) => toggle(p.id, ev.target.checked)} />
+                        <span>{p.e.title || "(sem título)"}</span>
+                      </label>
+                      <span className="pg-roles-move">
+                        <button type="button" className="pg-btn-line" disabled={i === 0} aria-label={"Subir " + (p.e.title || "")} onClick={() => move(i, -1)}>
+                          ↑
+                        </button>
+                        <button type="button" className="pg-btn-line" disabled={i === roles.length - 1} aria-label={"Descer " + (p.e.title || "")} onClick={() => move(i, 1)}>
+                          ↓
+                        </button>
+                      </span>
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          )}
           <div className="pg-field-row">
             <button className="pg-btn" type="button" disabled={busy || !prefs} onClick={doSave}>
               Salvar
