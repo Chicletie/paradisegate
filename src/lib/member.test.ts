@@ -51,6 +51,14 @@ describe("perfil público /@nome", () => {
     expect(roles.map((p) => p.id)).toEqual(["d", "v"]);
     expect(roles[0].em[0].sessao?.id).toBe("x1");
     expect(roles[1].em).toEqual([]);
+    expect(roles[0].textos).toEqual([]);
+  });
+
+  it("personagens: o texto do autor (onde interpretou) vem junto", () => {
+    const index: WikiIndex = {
+      d: { title: "Daphne", type: "Personagem", interpretes: [{ membro: "ania", em: [], texto: " em [Genesis](wiki:pg-genesis) " }, { membro: "ania", em: [], texto: "" }] },
+    };
+    expect(pagesOfMember(index, "ania")[0].textos).toEqual(["em [Genesis](wiki:pg-genesis)"]);
   });
 
   it("ordem escolhida primeiro, o resto por título; escondidos saem", () => {

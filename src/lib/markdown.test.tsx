@@ -16,6 +16,12 @@ describe("markdown da casa (docs/dados-da-wiki.md)", () => {
     );
   });
 
+  it("[texto](wiki:<id>#<âncora>) leva à âncora da página (sessão da temporada)", () => {
+    expect(html(<>{mdInline("[Sessão 3](wiki:pg-genesis#sessao-x9)")}</>)).toBe(
+      '<a class="wl-live" href="/wiki/pg-genesis#sessao-x9" data-discover="true">Sessão 3</a>',
+    );
+  });
+
   it("[@nome](membro:<nome>) leva ao perfil público do membro, mesma aba", () => {
     expect(html(<>{mdInline("Intérprete: [@ania](membro:ania)")}</>)).toBe(
       'Intérprete: <a class="wl-live" href="/@ania" data-discover="true">@ania</a>',

@@ -168,6 +168,13 @@ function wikiLinkTarget(raw: string): string {
   }
 }
 
+/** wiki:<id> ou wiki:<id>#<âncora> (ex.: uma sessão da temporada, #sessao-<id>) → endereço da página. */
+function wikiHref(raw: string): string {
+  const i = raw.indexOf("#");
+  const id = encodeURIComponent(wikiLinkTarget(i === -1 ? raw : raw.slice(0, i)));
+  return "/wiki/" + id + (i === -1 ? "" : "#" + encodeURIComponent(wikiLinkTarget(raw.slice(i + 1))));
+}
+
 export function mdInline(s: string | undefined): ReactNode[] {
   const nodes: ReactNode[] = [];
   const re = new RegExp(INLINE_TOKEN_SOURCE, "g");
@@ -205,7 +212,7 @@ export function mdInline(s: string | undefined): ReactNode[] {
       // wiki:<id> = página da própria wiki (o editor só gera pra página publicada): mesma aba.
       if (lm && lm[2].slice(0, 5) === "wiki:")
         nodes.push(
-          <Link key={k} className="wl-live" to={`/wiki/${encodeURIComponent(wikiLinkTarget(lm[2].slice(5)))}`}>
+          <Link key={k} className="wl-live" to={wikiHref(lm[2].slice(5))}>
             {lm[1]}
           </Link>,
         );
