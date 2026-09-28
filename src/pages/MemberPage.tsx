@@ -7,11 +7,11 @@ import { useWikiIndex, useWikiObras } from "../lib/wikiIndex";
 import { writingsBy, writingsFromIndex } from "../lib/escritos";
 import { PageObrasProvider } from "../components/SpoilerProgress";
 import { WritingCard } from "./EscritosPage";
-import { favoritePages, memberHandle, pagesOfMember, ROLES_SHOWN, shownRoles, sinceLabel, type MemberPage as Page, type MemberRole } from "../lib/member";
+import { favoritePages, memberCards, memberHandle, pagesOfMember, ROLES_SHOWN, shownRoles, sinceLabel, type MemberPage as Page, type MemberRole } from "../lib/member";
 import { objPos } from "../lib/format";
 import { PgHeader } from "../components/PgHeader";
 import { PgFooter } from "../components/PgFooter";
-import { PgSectionHead } from "../components/PgIcons";
+import { ArcanaGlyph, PgSectionHead } from "../components/PgIcons";
 import { ErrorPage } from "./ErrorPage";
 import type { MemberCard, WikiInterpreteOnde } from "../types";
 
@@ -68,6 +68,7 @@ function MemberView({ name, card }: { name: string; card: MemberCard }) {
   const obras = useWikiObras();
   const writings = index ? writingsBy(writingsFromIndex(index), name) : [];
   const since = sinceLabel(card.since);
+  const cartas = memberCards(card);
   const initial = (card.nickname || name).charAt(0).toUpperCase();
 
   return (
@@ -83,6 +84,16 @@ function MemberView({ name, card }: { name: string; card: MemberCard }) {
               {card.nickname || "@" + name}
             </h1>
             {card.nickname && <p className="pg-member-handle">@{name}</p>}
+            {cartas.length > 0 && (
+              <ul className="pg-member-cards" aria-label={cartas.length > 1 ? "Cartas do tarô" : "Carta do tarô"}>
+                {cartas.map((c) => (
+                  <li key={c.label} className="pg-member-arcana">
+                    <ArcanaGlyph glyph={c.glyph} className="pg-member-arcana-glyph" />
+                    <span>{c.label}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
             {since && <p className="pg-member-since">{since}</p>}
           </div>
           {card.bio && <p className="pg-member-bio">{card.bio}</p>}

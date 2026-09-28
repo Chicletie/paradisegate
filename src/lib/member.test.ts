@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cardFields, cardOutdated, favoritePages, memberHandle, orderRoles, pagesOfMember, shownRoles, sinceLabel } from "./member";
+import { cardFields, cardOutdated, favoritePages, memberCards, memberHandle, orderRoles, pagesOfMember, shownRoles, sinceLabel } from "./member";
 import type { WikiIndex } from "../types";
 
 describe("perfil público /@nome", () => {
@@ -66,6 +66,12 @@ describe("perfil público /@nome", () => {
     expect(cardOutdated({ uid: "u", ...want }, want)).toBe(false);
     expect(cardOutdated({ uid: "u", ...want, ordem: ["a", "b"] }, want)).toBe(true);
     expect("ordem" in cardFields({}, { ordem: [] }, undefined)).toBe(false);
+  });
+
+  it("cartas do membro: até duas, só as válidas", () => {
+    const got = memberCards({ cartas: [{ kind: "major", n: 17 }, { kind: "major", n: 99 }, { kind: "minor", suit: "copas", rank: 13 }, { kind: "major", n: 12 }] });
+    expect(got.map((c) => c.label)).toEqual(["XVII · A Estrela", "Rainha de Copas"]);
+    expect(memberCards({})).toEqual([]);
   });
 
   it("escreve a data de entrada", () => {
