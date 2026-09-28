@@ -9,6 +9,7 @@ import { PageObrasProvider } from "../components/SpoilerProgress";
 import { WritingCard } from "./EscritosPage";
 import { favoritePages, memberCards, memberHandle, pagesOfMember, ROLES_SHOWN, shownRoles, sinceLabel, type MemberPage as Page, type MemberRole } from "../lib/member";
 import { objPos } from "../lib/format";
+import { mdInline } from "../lib/markdown";
 import { PgHeader } from "../components/PgHeader";
 import { PgFooter } from "../components/PgFooter";
 import { ArcanaGlyph, PgSectionHead } from "../components/PgIcons";
@@ -165,7 +166,7 @@ function Roles({ roles, empty }: { roles: MemberRole[] | null; empty: string | n
       ) : (
         <>
           <ul className="pg-member-grid">
-            {shown.map(({ id: pid, e, em }) => (
+            {shown.map(({ id: pid, e, em, textos }) => (
               <li key={pid} className="pg-member-role">
                 <Link className="pg-member-tile" to={"/wiki/" + encodeURIComponent(pid)}>
                   {e.cover ? (
@@ -177,7 +178,18 @@ function Roles({ roles, empty }: { roles: MemberRole[] | null; empty: string | n
                   )}
                   <span className="pg-member-tile-title">{e.title || "(sem título)"}</span>
                 </Link>
-                <RoleWhere em={em} />
+                {textos.length ? (
+                  <span className="pg-member-tile-where">
+                    {textos.map((t, i) => (
+                      <Fragment key={i}>
+                        {i > 0 && " · "}
+                        {mdInline(t)}
+                      </Fragment>
+                    ))}
+                  </span>
+                ) : (
+                  <RoleWhere em={em} />
+                )}
               </li>
             ))}
           </ul>

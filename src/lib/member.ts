@@ -67,6 +67,8 @@ const byTitle = (a: MemberPage, b: MemberPage) => (a.e.title || "").localeCompar
 /** Personagem no perfil: a página e onde a pessoa o interpretou. */
 export interface MemberRole extends MemberPage {
   em: WikiInterpreteOnde[];
+  /** Onde interpretou, texto do autor (markdown da casa); quando tem, vale no lugar de `em`. */
+  textos: string[];
 }
 
 /**
@@ -79,8 +81,14 @@ export function pagesOfMember(index: WikiIndex, name: string): MemberRole[] {
   Object.entries(index).forEach(([id, e]) => {
     if (Array.isArray(e.interpretes)) {
       const mine = e.interpretes.filter((it) => it && it.membro === name);
-      if (mine.length) out.push({ id, e, em: mine.flatMap((it) => (Array.isArray(it.em) ? it.em : [])) });
-    } else if ((e.membros || []).includes(name)) out.push({ id, e, em: [] });
+      if (mine.length)
+        out.push({
+          id,
+          e,
+          em: mine.flatMap((it) => (Array.isArray(it.em) ? it.em : [])),
+          textos: mine.map((it) => (typeof it.texto === "string" ? it.texto.trim() : "")).filter(Boolean),
+        });
+    } else if ((e.membros || []).includes(name)) out.push({ id, e, em: [], textos: [] });
   });
   return out.sort(byTitle);
 }

@@ -359,6 +359,8 @@ export interface WikiInterpreteOnde {
 export interface WikiInterprete {
   membro: string;
   em: WikiInterpreteOnde[];
+  /** Onde interpretou, escrito pelo autor em markdown da casa ("em [Temporada](wiki:<id>)"). Vale no lugar de `em`. */
+  texto?: string;
 }
 
 /** wikiProfiles/{uid}. `photo` é um data URL JPEG 256×256 reduzido no navegador. */

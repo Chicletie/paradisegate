@@ -67,7 +67,7 @@ Como ler (já feito em `src/lib/wikiIndex.tsx`):
 | `cover`, `coverFocus` | URL/null, `{x,y}`/null | miniatura |
 | `wordCount`, `linkCount`, `postsCount` | number | números da home (`postsCount` só em página publicada antes dos Escritos) |
 | `membros` | string[] | usernames citados com `[@nome](membro:nome)` fora de spoiler |
-| `interpretes` | `{ membro, em: [{ titulo, id, sessao? }] }[]` | quem interpreta (campo Intérprete) e onde: `titulo` "Campanha: Temporada", `id` a página da temporada (ou `null`), `sessao` `{ titulo, id }` quando foi só uma sessão (link `/wiki/<id>#sessao-<id da sessão>`). "Personagens que interpreta" no perfil `/@nome` vem daqui; página sem o campo (publicada antes de 2026-09-27) vale pela menção em `membros` |
+| `interpretes` | `{ membro, em: [{ titulo, id, sessao? }], texto? }[]` | quem interpreta (campo Intérprete) e onde. `texto` (desde 2026-09-28): onde interpretou, escrito pelo autor em markdown da casa ("em [Temporada](wiki:<id>)", sessão com `wiki:<id>#sessao-<id>`); quando tem, o perfil mostra ele no lugar de `em`. `em`, o formato anterior: `titulo` "Campanha: Temporada", `id` a página da temporada (ou `null`), `sessao` `{ titulo, id }` quando foi só uma sessão (link `/wiki/<id>#sessao-<id da sessão>`). "Personagens que interpreta" no perfil `/@nome` vem daqui; página sem o campo (publicada antes de 2026-09-27) vale pela menção em `membros` |
 | `birthdayMD` | `MM-DD`/null | aniversariante do dia |
 | `arcana` | objeto/null | carta de tarô do Personagem do dia |
 | `excerpt` | string | trecho curto da "Entrada do dia" |
@@ -141,7 +141,7 @@ Lido por `src/lib/markdown.tsx`:
 | `\|\|trecho\|\|` | spoiler só naquele trecho: tarja lisa que revela no toque. Lido como markdown por dentro; escondido, o 1º toque só revela, nunca segue um link |
 | `\|\|@{<id da temporada>} trecho\|\|` | spoiler por temporada: igual, mas abre sozinho pra quem marcou que já viu até essa temporada (obras e temporadas em `spoilerObras` da página). A marca `@{…}` nunca aparece |
 | `[texto](https://…)` | link externo, em outra aba |
-| `[texto](wiki:<wikiId>)` | link pra outra página da wiki, na mesma aba |
+| `[texto](wiki:<wikiId>)` | link pra outra página da wiki, na mesma aba; `wiki:<wikiId>#<âncora>` vai direto a um ponto dela (ex.: `#sessao-<id>`) |
 | `[@nome](membro:<nome>)` | link pro perfil público do membro (`/@nome`), na mesma aba |
 | `[[Nome]]` / `[[Nome\|texto]]` | nome em negrito sem link (página não publicada) |
 
