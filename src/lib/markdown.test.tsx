@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import type { ReactNode } from "react";
-import { fieldValue, mdInline, RenderMarkdown, SpoilerBlock, WikiLinkUpgrade } from "./markdown";
+import { fieldValue, splitQualifier, mdInline, RenderMarkdown, SpoilerBlock, WikiLinkUpgrade } from "./markdown";
 import { swapWinners } from "../components/EntryActions";
 import { AliasLine } from "../components/Infobox";
 import { EntryView } from "../pages/EntryView";
@@ -67,6 +67,27 @@ describe("fieldValue (campo curto da infobox)", () => {
       '<div class="infobox-alias-line infobox-line">• Paradise Gate</div>' +
         '<div class="infobox-alias-line infobox-line">• Ordem de Vel</div>',
     );
+  });
+
+  it("parêntese no fim da linha sai em letra menor", () => {
+    expect(html(<>{fieldValue("Corte Romena (anteriormente)")}</>)).toBe(
+      'Corte Romena <span class="ib-qual">(anteriormente)</span>',
+    );
+  });
+
+  it("parêntese depois de um link, em cada linha da lista", () => {
+    expect(html(<>{fieldValue("[Devon](wiki:devon) (marido)\nIgreja")}</>)).toBe(
+      '<div class="infobox-alias-line infobox-line">• <a class="wl-live" href="/wiki/devon" data-discover="true">Devon</a> <span class="ib-qual">(marido)</span></div>' +
+        '<div class="infobox-alias-line infobox-line">• Igreja</div>',
+    );
+  });
+
+  it("parêntese no meio, sozinho, aninhado ou dentro de spoiler não muda", () => {
+    expect(splitQualifier("148 (Genesis) anos")).toBeNull();
+    expect(splitQualifier("(anteriormente)")).toBeNull();
+    expect(splitQualifier("||Asul (irmã)||")).toBeNull();
+    expect(splitQualifier("Hades (deus (antigo))")).toBeNull();
+    expect(splitQualifier("148 anos (Paradise Gate: Genesis)")).toEqual(["148 anos", "(Paradise Gate: Genesis)"]);
   });
 });
 

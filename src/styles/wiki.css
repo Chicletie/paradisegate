@@ -67,8 +67,12 @@ h1 { font-family: var(--font-display); font-weight: 500; font-size: 32px; margin
    inteiro, então nada muda pra quem usa leitor de tela ou tela larga) até o botão expandir. */
 .infobox-expand { display: none; width: 100%; border: 0; border-top: 1px solid var(--border); background: var(--surface-2); color: var(--gold-ink); font-family: var(--font-body); font-size: 12px; padding: 10px; cursor: pointer; }
 .infobox-expand:hover { background: var(--accent-wash); }
-/* Valor com mais de 3 linhas: recolhido, com um degradê e "ver mais" (Infobox.tsx, Clamp). */
-.ib-clamp { max-height: 4.4em; max-height: 3lh; overflow: hidden; }
+/* Valor longo: recolhido, com um degradê e "ver mais" (Infobox.tsx, Clamp). No computador a ficha
+   flutua ao lado do texto, então só recolhe o que for muito comprido; no celular ela vem antes
+   do artigo e recolhe mais cedo. */
+.infobox { --ib-clamp-lines: 5; }
+@media (min-width: 620px) { .infobox { --ib-clamp-lines: 12; } }
+.ib-clamp { max-height: calc(var(--ib-clamp-lines) * 1.45em); max-height: calc(var(--ib-clamp-lines) * 1lh); overflow: hidden; }
 .ib-clamp.open { max-height: none; overflow: visible; }
 .ib-clamp.over { -webkit-mask-image: linear-gradient(to bottom, #000 60%, transparent); mask-image: linear-gradient(to bottom, #000 60%, transparent); -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 1lh), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 1lh), transparent); }
 .ib-clamp-btn { display: inline-block; margin-top: 2px; padding: 2px 0; min-height: 0; line-height: 1.4; border: 0; background: none; color: var(--pg-link, var(--gold-ink)); font-family: var(--pg-f-ui, var(--font-body)); font-size: 12.5px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
@@ -713,15 +717,18 @@ body.pg-site:not(.pg-home) .cit-meta a { color: var(--pg-link); }
 /* infobox: faixa de título azul (estilo Fandom), linhas com fio fino, rótulos em Hanken */
 body.pg-site:not(.pg-home) .infobox { border: 1px solid var(--pg-line); border-radius: 12px; background: var(--pg-panel); box-shadow: var(--pg-card-shadow); }
 @media (min-width: 620px) { body.pg-site:not(.pg-home) .infobox { width: 290px; margin: 0 0 20px 32px; } }
+@media (min-width: 1100px) { body.pg-site:not(.pg-home) .infobox { width: 320px; } }
 .pg-infobox-title { padding: 14px 16px 13px; text-align: center; font-family: var(--pg-f-title); font-size: 17px; line-height: 1.25; letter-spacing: 0.07em; color: #fff; background-color: var(--pg-band); background-image: var(--pg-stars); background-size: 260px 170px; border-bottom: 1px solid rgba(201,164,92,0.45); text-wrap: balance; }
 body.pg-site:not(.pg-home) .infobox-quote { padding: 12px 16px; font-size: 14.5px; color: var(--pg-muted); background: var(--pg-page); border-bottom-color: var(--pg-line); }
 body.pg-site:not(.pg-home) .infobox .cover { max-height: 360px; }
 body.pg-site:not(.pg-home) .infobox-tab { min-height: 40px; padding: 8px 6px; font-size: 12.5px; text-transform: none; letter-spacing: 0; background: var(--pg-page); }
 body.pg-site:not(.pg-home) .infobox-tab.on { color: var(--pg-link); border-bottom-color: var(--pg-link); background: var(--pg-panel); font-weight: 600; }
-body.pg-site:not(.pg-home) .infobox-facts th, body.pg-site:not(.pg-home) .infobox-facts td { padding: 9px 14px; }
-body.pg-site:not(.pg-home) .infobox-facts th { font-size: 12.5px; text-transform: none; letter-spacing: 0; font-weight: 600; color: var(--pg-muted); }
-body.pg-site:not(.pg-home) .infobox-facts td { font-size: 15px; line-height: 1.45; color: var(--pg-ink); }
-body.pg-site:not(.pg-home) .infobox-header-row th { padding: 8px 14px; text-align: center; font-family: var(--pg-f-title); font-size: 13px; font-weight: 400; letter-spacing: 0.08em; color: var(--pg-ink); background: var(--pg-link-wash); }
+/* Proporção de infobox do Fandom (2026-09-29): rótulo numa coluna fixa e estreita (quebra com
+   hífen se precisar), padding curto e valor um pouco menor, pra caber ~30 letras por linha. */
+body.pg-site:not(.pg-home) .infobox-facts th { width: 90px; padding: 8px 0 8px 10px; font-size: 12.5px; text-transform: none; letter-spacing: 0; font-weight: 600; color: var(--pg-muted); -webkit-hyphens: auto; hyphens: auto; overflow-wrap: break-word; }
+body.pg-site:not(.pg-home) .infobox-facts td { padding: 8px 10px 8px 9px; font-size: 14px; line-height: 1.45; color: var(--pg-ink); }
+body.pg-site .ib-qual { font-size: 12.5px; color: var(--pg-muted); }
+body.pg-site:not(.pg-home) .infobox-header-row th { width: auto; padding: 8px 14px; text-align: center; font-family: var(--pg-f-title); font-size: 13px; font-weight: 400; letter-spacing: 0.08em; color: var(--pg-ink); background: var(--pg-link-wash); }
 body.pg-site:not(.pg-home) .infobox-expand { min-height: 44px; font-family: var(--pg-f-ui); font-size: 13px; color: var(--pg-link); background: var(--pg-page); }
 
 /* abas de variante, tags, galeria, ligações */
