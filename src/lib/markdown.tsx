@@ -185,18 +185,36 @@ export function SpoilerBlock({ children, at }: { children: ReactNode; at?: strin
  * Valor de um campo curto (infobox, taxonomia) — porta de fieldValue: numa linha só, texto
  * corrido; com várias linhas (`\n`), uma por linha com "•" na frente, igual às Alcunhas.
  * Linhas vazias são ignoradas. Cada linha aceita o markdown de linha.
+ * Parêntese no fim da linha ("Devon (marido)", "Corte Romena (anteriormente)") sai em letra
+ * menor, como o <small> das infobox do Fandom: o nome fica em destaque e o detalhe ocupa menos.
  */
 export function fieldValue(value: string | undefined): ReactNode {
   const lines = String(value || "")
     .split("\n")
     .map((l) => l.trim())
     .filter(Boolean);
-  if (lines.length < 2) return mdInline(lines[0] || "");
+  if (lines.length < 2) return qualLine(lines[0] || "");
   return lines.map((l, i) => (
     <div key={i} className="infobox-alias-line infobox-line">
-      • {mdInline(l)}
+      • {qualLine(l)}
     </div>
   ));
+}
+
+/** Separa um parêntese final (sem parêntese dentro) do resto da linha. */
+export function splitQualifier(line: string): [string, string] | null {
+  const m = /^(.*\S)\s+(\([^()]+\))$/.exec(line);
+  return m ? [m[1], m[2]] : null;
+}
+
+function qualLine(line: string): ReactNode {
+  const q = splitQualifier(line);
+  if (!q) return mdInline(line);
+  return (
+    <>
+      {mdInline(q[0])} <span className="ib-qual">{mdInline(q[1])}</span>
+    </>
+  );
 }
 
 function wikiLinkTarget(raw: string): string {
