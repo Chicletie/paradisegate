@@ -166,7 +166,7 @@ export function FamilyTree({ title, links, birthKey }: { title: string; links?: 
       <svg ref={svgRef} viewBox={`0 ${L.y0} ${W} ${L.y1 - L.y0}`} width="100%" className="wb-famtree" style={style}>
         <g>
           {L.lines.map((l, i) => (
-            <path key={i} d={ftLinePath(l)} fill="none" stroke="var(--border-strong)" strokeDasharray={DASH[l.dash]} />
+            <path key={i} d={ftLinePath(l)} fill="none" stroke="var(--border-strong)" strokeWidth={l.mark ? 1.6 : undefined} strokeDasharray={DASH[l.dash]} />
           ))}
         </g>
         <g>

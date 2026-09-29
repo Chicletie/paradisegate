@@ -117,24 +117,45 @@ netos) traz `fam`:
 | Campo | Tipo | Uso |
 |---|---|---|
 | `k` | string | apelido da pessoa nesta árvore (`f1`, `f2`…; nunca o id interno) |
-| `via` | string (avô, neto) ou string[] (meio-irmão) | de qual pai é o avô; qual pai/mãe o meio-irmão divide; de qual filho é o neto |
-| `with` | string | com quem o filho foi tido (o `k` do outro pai/mãe) |
+| `via` | string (avô, neto) ou string[] (irmão, meio-irmão) | de qual pai é o avô; quais pais o irmão divide com a pessoa (desde 2026-09-29: irmão adotivo de quem também tem pais biológicos pendura no casal certo); qual pai/mãe o meio-irmão divide; de qual filho é o neto |
+| `with` | string | com quem o filho foi tido (o `k` do outro pai/mãe; conta pais adotivos e de criação); no padrasto/madrasta, com qual dos pais ele(a) é casado(a); no enteado, qual cônjuge é o pai/mãe dele |
 | `wl`, `wid` | string | nome e página do outro pai/mãe, quando não é cônjuge desta página (a árvore o põe ao lado, com linha traço-ponto) |
 | `bk` | number | ordem de nascimento (AAAAMMDD), só quando o ano aparece na página |
 
-A página traz também `birthKey` (a mesma ordem, da própria pessoa). Parentesco em spoiler ou
-disfarce não ganha `fam` e nunca serve de ponte (`via`/`with`) pra outro. Ponte pra alguém
-que não está publicado não vai: a árvore desenha essa ligação pontilhada ("não dá pra situar").
-Página publicada antes de 2026-09-27 não traz `fam` e cai nesse desenho até ser republicada.
+A página traz também `birthKey` (a mesma ordem, da própria pessoa). Desde 2026-09-29, o
+parentesco em spoiler ou disfarce também ganha `fam` (calculado com todo mundo, com os mesmos
+apelidos), e a árvore só o usa quando o leitor já pode ver: viu a temporada de `at` (ou "vi
+tudo") ou abriu a tarja dele na ficha de Família. O parentesco público nunca aponta (`via`/`with`)
+pra alguém em spoiler, nem pro pai/mãe cuja ligação está em spoiler na página do filho. Ponte pra
+alguém que não está publicado não vai: a árvore desenha essa ligação pontilhada ("não dá pra
+situar"). Página publicada antes de 2026-09-27 não traz `fam` e cai nesse desenho até ser
+republicada.
 
-Casamentos: `casado(a) com` (atual, colado na pessoa), `ex-cônjuge de` (desfeito: duas barrinhas
-na linha do casal) e `viúvo(a) de`/`cônjuge falecido(a) de` (viuvez: casamento normal). Filho
-adotivo ou de criação conta o casal como pais: ele desce do meio da linha do casal, em tracejado;
-na página do filho, dois pais adotivos (sem pai/mãe de sangue) formam o casal de cima. A árvore
-leva uma legenda ao lado com uma amostra de cada traço que usa (`legend` na saída da conta). Outros
-parentes com `style: "family"` que não cabem nas 5 gerações (primos, tios, bisavós, cunhados…,
-menos `alma-irmã de`) vão numa faixa embaixo, com o `term` da ligação (ex.: "prima distante") e
-pontilhado: parentesco sem caminho na árvore.
+Casamentos: `casado(a) com` (atual), `ex-cônjuge de` (desfeito: duas barrinhas // na linha do
+casal) e `viúvo(a) de`/`cônjuge falecido(a) de` (viuvez: uma cruz † na linha do casal). Os
+cônjuges ficam de um lado da pessoa e os irmãos do outro; os casamentos sem filhos mais perto, os
+com filhos mais longe, cada um com a sua faixa embaixo das caixas, e onde duas linhas só se cruzam
+a de cima ganha uma ponte. Três ou mais pais do mesmo filho (trisal) descem juntos por uma barra.
+
+Tipos de pai/mãe e filho (do lado de quem guarda a ligação):
+
+| Ligação | Na árvore |
+|---|---|
+| `é filho(a) de` / `é pai/mãe de` | linha cheia |
+| `é filho(a) adotivo(a) de`, `é filho(a) de criação de` (e os inversos) | tracejado; com pais biológicos também, os dois casais aparecem lado a lado, cada um com os seus avós |
+| `enteado(a) de` / `padrasto/madrasta de` | padrasto casado com o pai/mãe (`with`), sem linha até a pessoa; enteado desce do cônjuge que é pai/mãe dele |
+| `sob a guarda de` / `responsável legal de` | tracejado, com o termo na caixa (guarda sem adoção) |
+| `foi gestado(a) por` / `gestou` | linha dupla (gestação por substituição), com o termo; a gestante não vira casal de ninguém nem entra na árvore dos pais |
+| `concebido(a) com doação de` / `doador(a) de` | linha dupla, com o termo |
+
+A caixa pode trazer uma segunda linha pequena com o termo (padrasto, gestante, gêmea, parente
+distante…); quem aparece na árvore e também numa ligação de "outros parentes" (cônjuge que também é
+prima) aparece uma vez só, com esse termo na caixa. A árvore leva uma legenda ao lado com uma
+amostra de cada traço que usa (`legend` na saída da conta). Outros parentes com `style: "family"`
+que não cabem nas 5 gerações (primos, tios, bisavós, cunhados…, menos `alma-irmã de`) vão numa
+faixa embaixo, com o `term` da ligação (ex.: "prima distante") e pontilhado: parentesco sem
+caminho na árvore. Famílias de teste (comuns e diversas) em `src/lib/familyCenarios.js` do site.
+
 
 Parente distante: ligação com `distant: true` (caixa "parente distante" no editor; vale pra avô/neto,
 bisavô/bisneto, tio/sobrinho e primo). O `term` já vem pronto: "prima distante", "tio distante", e
