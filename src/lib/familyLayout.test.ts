@@ -158,11 +158,13 @@ describe("árvore genealógica: casamentos desfeitos e parentes distantes", func
     expect(boxOf(L, "Filho atual").x).toBeLessThan(boxOf(L, "Filho do ex").x);
     expect(overlaps(L)).toBe(0);
   });
-  it("viuvez é casamento normal (sem barrinhas)", function () {
+  it("viuvez: casamento com uma cruz na linha do casal (sem as barrinhas do desfeito), na legenda", function () {
     var inp = empty();
     inp.spouses = [P("Falecido", { status: "viuvo" })];
     var L = familyTreeLayout(inp);
     expect(L.lines.filter(function (l) { return l.x1 !== l.x2 && l.y1 !== l.y2; }).length).toBe(0);
+    expect(L.lines.filter(function (l) { return l.mark; }).length).toBe(2);
+    expect(L.legend).toEqual(["casal", "viuvo"]);
   });
   it("parente distante vai pra faixa de baixo, com o termo e o pontilhado", function () {
     var inp = familyInputFromLinks("Pessoa", null, [

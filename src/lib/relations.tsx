@@ -1,10 +1,11 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useContext, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { WikiIndexEvent, WikiLink, LinkStyle } from "../types";
 import { fmtEventDate, eventSortKey } from "./events";
-import { RenderMarkdown, WikiLinkUpgrade } from "./markdown";
+import { RenderMarkdown, WikiLinkUpgrade, useRevealedTargetIds } from "./markdown";
+import { PageObrasContext, isUnlocked, useSpoilerProgress } from "./spoilerProgress";
 import { LinkCard } from "../components/LinkCard";
-import { FT_LEGEND, familyHasAny, familyInputFromLinks, familyTreeLayout, ftMinWidth, type FtBox, type FtLegendKey } from "./familyLayout.js";
+import { FT_LEGEND, familyHasAny, familyInputFromLinks, familyTreeLayout, ftLinePath, ftMinWidth, type FtBox, type FtLegendKey } from "./familyLayout.js";
 
 // Porta de buildFamilyTree, EDGE_STYLE/affinitiesOf/
 // relNeighbors/buildRelGroups e buildTimelineViz na wiki original.
@@ -37,18 +38,18 @@ function TreeNode({ b }: { b: FtBox }) {
       {b.short !== b.label && <title>{b.label}</title>}
       <rect
         x={-b.w / 2}
-        y={-13}
+        y={-b.h}
         width={b.w}
-        height={26}
+        height={2 * b.h}
         rx={7}
         fill={b.self ? "var(--accent-wash)" : "var(--surface)"}
         stroke={b.self ? "var(--gold)" : "var(--border-strong)"}
       />
-      <text className="wb-ft-label" y={4}>
+      <text className="wb-ft-label" y={b.term ? -2 : 4}>
         {b.short}
       </text>
       {b.term && (
-        <text className="wb-ft-label" y={27} style={{ fontSize: 10, opacity: 0.75 }}>
+        <text className="wb-ft-label" y={12} style={{ fontSize: 9.5, opacity: 0.75 }}>
           {b.term}
         </text>
       )}
@@ -56,13 +57,22 @@ function TreeNode({ b }: { b: FtBox }) {
   );
 }
 
-export function hasFamilyData(links: WikiLink[] = []): boolean {
-  return familyHasAny(familyInputFromLinks("", null, links));
+/** O leitor já pode ver este parentesco em spoiler? Viu a temporada em que ele é revelado (ou
+ * "vi tudo"), ou abriu a tarja dele na ficha de família desta página. */
+export function useFamilyCanSee(): (lk: WikiLink) => boolean {
+  const { progress } = useSpoilerProgress();
+  const obras = useContext(PageObrasContext);
+  const revealed = useRevealedTargetIds();
+  return (lk) => isUnlocked(progress, obras, lk.at) || (!!lk.targetId && revealed.has(lk.targetId));
 }
 
-// Tracejado = adoção/criação; pontilhado = ligação que não dá pra situar (página publicada
-// antes da árvore saber quem é quem, ou parente não publicado); traço-ponto = pais do mesmo
-// filho sem casamento.
+export function hasFamilyData(links: WikiLink[] = [], canSee?: (lk: WikiLink) => boolean): boolean {
+  return familyHasAny(familyInputFromLinks("", null, links, canSee));
+}
+
+// Tracejado = adoção/criação/guarda; pontilhado = ligação que não dá pra situar (página
+// publicada antes da árvore saber quem é quem, ou parente não publicado); traço-ponto = pais do
+// mesmo filho sem casamento. Gestação/doação ("origem") já vem em linha dupla, sem tracejado.
 const DASH: Record<string, string | undefined> = { adocao: "5 3", incerto: "1 3", uniao: "6 3 1 3" };
 
 /** Amostra de cada item da legenda, com o mesmo traço e as mesmas caixas da árvore. */
@@ -75,6 +85,15 @@ function LegendSample({ k }: { k: FtLegendKey }) {
   if (k === "sangue") body = <>{box(15, 1)}{line(22, 10, 22, 17)}{line(8, 17, 36, 17)}{line(8, 17, 8, 22)}{line(36, 17, 36, 22)}</>;
   else if (k === "casal") body = <>{box(1, 7)}{box(29, 7)}{line(15, 11.5, 29, 11.5)}</>;
   else if (k === "ex") body = <>{box(1, 7)}{box(29, 7)}{line(15, 11.5, 29, 11.5)}{line(19, 16, 22, 7)}{line(23, 16, 26, 7)}</>;
+  else if (k === "viuvo") body = <>{box(1, 7)}{box(29, 7)}{line(15, 11.5, 29, 11.5)}{line(22, 11.5, 22, 4.5)}{line(19.5, 6.5, 24.5, 6.5)}</>;
+  else if (k === "origem") body = <>{box(15, 1)}{line(20.6, 10, 20.6, 22)}{line(23.4, 10, 23.4, 22)}</>;
+  else if (k === "ponte")
+    body = (
+      <>
+        <path d="M2 14L18.5 14A3.5 3.5 0 0 1 25.5 14L42 14" fill="none" stroke="var(--border-strong)" />
+        {line(22, 2, 22, 24)}
+      </>
+    );
   else if (k === "uniao") body = <>{box(1, 2)}{box(29, 2)}{line(8, 11, 8, 18, "uniao")}{line(8, 18, 36, 18, "uniao")}{line(36, 18, 36, 11, "uniao")}</>;
   else if (k === "adocao") body = <>{box(15, 1)}{line(22, 10, 22, 22, "adocao")}</>;
   else if (k === "meio") body = <>{box(1, 1)}{line(8, 10, 8, 16)}{line(8, 16, 34, 16)}{line(34, 16, 34, 22)}</>;
@@ -109,7 +128,8 @@ function FamilyLegend({ keys }: { keys: FtLegendKey[] }) {
 export function FamilyTree({ title, links, birthKey }: { title: string; links?: WikiLink[]; birthKey?: number | null }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
-  const inp = familyInputFromLinks(title, birthKey ?? null, links || []);
+  const canSee = useFamilyCanSee();
+  const inp = familyInputFromLinks(title, birthKey ?? null, links || [], canSee);
   const has = familyHasAny(inp);
   const L = has ? familyTreeLayout(inp) : null;
   const W = L ? L.W : 0,
@@ -146,7 +166,7 @@ export function FamilyTree({ title, links, birthKey }: { title: string; links?: 
       <svg ref={svgRef} viewBox={`0 ${L.y0} ${W} ${L.y1 - L.y0}`} width="100%" className="wb-famtree" style={style}>
         <g>
           {L.lines.map((l, i) => (
-            <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} stroke="var(--border-strong)" strokeDasharray={DASH[l.dash]} />
+            <path key={i} d={ftLinePath(l)} fill="none" stroke="var(--border-strong)" strokeDasharray={DASH[l.dash]} />
           ))}
         </g>
         <g>
