@@ -46,6 +46,13 @@ export function useTargetRevealed(targetId?: string): boolean {
   return !!(targetId && ctx?.ids.has(targetId));
 }
 
+/** Todas as páginas cuja tarja já foi aberta aqui (a árvore genealógica usa pra mostrar o
+ * parente revelado na ficha de família). */
+export function useRevealedTargetIds(): ReadonlySet<string> {
+  return useContext(RevealedTargetsContext)?.ids ?? EMPTY_IDS;
+}
+const EMPTY_IDS: ReadonlySet<string> = new Set();
+
 /** Os ids das páginas da wiki linkadas dentro de um trecho (hrefs ".../wiki/<id>"). */
 function wikiIdsIn(el: Element): string[] {
   const out: string[] = [];
