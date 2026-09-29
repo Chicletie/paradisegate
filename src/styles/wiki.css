@@ -67,6 +67,11 @@ h1 { font-family: var(--font-display); font-weight: 500; font-size: 32px; margin
    inteiro, então nada muda pra quem usa leitor de tela ou tela larga) até o botão expandir. */
 .infobox-expand { display: none; width: 100%; border: 0; border-top: 1px solid var(--border); background: var(--surface-2); color: var(--gold-ink); font-family: var(--font-body); font-size: 12px; padding: 10px; cursor: pointer; }
 .infobox-expand:hover { background: var(--accent-wash); }
+/* Valor com mais de 3 linhas: recolhido, com um degradê e "ver mais" (Infobox.tsx, Clamp). */
+.ib-clamp { max-height: 4.4em; max-height: 3lh; overflow: hidden; }
+.ib-clamp.open { max-height: none; overflow: visible; }
+.ib-clamp.over { -webkit-mask-image: linear-gradient(to bottom, #000 60%, transparent); mask-image: linear-gradient(to bottom, #000 60%, transparent); -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 1lh), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 1lh), transparent); }
+.ib-clamp-btn { display: inline-block; margin-top: 2px; padding: 2px 0; min-height: 0; line-height: 1.4; border: 0; background: none; color: var(--pg-link, var(--gold-ink)); font-family: var(--pg-f-ui, var(--font-body)); font-size: 12.5px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 /* Precisa vir DEPOIS das regras base acima (mesma especificidade — a última declarada ganha),
    senão o "display:none" base sempre venceria mesmo dentro da media query. */
 @media (max-width: 619px) {

@@ -1,4 +1,4 @@
-import { Fragment, useState, type ReactNode } from "react";
+import { Fragment, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { fieldValue, RevealSpoiler, SpoilerBlock } from "../lib/markdown";
 import { SwapCell } from "./EntryActions";
@@ -86,6 +86,38 @@ function Portrait({ images, title }: { images: InfoboxImage[]; title: string }) 
  * mais de uma imagem marcada), fatos curtos numa tabela, Alcunhas, Nascimento/Nascimento
  * Lunar (dentro de "Dados básicos" quando esse cabeçalho existe), Contém.
  */
+/** Valor da ficha com mais de 3 linhas (ex.: Família): mostra 3 e um "ver mais" pra abrir. Mede o
+ *  conteúdo de dentro, então uma tarja revelada que faça o valor crescer também conta. */
+function Clamp({ children }: { children: ReactNode }) {
+  const box = useRef<HTMLDivElement>(null);
+  const inner = useRef<HTMLDivElement>(null);
+  const [over, setOver] = useState(false);
+  const [open, setOpen] = useState(false);
+  useLayoutEffect(() => {
+    const b = box.current, c = inner.current;
+    if (!b || !c || open) return;
+    const check = () => setOver(c.offsetHeight > b.clientHeight + 2);
+    check();
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(check);
+    ro.observe(c);
+    ro.observe(b);
+    return () => ro.disconnect();
+  }, [open]);
+  return (
+    <>
+      <div ref={box} className={"ib-clamp" + (open ? " open" : over ? " over" : "")}>
+        <div ref={inner}>{children}</div>
+      </div>
+      {(over || open) && (
+        <button type="button" className="ib-clamp-btn" aria-expanded={open} onClick={() => setOpen(!open)}>
+          {open ? "ver menos" : "ver mais"}
+        </button>
+      )}
+    </>
+  );
+}
+
 export function Infobox({ data }: { data: WikiEntryDoc }) {
   const [expanded, setExpanded] = useState(false);
   const shortFields = (data.fields || []).filter((f) => f.type !== "nota");
@@ -121,13 +153,15 @@ export function Infobox({ data }: { data: WikiEntryDoc }) {
       <tr key="aliases">
         <th>Alcunhas</th>
         <td>
-          {aliases.map((a, i) => (
-            <Fragment key={i}>
-              <RestritoInline area="aliases" index={i} />
-              <AliasLine alias={a} />
-            </Fragment>
-          ))}
-          <RestritoInline area="aliases" index={aliases.length} />
+          <Clamp>
+            {aliases.map((a, i) => (
+              <Fragment key={i}>
+                <RestritoInline area="aliases" index={i} />
+                <AliasLine alias={a} />
+              </Fragment>
+            ))}
+            <RestritoInline area="aliases" index={aliases.length} />
+          </Clamp>
         </td>
       </tr>,
     );
@@ -154,13 +188,15 @@ export function Infobox({ data }: { data: WikiEntryDoc }) {
           {f.key}
         </th>
         <SwapCell slot={"ib:" + i} fieldKey={f.key}>
-          {f.vis === "spoiler" ? (
-            <RevealSpoiler preview="spoiler · toque" at={f.at}>
-              <span>{fieldValue(f.value)}</span>
-            </RevealSpoiler>
-          ) : (
-            fieldValue(f.value)
-          )}
+          <Clamp>
+            {f.vis === "spoiler" ? (
+              <RevealSpoiler preview="spoiler · toque" at={f.at}>
+                <span>{fieldValue(f.value)}</span>
+              </RevealSpoiler>
+            ) : (
+              fieldValue(f.value)
+            )}
+          </Clamp>
         </SwapCell>
       </tr>,
     );
