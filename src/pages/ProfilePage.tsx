@@ -4,7 +4,7 @@ import { usePgBody } from "../lib/usePgBody";
 import { useAccount } from "../lib/account";
 import { checkUsername, fetchMyAccesses, fetchMySuggestions } from "../lib/api";
 import { useWikiIndex, useWikiObras } from "../lib/wikiIndex";
-import { ProgressPicker } from "../components/SpoilerProgress";
+import { PROGRESS_HINT, ProgressPicker } from "../components/SpoilerProgress";
 import { UsernameDialog } from "../components/UsernameDialog";
 import { objPos } from "../lib/format";
 import { resizePhoto } from "../lib/photo";
@@ -247,7 +247,7 @@ function SpoilerSettings() {
     <Panel id="spoilers" title="Até onde você já viu">
       {obras.length ? (
         <>
-          <p className="pg-profile-note">Marque até onde você já acompanhou cada campanha! Os spoilers das temporadas que você já viu ficam abertos em toda a wiki, e o restante continua escondido.</p>
+          <p className="pg-profile-note">Os spoilers das temporadas que você já viu ficam abertos em toda a wiki; o restante continua escondido. <strong>{PROGRESS_HINT}</strong></p>
           <div className="pg-prog-list">
             {obras.map((o) => (
               <ProgressPicker key={o.id} obra={o} />

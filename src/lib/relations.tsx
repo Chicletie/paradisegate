@@ -4,7 +4,7 @@ import type { WikiIndexEvent, WikiLink, LinkStyle } from "../types";
 import { fmtEventDate, eventSortKey } from "./events";
 import { RenderMarkdown, WikiLinkUpgrade } from "./markdown";
 import { LinkCard } from "../components/LinkCard";
-import { familyHasAny, familyInputFromLinks, familyTreeLayout, ftMinWidth, type FtBox } from "./familyLayout.js";
+import { FT_LEGEND, familyHasAny, familyInputFromLinks, familyTreeLayout, ftMinWidth, type FtBox, type FtLegendKey } from "./familyLayout.js";
 
 // Porta de buildFamilyTree, EDGE_STYLE/affinitiesOf/
 // relNeighbors/buildRelGroups e buildTimelineViz na wiki original.
@@ -61,8 +61,49 @@ export function hasFamilyData(links: WikiLink[] = []): boolean {
 }
 
 // Tracejado = adoção/criação; pontilhado = ligação que não dá pra situar (página publicada
-// antes da árvore saber quem é quem, ou parente não publicado).
-const DASH: Record<string, string | undefined> = { adocao: "5 3", incerto: "1 3" };
+// antes da árvore saber quem é quem, ou parente não publicado); traço-ponto = pais do mesmo
+// filho sem casamento.
+const DASH: Record<string, string | undefined> = { adocao: "5 3", incerto: "1 3", uniao: "6 3 1 3" };
+
+/** Amostra de cada item da legenda, com o mesmo traço e as mesmas caixas da árvore. */
+function LegendSample({ k }: { k: FtLegendKey }) {
+  const line = (x1: number, y1: number, x2: number, y2: number, dash?: string) => (
+    <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--border-strong)" strokeDasharray={dash ? DASH[dash] : undefined} />
+  );
+  const box = (x: number, y: number, w = 14) => <rect x={x} y={y} width={w} height={9} rx={2.5} fill="var(--surface)" stroke="var(--border-strong)" />;
+  let body;
+  if (k === "sangue") body = <>{box(15, 1)}{line(22, 10, 22, 17)}{line(8, 17, 36, 17)}{line(8, 17, 8, 22)}{line(36, 17, 36, 22)}</>;
+  else if (k === "casal") body = <>{box(1, 7)}{box(29, 7)}{line(15, 11.5, 29, 11.5)}</>;
+  else if (k === "ex") body = <>{box(1, 7)}{box(29, 7)}{line(15, 11.5, 29, 11.5)}{line(19, 16, 22, 7)}{line(23, 16, 26, 7)}</>;
+  else if (k === "uniao") body = <>{box(1, 2)}{box(29, 2)}{line(8, 11, 8, 18, "uniao")}{line(8, 18, 36, 18, "uniao")}{line(36, 18, 36, 11, "uniao")}</>;
+  else if (k === "adocao") body = <>{box(15, 1)}{line(22, 10, 22, 22, "adocao")}</>;
+  else if (k === "meio") body = <>{box(1, 1)}{line(8, 10, 8, 16)}{line(8, 16, 34, 16)}{line(34, 16, 34, 22)}</>;
+  else if (k === "incerto") body = <>{line(2, 6, 34, 6, "incerto")}{line(34, 6, 34, 22, "incerto")}</>;
+  else body = <>{line(4, 6, 40, 6, "incerto")}{line(22, 6, 22, 13, "incerto")}{box(13, 13, 18)}</>;
+  return (
+    <svg className="wb-ft-legend-sample" viewBox="0 0 44 24" width="44" height="24" aria-hidden="true">
+      {body}
+    </svg>
+  );
+}
+
+/** Legenda ao lado da árvore: só os traços que ela usa, cada um com o seu desenho. */
+function FamilyLegend({ keys }: { keys: FtLegendKey[] }) {
+  if (!keys.length) return null;
+  return (
+    <aside className="wb-ft-legend" aria-label="Legenda da árvore">
+      <p className="wb-ft-legend-title">Legenda</p>
+      <ul>
+        {FT_LEGEND.filter(([k]) => keys.includes(k)).map(([k, text]) => (
+          <li key={k}>
+            <LegendSample k={k} />
+            <span>{text}</span>
+          </li>
+        ))}
+      </ul>
+    </aside>
+  );
+}
 
 /** Árvore genealógica na notação de genealogia (conta em familyLayout.js, igual à wiki original). */
 export function FamilyTree({ title, links, birthKey }: { title: string; links?: WikiLink[]; birthKey?: number | null }) {
@@ -100,6 +141,7 @@ export function FamilyTree({ title, links, birthKey }: { title: string; links?: 
   const style = minW ? { minWidth: minW, maxWidth: Math.max(540, W) } : undefined;
 
   return (
+    <div className="wb-famtree-box">
     <div className="wb-famtree-wrap" ref={wrapRef} style={minW ? { contain: "inline-size" } : undefined}>
       <svg ref={svgRef} viewBox={`0 ${L.y0} ${W} ${L.y1 - L.y0}`} width="100%" className="wb-famtree" style={style}>
         <g>
@@ -118,6 +160,8 @@ export function FamilyTree({ title, links, birthKey }: { title: string; links?: 
           </text>
         ))}
       </svg>
+    </div>
+    <FamilyLegend keys={L.legend} />
     </div>
   );
 }

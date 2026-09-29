@@ -11,7 +11,7 @@ import { GalleryPanel } from "../components/GalleryPanel";
 import { CitationsPanel } from "../components/CitationsPanel";
 import { TaxonomyPanel } from "../components/TaxonomyPanel";
 import { RelationsSection, AffinitiesSection } from "../components/RelationsSection";
-import { RenderMarkdown, SpoilerBlock, SpoilerSpan } from "../lib/markdown";
+import { RenderMarkdown, RevealedTargetsProvider, SpoilerBlock, SpoilerSpan } from "../lib/markdown";
 import {
   FavoriteButton,
   MySuggestionsHere,
@@ -46,18 +46,22 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
   if (relLabel) sharedToc.push({ id: "relacoes", label: relLabel });
   if (affinitiesOf(data.links).length) sharedToc.push({ id: "afinidades", label: "Afinidades" });
 
-  const tabPanels: { label: string; content: ReactNode }[] = [
-    { label: "Geral", content: <ArticleBundle bundle={data} anchorPrefix="geral-" epigraph={epigraph} extraToc={sharedToc} /> },
+  // Com abas próprias, a principal leva o nome que o autor deu (ex. "Paradise Gate") e não há
+  // "Geral"; sem abas próprias, "Geral" só aparece pra voltar da Galeria/Citações.
+  const hasVariants = !!data.variants?.length;
+  const tabPanels: { label: string; content: ReactNode; extra?: boolean }[] = [
+    { label: (hasVariants && data.mainTab) || "Geral", content: <ArticleBundle bundle={data} anchorPrefix="geral-" epigraph={epigraph} extraToc={sharedToc} /> },
   ];
   (data.variants || []).forEach((variant, vi) => {
     tabPanels.push({ label: variant.label || "Versão", content: <ArticleBundle bundle={variant} anchorPrefix={`v${vi}-`} epigraph={epigraph} /> });
   });
-  if (data.gallery?.length) tabPanels.push({ label: "Galeria", content: <GalleryPanel gallery={data.gallery} title={data.title} /> });
-  if (data.citacoes?.length) tabPanels.push({ label: "Citações", content: <CitationsPanel citacoes={data.citacoes} title={data.title} /> });
-  if (data.taxonomy?.length) tabPanels.push({ label: "Taxonomia", content: <TaxonomyPanel taxonomy={data.taxonomy} /> });
+  if (data.gallery?.length) tabPanels.push({ label: "Galeria", extra: true, content: <GalleryPanel gallery={data.gallery} title={data.title} /> });
+  if (data.citacoes?.length) tabPanels.push({ label: "Citações", extra: true, content: <CitationsPanel citacoes={data.citacoes} title={data.title} /> });
+  if (data.taxonomy?.length) tabPanels.push({ label: "Taxonomia", extra: true, content: <TaxonomyPanel taxonomy={data.taxonomy} /> });
 
   return (
     <PageObrasProvider obras={data.spoilerObras}>
+    <RevealedTargetsProvider key={wikiId}>
     <RestritoPlaceProvider value={place}>
     <SwapProvider items={restrito} winner={swapWinners(data.fields, data.taxonomy)}>
       <article className="card">
@@ -88,10 +92,11 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
         <SpoilerProgressBar />
 
         {tabPanels.length > 1 && (
-          <div className="work-tabs" role="tablist" aria-label="Seções da página">
+          <div className="work-tabs entry-tabs" role="tablist" aria-label="Seções da página">
             {tabPanels.map((p, i) => (
+              <Fragment key={i}>
+              {hasVariants && p.extra && !tabPanels[i - 1]?.extra && <span className="entry-tabs-sep" aria-hidden="true" />}
               <button
-                key={i}
                 type="button"
                 role="tab"
                 aria-selected={i === activeTab}
@@ -100,6 +105,7 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
               >
                 {p.label}
               </button>
+              </Fragment>
             ))}
           </div>
         )}
@@ -177,6 +183,7 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
       </article>
     </SwapProvider>
     </RestritoPlaceProvider>
+    </RevealedTargetsProvider>
     </PageObrasProvider>
   );
 }
