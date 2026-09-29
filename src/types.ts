@@ -206,16 +206,19 @@ export interface WikiLink {
   style?: LinkStyle;
   /** O que o outro é pra esta página ("mãe adotiva"), escolhido pelo autor. */
   term?: string;
-  /** true = a relação inteira atrás da tarja; "disfarce" = mostra `cover` e esconde só o termo. */
+  /** true = a relação inteira atrás da tarja; "disfarce" = o cartão mostra só a fachada (`cover`,
+   * com o termo `coverTerm`, ex. "amiga") até a relação ser revelada. */
   spoiler?: boolean | "disfarce";
   cover?: string;
+  coverTerm?: string;
   coverStyle?: LinkStyle;
   /** Spoiler por obra: id da temporada em que a relação é revelada. */
   at?: string;
   /** Árvore genealógica: quem é quem (k = apelido da pessoa na árvore; via = de qual pai é o avô,
    * qual pai o meio-irmão divide, de qual filho é o neto; with = com quem o filho foi tido; bk =
-   * ordem de nascimento). Página publicada antes de 2026-09-27 não traz. */
-  fam?: { k: string; via?: string | string[]; with?: string; bk?: number };
+   * ordem de nascimento; wl/wid = nome e página do outro pai/mãe do filho quando não é cônjuge
+   * desta página). Página publicada antes de 2026-09-27 não traz. */
+  fam?: { k: string; via?: string | string[]; with?: string; bk?: number; wl?: string; wid?: string };
   /** Parente distante ("prima distante", "ancestral distante"): vai pra faixa de outros parentes da árvore; `term` já vem pronto. */
   distant?: boolean;
 }
@@ -268,6 +271,8 @@ export interface WikiEntryDoc extends WikiArticleBundle {
   gallery?: WikiGalleryItem[];
   taxonomy?: WikiField[];
   variants?: WikiVariant[];
+  /** Nome da aba principal quando a página tem abas próprias (ex. "Paradise Gate"); sem ele, "Geral". */
+  mainTab?: string;
   events?: WikiIndexEvent[];
   restritoSlots?: RestritoSlotMark[];
   /** Ordem de nascimento da própria pessoa (só quando o ano aparece), pra árvore genealógica. */

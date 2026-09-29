@@ -118,7 +118,8 @@ netos) traz `fam`:
 |---|---|---|
 | `k` | string | apelido da pessoa nesta árvore (`f1`, `f2`…; nunca o id interno) |
 | `via` | string (avô, neto) ou string[] (meio-irmão) | de qual pai é o avô; qual pai/mãe o meio-irmão divide; de qual filho é o neto |
-| `with` | string | com qual cônjuge o filho foi tido |
+| `with` | string | com quem o filho foi tido (o `k` do outro pai/mãe) |
+| `wl`, `wid` | string | nome e página do outro pai/mãe, quando não é cônjuge desta página (a árvore o põe ao lado, com linha traço-ponto) |
 | `bk` | number | ordem de nascimento (AAAAMMDD), só quando o ano aparece na página |
 
 A página traz também `birthKey` (a mesma ordem, da própria pessoa). Parentesco em spoiler ou
@@ -127,7 +128,10 @@ que não está publicado não vai: a árvore desenha essa ligação pontilhada (
 Página publicada antes de 2026-09-27 não traz `fam` e cai nesse desenho até ser republicada.
 
 Casamentos: `casado(a) com` (atual, colado na pessoa), `ex-cônjuge de` (desfeito: duas barrinhas
-na linha do casal) e `viúvo(a) de`/`cônjuge falecido(a) de` (viuvez: casamento normal). Outros
+na linha do casal) e `viúvo(a) de`/`cônjuge falecido(a) de` (viuvez: casamento normal). Filho
+adotivo ou de criação conta o casal como pais: ele desce do meio da linha do casal, em tracejado;
+na página do filho, dois pais adotivos (sem pai/mãe de sangue) formam o casal de cima. A árvore
+leva uma legenda ao lado com uma amostra de cada traço que usa (`legend` na saída da conta). Outros
 parentes com `style: "family"` que não cabem nas 5 gerações (primos, tios, bisavós, cunhados…,
 menos `alma-irmã de`) vão numa faixa embaixo, com o `term` da ligação (ex.: "prima distante") e
 pontilhado: parentesco sem caminho na árvore.
@@ -136,6 +140,18 @@ Parente distante: ligação com `distant: true` (caixa "parente distante" no edi
 bisavô/bisneto, tio/sobrinho e primo). O `term` já vem pronto: "prima distante", "tio distante", e
 nos avós/bisavós "ancestral distante" (do outro lado, "descendente distante"). Sempre vai pra faixa
 de outros parentes, nunca pro lugar de avô/neto na árvore.
+
+## Abas e relações em disfarce
+
+- **Abas da página**: `variants[]` (cada uma com `label`) são abas que o autor nomeia. Quando há
+  abas, `mainTab` é o nome da aba principal (ex. "Paradise Gate") e não existe "Geral"; sem
+  `mainTab` (página antiga) a principal se chama "Geral". Sem abas próprias, "Geral" só aparece
+  quando há Galeria, Citações ou Taxonomia, pra voltar à descrição. As pílulas ficam centradas
+  acima da ficha; o seletor de retratos da ficha é separado das abas.
+- **Disfarce** (`spoiler: "disfarce"`): o cartão mostra só a relação de fachada (`cover`, com o
+  termo `coverTerm`, ex. "amiga"), sem tarja. A verdadeira aparece se o leitor já viu a
+  temporada `at`, ou, em relação de família, depois que ele abre na ficha Família a tarja da linha
+  dessa pessoa.
 
 ## Texto dentro da página (markdown da casa)
 
@@ -152,4 +168,7 @@ Lido por `src/lib/markdown.tsx`:
 | `[[Nome]]` / `[[Nome\|texto]]` | nome em negrito sem link (página não publicada) |
 
 Campo curto da infobox com várias linhas (`\n`): uma por linha, com "•" na frente, sem itálico.
-Campo inteiro marcado spoiler fica coberto por inteiro, sem marca no rótulo.
+Campo inteiro marcado spoiler fica coberto por inteiro, sem marca no rótulo. A tarja de um
+trecho tem o tamanho do texto, exceto no campo `Status`, onde é sempre do mesmo tamanho (vivo e
+morto não se denunciam pelo comprimento). Na ficha Família gerada pelo editor, as linhas com
+spoiler vêm depois das reveladas.

@@ -32,25 +32,31 @@ export function PageObrasProvider({ obras, children }: { obras: SpoilerObra[] | 
   return <PageObrasContext.Provider value={obras || []}>{children}</PageObrasContext.Provider>;
 }
 
-/** Seletor de uma obra: nada / até a temporada N / tudo. */
+/** Seletor de uma obra: nada / até o fim da temporada N / tudo. Só conta temporada vista até
+ * o fim: marcar uma pela metade abriria os spoilers do resto dela. */
 export function ProgressPicker({ obra }: { obra: SpoilerObra }) {
   const { progress, setSeen } = useSpoilerProgress();
   const id = "pg-prog-" + obra.id;
   return (
     <label className="pg-prog-pick" htmlFor={id}>
       <span className="pg-prog-name">{obra.name}</span>
-      <select id={id} value={progress[obra.id] || ""} onChange={(ev) => setSeen(obra.id, ev.target.value)}>
-        <option value="">não vi nada ainda</option>
-        {obra.seasons.map((s) => (
-          <option key={s.id} value={s.id}>
-            vi até {s.name}
-          </option>
-        ))}
-        <option value="*">vi tudo</option>
-      </select>
+      <span className="pg-prog-select">
+        <select id={id} value={progress[obra.id] || ""} onChange={(ev) => setSeen(obra.id, ev.target.value)}>
+          <option value="">não terminei nenhuma temporada</option>
+          {obra.seasons.map((s) => (
+            <option key={s.id} value={s.id}>
+              vi até o fim de {s.name}
+            </option>
+          ))}
+          <option value="*">vi tudo</option>
+        </select>
+      </span>
     </label>
   );
 }
+
+/** O aviso de sempre: só vale temporada assistida até o fim. */
+export const PROGRESS_HINT = "Marque só a última temporada que você assistiu até o fim. Se parou no meio de uma, marque a anterior.";
 
 /** Barrinha no alto da página, só pra quem não tem conta (quem tem escolhe no perfil). */
 export function SpoilerProgressBar() {
@@ -59,7 +65,10 @@ export function SpoilerProgressBar() {
   if (inAccount || !obras.length) return null;
   return (
     <aside className="pg-prog-bar" aria-label="Até onde você já viu">
-      <span className="pg-prog-lead">Esta página tem spoilers! Até onde você já acompanhou?</span>
+      <div className="pg-prog-head">
+        <p className="pg-prog-kicker">Esta página tem spoilers</p>
+        <p className="pg-prog-lead">Até onde você já assistiu? {PROGRESS_HINT}</p>
+      </div>
       <div className="pg-prog-list">
         {obras.map((o) => (
           <ProgressPicker key={o.id} obra={o} />

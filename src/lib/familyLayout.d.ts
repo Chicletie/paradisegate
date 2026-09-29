@@ -10,7 +10,7 @@ export interface FtInput {
   parents: (FtPerson & { adopt?: boolean })[];
   gps: (FtPerson & { via?: string | null })[];
   sibs: (FtPerson & { half?: boolean; via?: string[]; bk?: number | null })[];
-  spouses: (FtPerson & { status?: "" | "ex" | "viuvo" })[];
+  spouses: (FtPerson & { status?: "" | "ex" | "viuvo" | "par" })[];
   kids: (FtPerson & { with?: string | null; bk?: number | null; adopt?: boolean })[];
   gks: (FtPerson & { via?: string | null })[];
   others?: (FtPerson & { term?: string })[];
@@ -31,8 +31,8 @@ export interface FtLine {
   y1: number;
   x2: number;
   y2: number;
-  /** "" linha cheia, "adocao" tracejado, "incerto" pontilhado. */
-  dash: "" | "adocao" | "incerto";
+  /** "" linha cheia, "adocao" tracejado, "incerto" pontilhado, "uniao" traço-ponto. */
+  dash: "" | "adocao" | "incerto" | "uniao";
 }
 export interface FtLayout {
   W: number;
@@ -43,7 +43,11 @@ export interface FtLayout {
   lines: FtLine[];
   /** Legendas soltas (ex.: a da faixa de outros parentes). */
   notes: { x: number; y: number; text: string }[];
+  /** Chaves de FT_LEGEND que esta árvore usa, na ordem da legenda. */
+  legend: FtLegendKey[];
 }
+export type FtLegendKey = "sangue" | "casal" | "ex" | "uniao" | "adocao" | "meio" | "incerto" | "outros";
+export const FT_LEGEND: [FtLegendKey, string][];
 
 export const FT_MIN_W: number;
 export const FT_PAD: number;

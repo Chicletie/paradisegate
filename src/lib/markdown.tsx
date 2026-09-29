@@ -1,5 +1,5 @@
 import { memberHref } from "./member";
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useSpoilerAt } from "./spoilerProgress";
 
@@ -25,6 +25,37 @@ export function WikiLinkUpgrade({ links, children }: { links: { targetId?: strin
   return <LiveTitlesContext.Provider value={byTitle}>{children}</LiveTitlesContext.Provider>;
 }
 
+/**
+ * Páginas cuja tarja o leitor já abriu nesta página (ex.: a linha "||[[Fulano]] (irmão)||" da
+ * ficha Família). O cartão de Relações dessa pessoa usa isso pra tirar o disfarce de família:
+ * o segredo já foi revelado ali em cima.
+ */
+const RevealedTargetsContext = createContext<{ ids: ReadonlySet<string>; add: (ids: string[]) => void } | null>(null);
+
+export function RevealedTargetsProvider({ children }: { children: ReactNode }) {
+  const [ids, setIds] = useState<ReadonlySet<string>>(() => new Set());
+  const add = useCallback((more: string[]) => {
+    setIds((cur) => (more.every((id) => cur.has(id)) ? cur : new Set([...cur, ...more])));
+  }, []);
+  return <RevealedTargetsContext.Provider value={{ ids, add }}>{children}</RevealedTargetsContext.Provider>;
+}
+
+/** Se a tarja de alguma linha que liga a esta página já foi aberta aqui. */
+export function useTargetRevealed(targetId?: string): boolean {
+  const ctx = useContext(RevealedTargetsContext);
+  return !!(targetId && ctx?.ids.has(targetId));
+}
+
+/** Os ids das páginas da wiki linkadas dentro de um trecho (hrefs ".../wiki/<id>"). */
+function wikiIdsIn(el: Element): string[] {
+  const out: string[] = [];
+  el.querySelectorAll("a[href]").forEach((a) => {
+    const m = /\/wiki\/([^/?#]+)/.exec(a.getAttribute("href") || "");
+    if (m) out.push(decodeURIComponent(m[1]));
+  });
+  return out;
+}
+
 function PlainWikiLink({ text }: { text: string }) {
   const id = useContext(LiveTitlesContext)?.[text.toLowerCase()];
   if (id)
@@ -48,6 +79,7 @@ const INLINE_TOKEN_SOURCE =
 function InlineSpoiler({ children, at }: { children: ReactNode; at?: string }) {
   const [on, setOn] = useState(false);
   const sp = useSpoilerAt(at);
+  const revealed = useContext(RevealedTargetsContext);
   // Temporada que o leitor já viu: o trecho aparece aberto, sem tarja.
   if (sp.open) return <span className="md-unlocked">{children}</span>;
   return (
@@ -61,6 +93,7 @@ function InlineSpoiler({ children, at }: { children: ReactNode; at?: string }) {
         if (!on) {
           ev.preventDefault();
           setOn(true);
+          revealed?.add(wikiIdsIn(ev.currentTarget));
           return;
         }
         if ((ev.target as Element).closest?.("a")) return;
@@ -69,6 +102,7 @@ function InlineSpoiler({ children, at }: { children: ReactNode; at?: string }) {
       onKeyDown={(ev) => {
         if ((ev.key === "Enter" || ev.key === " ") && ev.target === ev.currentTarget) {
           ev.preventDefault();
+          if (!on) revealed?.add(wikiIdsIn(ev.currentTarget));
           setOn((v) => !v);
         }
       }}
@@ -89,7 +123,12 @@ export function SpoilerSpan({ text, at }: { text: string; at?: string }) {
       tabIndex={0}
       role="button"
       title={sp.label ? "Spoiler de " + sp.label + ". Toque para revelar" : "Spoiler. Toque para revelar"}
-      onClick={() => setOn((v) => !v)}
+      // Dentro de um cartão (que é um link), tocar na tarja só revela: nunca abre a página.
+      onClick={(ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        setOn((v) => !v);
+      }}
     >
       {text}
     </span>

@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import { Link } from "react-router-dom";
-import { RevealSpoiler, SpoilerSpan } from "../lib/markdown";
+import { RevealSpoiler, SpoilerSpan, useTargetRevealed } from "../lib/markdown";
+import { useSpoilerAt } from "../lib/spoilerProgress";
 import { useWikiIndex } from "../lib/wikiIndex";
 import { PgThumb } from "./PgThumb";
 import type { WikiLink } from "../types";
@@ -15,17 +16,14 @@ function relShort(label: string) {
   return label.replace(/^é /, "");
 }
 
-/** O rótulo de uma relação no cartão: o termo escolhido ("mãe adotiva") ou o rótulo; disfarce
- * mostra a relação de fachada e esconde só o termo verdadeiro na tarja. */
+/** O rótulo de uma relação no cartão: o termo escolhido ("mãe adotiva") ou o rótulo. Disfarce
+ * aparece como uma relação comum, só com a fachada ("amiga"), sem tarja nem sinal de segredo.
+ * A verdadeira aparece quando o leitor já viu a temporada em que ela é revelada, ou, se for de
+ * família, quando ele abre a tarja dessa pessoa na ficha Família lá em cima. */
 function RelLabel({ lk }: { lk: WikiLink }) {
-  if (lk.spoiler === "disfarce" && lk.cover) {
-    return (
-      <>
-        {relShort(lk.cover) + " "}
-        <SpoilerSpan text={"(" + (lk.term || relShort(lk.label || "")) + ")"} at={lk.at} />
-      </>
-    );
-  }
+  const seen = useSpoilerAt(lk.at).open && !!lk.at;
+  const openedAbove = useTargetRevealed(lk.targetId) && lk.style === "family";
+  if (lk.spoiler === "disfarce" && lk.cover && !seen && !openedAbove) return <>{lk.coverTerm || relShort(lk.cover)}</>;
   return <>{lk.term || relShort(lk.label || "ligação")}</>;
 }
 

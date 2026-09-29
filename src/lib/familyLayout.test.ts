@@ -204,3 +204,64 @@ describe("árvore genealógica: casamentos desfeitos e parentes distantes", func
     expect(inside(L)).toBe(true);
   });
 });
+
+describe("árvore genealógica: adoção, coparente e legenda", function () {
+  it("casal adotivo: o filho adotivo desce do meio do casal, em tracejado", function () {
+    var inp = familyInputFromLinks("Dementor", null, [
+      { label: "casado(a) com", targetTitle: "Devon", targetId: "devon", style: "family", fam: { k: "f1" } },
+      { label: "é pai/mãe adotivo(a) de", targetTitle: "Astéri", targetId: "asteri", style: "family", fam: { k: "f2", with: "f1" } }
+    ]);
+    var L = familyTreeLayout(inp);
+    var dem = boxOf(L, "Dementor"), dev = boxOf(L, "Devon"), ast = boxOf(L, "Astéri");
+    var mid = (Math.min(dem.x, dev.x) + Math.max(dem.x, dev.x)) / 2;
+    expect(Math.abs(ast.x - mid)).toBeLessThan(40);
+    expect(L.lines.some(function (l) { return l.dash === "adocao" && Math.abs(l.x1 - ast.x) < 0.01; })).toBe(true);
+    expect(L.legend).toEqual(["casal", "adocao"]);
+  });
+  it("página do filho com dois pais adotivos: os dois formam o casal de cima", function () {
+    var inp = familyInputFromLinks("Astéri", null, [
+      { label: "é filho(a) adotivo(a) de", targetTitle: "Dementor", targetId: "dem", style: "family", fam: { k: "f1" } },
+      { label: "é filho(a) adotivo(a) de", targetTitle: "Devon", targetId: "dev", style: "family", fam: { k: "f2" } }
+    ]);
+    var L = familyTreeLayout(inp);
+    var dem = boxOf(L, "Dementor"), dev = boxOf(L, "Devon"), ast = boxOf(L, "Astéri");
+    expect(dem.y).toBe(dev.y);
+    expect(Math.abs(ast.x - (dem.x + dev.x) / 2)).toBeLessThan(1);
+    // linha de casal entre os dois, e a descida tracejada
+    expect(L.lines.some(function (l) { return l.y1 === dem.y && l.y2 === dem.y && !l.dash; })).toBe(true);
+    expect(L.lines.filter(function (l) { return l.y2 > dem.y; }).every(function (l) { return l.dash === "adocao"; })).toBe(true);
+    expect(L.legend).toEqual(["casal", "adocao"]);
+    expect(overlaps(L)).toBe(0);
+  });
+  it("coparente sem casamento: o outro pai aparece ao lado, com linha traço-ponto, e o filho desce do meio", function () {
+    var inp = familyInputFromLinks("Dementor", null, [
+      { label: "é pai/mãe adotivo(a) de", targetTitle: "Astéri", targetId: "asteri", style: "family", fam: { k: "f1", with: "f2", wl: "Devon", wid: "devon" } }
+    ]);
+    expect(inp.spouses.map(function (s) { return s.label + ":" + s.status; })).toEqual(["Devon:par"]);
+    var L = familyTreeLayout(inp);
+    var dev = boxOf(L, "Devon"), ast = boxOf(L, "Astéri"), dem = boxOf(L, "Dementor");
+    expect(dev.y).toBe(dem.y);
+    expect(dev.ref.targetId).toBe("devon");
+    expect(L.lines.some(function (l) { return l.dash === "uniao"; })).toBe(true);
+    expect(ast.x).toBeGreaterThan(Math.min(dem.x, dev.x));
+    expect(ast.x).toBeLessThan(Math.max(dem.x, dev.x));
+    expect(L.legend).toEqual(["uniao", "adocao"]);
+  });
+  it("coparente que já é cônjuge não se repete", function () {
+    var inp = familyInputFromLinks("Pessoa", null, [
+      { label: "casado(a) com", targetTitle: "Par", targetId: "par", style: "family", fam: { k: "f1" } },
+      { label: "é pai/mãe de", targetTitle: "Filho", targetId: "filho", style: "family", fam: { k: "f2", with: "f1", wl: "Par", wid: "par" } }
+    ]);
+    expect(inp.spouses.length).toBe(1);
+    expect(inp.spouses[0].status).toBe("");
+    expect(familyTreeLayout(inp).legend).toEqual(["sangue", "casal"]);
+  });
+  it("legenda mostra ex-cônjuge, meio-irmão e outros parentes quando existem", function () {
+    var inp = empty();
+    inp.parents = [P("Pai"), P("Mãe")];
+    inp.sibs = [P("Meio", { half: true, via: ["Mãe"] })];
+    inp.spouses = [P("Ex", { status: "ex" })];
+    inp.others = [P("Prima", { term: "prima" })];
+    expect(familyTreeLayout(inp).legend).toEqual(["sangue", "casal", "ex", "meio", "outros"]);
+  });
+});

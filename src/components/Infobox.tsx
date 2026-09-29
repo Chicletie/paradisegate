@@ -148,7 +148,8 @@ export function Infobox({ data }: { data: WikiEntryDoc }) {
       return;
     }
     rows.push(
-      <tr key={i}>
+      // Status (vivo/morto…): tarja de largura fixa, pra não entregar pelo tamanho (wiki.css).
+      <tr key={i} className={/^status$/i.test((f.key || "").trim()) ? "infobox-status" : undefined}>
         <th>
           {f.key}
         </th>

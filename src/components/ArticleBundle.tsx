@@ -76,9 +76,9 @@ export function ArticleBundle({
         return (
           <Fragment key={id}>
             {geral && <RestritoBlocks area="notas" index={i} />}
-            <h2 className="cathead" id={id}>
-              {f.key}
-            </h2>
+            {/* Dobra igual às seções (2026-09-29): pro leitor, bloco "nota" e seção são a mesma coisa. */}
+            <details className="wiki-section" id={id} open>
+            <summary className="cathead">{f.key}</summary>
             {/* Troca confidencial só na aba Geral: variantes de obra não têm versão confidencial. */}
             <SwapBody slot={anchorPrefix === "geral-" ? "lf:" + i : undefined} fieldKey={f.key}>
               {f.vis === "spoiler" ? (
@@ -89,6 +89,7 @@ export function ArticleBundle({
                 <RenderMarkdown text={f.value} />
               )}
             </SwapBody>
+            </details>
           </Fragment>
         );
       })}
