@@ -5,6 +5,9 @@
    uso nas páginas de entrada (ver DESIGN.md); a identidade nova (`body.pg-site`/`.pg-*`) vem
    depois no arquivo, remapeando quase tudo daqui pra baixo. */
 :root { color-scheme: light dark; }
+/* Tema escolhido à mão no botão do cabeçalho (src/lib/theme.ts, scripts/tema-css.mjs). */
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
 /* "pg-theme" expande a identidade do e-mail de convite pra própria wiki: um "envelope"
    azul-royal atrás de painéis "carta", o mesmo contraste que já funcionava no e-mail, em vez
    de um azul-marinho liso. Segue a preferência de claro/escuro do sistema do visitante — com
@@ -456,6 +459,10 @@ body.pg-site .pg-mast .login-bar a, body.pg-site .pg-mast .login-bar button.link
 body.pg-site .pg-mast .login-bar a:hover, body.pg-site .pg-mast .login-bar button.linklike:hover { background: rgba(255,255,255,0.1); border-color: var(--pg-gold); color: #fff; }
 /* Entrar (deslogado) e menu da conta (logado) — ver pgAccountMenu em wiki-core.js */
 .pg-signin { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px 10px 14px; border-radius: 999px; border: 1px solid var(--pg-gold-soft); background: rgba(201,164,92,0.1); color: #f3e6c4; font-family: var(--pg-f-ui); font-size: 14px; font-weight: 600; cursor: pointer; transition: background-color 0.2s ease-out, border-color 0.2s ease-out, color 0.2s ease-out; }
+.pg-theme-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin-left: auto; border-radius: 999px; border: 1px solid rgba(255,255,255,0.24); background: transparent; color: #f3e6c4; cursor: pointer; transition: background-color 0.2s ease-out, border-color 0.2s ease-out; }
+.pg-theme-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--pg-gold); }
+.pg-theme-btn:focus-visible { outline: 2px solid var(--pg-gold); outline-offset: 2px; }
+.pg-theme-btn + .login-bar { margin-left: 0; }
 .pg-signin:hover { background: var(--pg-gold); border-color: var(--pg-gold); color: #1d1606; }
 .pg-user-icon { width: 18px; height: 18px; flex: none; }
 .pg-signin { min-height: 44px; }
@@ -658,6 +665,9 @@ a.pg-sug-page:hover { text-decoration: underline; }
   .pg-mast-inner { padding: 10px 16px 12px; gap: 10px 12px; }
   body.pg-site .pg-mast .brand { flex: 1 1 auto; order: 1; }
   body.pg-site .pg-mast .login-bar { order: 2; }
+  /* no celular o botão de tema fica ao lado da busca (marca e Entrar continuam na 1ª linha) */
+  .pg-theme-btn { order: 4; margin-left: 0; flex: none; }
+  .pg-mast-inner:has(> .pg-theme-btn) > .pg-search-wrap { flex: 1 1 calc(100% - 56px); min-width: 0; }
   .pg-search-wrap { order: 3; flex-basis: 100%; max-width: none; }
   .pg-today-inner { display: flex; flex-direction: column; align-items: stretch; gap: 26px; padding: 30px 16px 34px; }
   .pg-capped .home-card:nth-child(n+13) { display: none; }
