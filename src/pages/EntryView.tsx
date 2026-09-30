@@ -11,6 +11,7 @@ import { GalleryPanel } from "../components/GalleryPanel";
 import { CitationsPanel } from "../components/CitationsPanel";
 import { TaxonomyPanel } from "../components/TaxonomyPanel";
 import { RelationsSection, AffinitiesSection } from "../components/RelationsSection";
+import { Navboxes } from "../components/Navboxes";
 import { RenderMarkdown, RevealedTargetsProvider, SpoilerBlock, SpoilerSpan } from "../lib/markdown";
 import {
   FavoriteButton,
@@ -178,6 +179,7 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
             <RestritoInline area="tags" index={(data.tags || []).length} />
           </div>
         )}
+        <Navboxes wikiId={wikiId} />
         <RestritoSlot items={restrito} />
         <MySuggestionsHere wikiId={wikiId} open={mine} />
       </article>

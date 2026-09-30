@@ -24,6 +24,8 @@ export interface WikiIndexEntry {
   universeId?: string;
   franchiseIds?: string[];
   tags?: string[];
+  /** Grupos com nome (ex.: uma equipe) de que a página faz parte: caixa de navegação no pé. */
+  grupos?: string[];
   search?: string;
   updatedAt?: string;
   firstPublishedAt?: string;
