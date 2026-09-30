@@ -67,6 +67,7 @@ Como ler (já feito em `src/lib/wikiIndex.tsx`):
 | `title`, `type` | string | nome e tipo da página |
 | `franchiseIds` | string[] | obras |
 | `tags` | string[] | só as públicas |
+| `grupos` | string[] | nomes dos grupos (relação em grupo) de que a página faz parte: só os com nome, públicos e que não são de família. Desde 2026-09-29: o pé da página mostra uma caixa de navegação recolhida por grupo e por tag pública, com as outras páginas do mesmo universo com o mesmo grupo ou tag (sem diferença de maiúscula ou acento), uma linha por tipo; só com mais de uma página (`src/lib/navbox.ts`) |
 | `search` | string | texto corrido pra busca (sem spoilers) |
 | `updatedAt` | `AAAA-MM-DD` | "atualizado em" e desempate de partes |
 | `firstPublishedAt` | `AAAA-MM-DD` | fora dos sorteios do dia até o reset seguinte (00h de Brasília) |
