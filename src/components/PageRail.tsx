@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { gmt3DateKey } from "../lib/daily";
 import { objPos } from "../lib/format";
 import { relatedPages } from "../lib/related";
 import { useWikiIndex } from "../lib/wikiIndex";
@@ -11,9 +12,24 @@ import { openFor, type TocItem } from "./ArticleBundle";
  * páginas relacionadas e o índice que acompanha a leitura, marcando a seção em que o leitor
  * está (2026-09-30: depois da ficha sobrava uma faixa vazia).
  */
-export function PageRail({ wikiId, toc, links, backlinks, tags }: { wikiId: string; toc: TocItem[]; links?: WikiLink[]; backlinks?: WikiLink[]; tags: string[] }) {
+export function PageRail({
+  wikiId,
+  toc,
+  links,
+  backlinks,
+  texts,
+  tags,
+}: {
+  wikiId: string;
+  toc: TocItem[];
+  links?: WikiLink[];
+  backlinks?: WikiLink[];
+  /** O texto público da página (sem os blocos em spoiler), pros links que ele cita. */
+  texts: (string | undefined)[];
+  tags: string[];
+}) {
   const index = useWikiIndex();
-  const related = index ? relatedPages(wikiId, links, backlinks, tags, index) : [];
+  const related = index ? relatedPages(wikiId, { links, backlinks, texts, tags }, index, gmt3DateKey()) : [];
   return (
     <div className="page-rail">
       {related.length > 0 && (

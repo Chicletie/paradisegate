@@ -71,6 +71,12 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
   });
   // tags públicas (as em spoiler não puxam página relacionada)
   const publicTags = (data.tags || []).filter((t) => t.vis !== "spoiler" && !t.at).map((t) => t.text);
+  // texto público da página (blocos em spoiler ficam de fora) pros links citados nele
+  const publicTexts = [
+    data.body,
+    ...(data.fields || []).filter((f) => f.vis !== "spoiler" && !f.at).map((f) => f.value),
+    ...(data.sections || []).filter((s) => s.vis !== "spoiler" && !s.at).map((s) => s.body),
+  ];
   if (data.gallery?.length) tabPanels.push({ label: "Galeria", extra: true, content: <GalleryPanel gallery={data.gallery} title={data.title} /> });
   if (data.citacoes?.length) tabPanels.push({ label: "Citações", extra: true, content: <CitationsPanel citacoes={data.citacoes} title={data.title} /> });
   if (data.taxonomy?.length) tabPanels.push({ label: "Taxonomia", extra: true, content: <TaxonomyPanel taxonomy={data.taxonomy} /> });
@@ -133,7 +139,7 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
         <div className="entry-main">
           <aside className="entry-aside">
             <Infobox data={data} />
-            <PageRail wikiId={wikiId} toc={tabPanels[activeTab]?.toc || []} links={data.links} backlinks={data.backlinks} tags={publicTags} />
+            <PageRail wikiId={wikiId} toc={tabPanels[activeTab]?.toc || []} links={data.links} backlinks={data.backlinks} texts={publicTexts} tags={publicTags} />
           </aside>
           <div className="entry-panels">
             {tabPanels.map((p, i) => (
