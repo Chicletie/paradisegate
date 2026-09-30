@@ -5,6 +5,7 @@ import { SwapCell } from "./EntryActions";
 import { RestritoInline, RestritoRows } from "./RestritoPlace";
 import { useRestritoCount } from "../lib/restritoPlace";
 import { objPos } from "../lib/format";
+import { Lightbox } from "./Lightbox";
 import type { InfoboxImage, WikiAlias, WikiCrumb, WikiEntryDoc, WikiField } from "../types";
 
 /** Porta de buildAlias/appendAliasNote: a anotação entre parênteses junta só os pedaços que
@@ -51,11 +52,22 @@ export function AliasLine({ alias }: { alias: WikiAlias }) {
 
 // As abas de retrato ficam antes do `.infobox-portrait`, como irmãs (mesma ordem de
 // wiki-core.js); trocar de aba repinta o retrato, e um retrato-spoiler volta coberto.
+// Clicar no retrato amplia a imagem inteira; as setas passam pelos outros retratos, e um
+// retrato em spoiler só entra na sequência depois que o leitor o revelou.
 function Portrait({ images, title }: { images: InfoboxImage[]; title: string }) {
   const [active, setActive] = useState(0);
+  const [zoom, setZoom] = useState(false);
+  const [seen, setSeen] = useState<ReadonlySet<number>>(new Set());
   const opt = images[active];
+  const open = () => {
+    if (opt.vis === "spoiler") setSeen((s) => new Set(s).add(active));
+    setZoom(true);
+  };
+  const shown = images.map((_, i) => i).filter((i) => images[i].vis !== "spoiler" || seen.has(i) || i === active);
   const img = (
-    <img className="cover" style={{ objectPosition: objPos(opt.focus) }} src={opt.url} alt={title} />
+    <button type="button" className="infobox-zoom" aria-label={"Ampliar retrato" + (images.length > 1 ? ": " + (opt.name || "Retrato") : "")} onClick={open}>
+      <img className="cover" style={{ objectPosition: objPos(opt.focus) }} src={opt.url} alt={title} />
+    </button>
   );
   return (
     <>
@@ -77,6 +89,13 @@ function Portrait({ images, title }: { images: InfoboxImage[]; title: string }) 
         </div>
       )}
       <div className="infobox-portrait">{opt.vis === "spoiler" ? <SpoilerBlock key={active} at={opt.at}>{img}</SpoilerBlock> : img}</div>
+      {zoom && (
+        <Lightbox
+          items={shown.map((i) => ({ url: images[i].url, caption: images.length > 1 ? images[i].name || "Retrato" : title }))}
+          start={shown.indexOf(active)}
+          onClose={() => setZoom(false)}
+        />
+      )}
     </>
   );
 }

@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { RenderMarkdown, SpoilerBlock, footnotesOf, markdownHeadings, mdInline } from "../lib/markdown";
+import { RenderMarkdown, SpoilerBlock, footnotesOf, markdownHeadings, mdInline, revealInTabs } from "../lib/markdown";
 import { QuoteEpigraph } from "../lib/quotes";
 import type { WikiArticleBundle, WikiCitation } from "../types";
 import { SwapBody } from "./EntryActions";
@@ -48,6 +48,7 @@ function openFor(id: string) {
   const target = document.getElementById(id);
   const d = target instanceof HTMLDetailsElement ? target : target?.closest("details");
   if (d) d.open = true;
+  revealInTabs(id);
 }
 
 /**

@@ -228,6 +228,30 @@ details.wiki-section.post:last-child { border-bottom: 0; }
 .wb-lightbox { position: fixed; inset: 0; z-index: 80; background: color-mix(in srgb, var(--bg-deep) 88%, transparent); display: flex; align-items: center; justify-content: center; padding: 24px; cursor: zoom-out; animation: wb-lightbox-in .12s ease; }
 .wb-lightbox img { max-width: 92vw; max-height: 92vh; object-fit: contain; border-radius: var(--radius-sm); box-shadow: var(--shadow-lift); }
 @keyframes wb-lightbox-in { from { opacity: 0; } to { opacity: 1; } }
+.wb-lightbox-fig { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; max-width: 92vw; cursor: default; }
+.wb-lightbox-fig img { max-height: 84vh; cursor: zoom-out; }
+.wb-lightbox-fig figcaption { font-family: var(--font-body); font-size: 14px; color: var(--pg-on-dark, #eef2fb); text-align: center; text-shadow: 0 1px 3px rgba(0,0,0,0.6); }
+.wb-lightbox-count { opacity: 0.8; font-variant-numeric: tabular-nums; }
+.wb-lightbox-btn { position: absolute; border: 0; border-radius: 999px; width: 44px; height: 44px; font-size: 26px; line-height: 1; background: color-mix(in srgb, var(--surface) 85%, transparent); color: var(--ink); cursor: pointer; box-shadow: var(--shadow); }
+.wb-lightbox-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.wb-lightbox-close { top: 14px; right: 14px; font-size: 18px; }
+.wb-lightbox-prev { left: 14px; top: 50%; transform: translateY(-50%); }
+.wb-lightbox-next { right: 14px; top: 50%; transform: translateY(-50%); }
+/* retrato da ficha: o próprio retrato é o botão de ampliar */
+.infobox-zoom { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
+.infobox-zoom:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+/* Imagens e abas no texto (2026-09-29). Figura: ![legenda](url) sozinha na linha, à direita do
+   texto (abaixo da ficha, se as duas se encontrarem); largura cheia no celular. */
+.prose .md-figure { float: right; clear: right; width: min(260px, 42%); margin: 4px 0 14px 20px; padding: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.prose:has(> .md-figure)::after, .md-tab-panel:has(> .md-figure)::after { content: ""; display: block; clear: right; }
+.prose .md-figure-zoom { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
+.prose .md-figure img { display: block; width: 100%; height: auto; border-radius: calc(var(--radius) - 2px); }
+.prose .md-figure figcaption { margin-top: 6px; font-family: var(--font-body); font-size: 13.5px; line-height: 1.4; color: var(--muted); }
+@media (max-width: 619px) { .prose .md-figure { float: none; width: auto; margin: 10px 0 14px; } }
+.md-tabs { margin: 6px 0 16px; }
+.md-tabs-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.md-tab-panel { padding-top: 2px; }
+.md-tab-panel[hidden] { display: none; }
 
 /* citações — aba própria, agrupada por "obra" igual à galeria */
 .cit-list { display: flex; flex-direction: column; gap: 14px; }
