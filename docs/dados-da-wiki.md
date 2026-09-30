@@ -11,7 +11,7 @@ e cada jogador logado só recebe o que foi liberado pro e-mail dele.
 |---|---|---|
 | `wikiIndex/lotus` | Índice de todas as páginas publicadas (base, ver abaixo) | qualquer um lê |
 | `wikiIndex/lotus/shards/{n}` | Continuação do índice quando ele fica grande | qualquer um lê |
-| `wikiPublic/{slug}` | Página completa (entrada, temporada ou escrito) | qualquer um lê |
+| `wikiPublic/{slug}` | Página completa (entrada, obra, temporada ou escrito) | qualquer um lê |
 | `wikiRestrito/{wikiId}/itens/{itemId}` | Trechos liberados por pessoa (`permitidos: [e-mails]`) | jogador logado cujo e-mail está na lista |
 | `wikiProfiles/{uid}` | Perfil do leitor: apelido, foto, favoritos, `seenAt`, `progress` (até onde viu cada obra), `username` e `usernameChangedAt` | o próprio leitor lê e grava (o username só pela função `claimUsername`, ver abaixo) |
 | `wikiUsernames/{nome}` | `{ uid, at }` + o **cartão público** do membro (`nickname`, `photo`, `bio`, `since`, `showFavorites`, `favorites` só se mostrar, `ordem` e `ocultos`: ids das páginas dos personagens na ordem escolhida e os escondidos do perfil; nunca o e-mail), lido pela página `/@nome`. Um documento por @username tomado (único por conta). Escolher/trocar acontece só na função `claimUsername`, que cria o novo (com o cartão), apaga o antigo e grava no perfil numa transação só; troca no máximo a cada 30 dias (a regra em `functions/username.js`, no repo do autor). O cartão acompanha o perfil a cada gravação | qualquer um lê um nome (não lista); edita o cartão o próprio dono; criar/apagar o documento é só pela função; o autor modera o cartão |
@@ -85,6 +85,28 @@ Como ler (já feito em `src/lib/wikiIndex.tsx`):
 
 Temporadas aparecem no índice com `type: "Temporada"`. Cada sessão da temporada publicada tem `id` (âncora `#sessao-<id>` na página; as antigas, sem `id`, ficam em `#s<n>`). Os tipos da página completa
 (`wikiPublic/{slug}`) estão em `src/types.ts`.
+
+## Obras e Aparições (desde 2026-09-30)
+
+No editor, campanha de RPG, livro, série, conto… são uma coisa só: a **obra**, com temporadas e,
+dentro delas, capítulos (numa campanha, a sessão). Na wiki:
+
+- **Página da obra** (`kind: "obra"`, no índice com `type: "Obra"`): `tipo` ("Campanha de RPG",
+  "Romance"…), `status`, `system` (só campanha), `synopsis` (markdown da casa), `palavra`
+  ("sessão" ou "capítulo"), `temporadas` (`{ name, id, status, synopsis, total }`, `id` = página da
+  temporada ou `null` se não está no ar), `elenco` (`{ name, id, at? }`: quem só entra depois da
+  primeira temporada vem com `at`) e `spoilerObras`.
+- **Página da temporada** ganhou (páginas antigas não têm, e continuam como eram): `obra`
+  (`{ name, id }`, `id` = página da obra ou `null`), `tipo`, `palavra` (sem ela, "sessão"), e em cada
+  capítulo `escrito` (`{ titulo, id }`): o texto inteiro está no escrito `/wiki/_escritos/<id>`. Numa
+  obra de texto, cada capítulo publica só o resumo (`recap`).
+- **Aparições** na página da entrada (`aparicoes`, só quando há alguma), por obra › temporada, na
+  ordem das obras: `{ obra, obraId, tipo, palavra, temporada?, temporadaId?, estreia?, total?, nota?, at? }`.
+  Sem `temporada` = a obra toda (aparição à mão). `estreia` = `{ titulo, n, ancora? }`: `n` é o número
+  do capítulo na página da temporada e `ancora` o `sessao-<id>` (só quando a temporada está no ar).
+  O editor monta: automáticas pelos capítulos que a wiki mostra (e pelo elenco da temporada), mais
+  as acrescentadas à mão, menos as escondidas. Aparição numa temporada depois da primeira vem com
+  `at` (spoiler dessa temporada).
 
 ## Escritos
 

@@ -12,6 +12,7 @@ import { CitationsPanel } from "../components/CitationsPanel";
 import { TaxonomyPanel } from "../components/TaxonomyPanel";
 import { RelationsSection, AffinitiesSection } from "../components/RelationsSection";
 import { Navboxes } from "../components/Navboxes";
+import { AparicoesSection } from "../components/Aparicoes";
 import { RenderMarkdown, RevealedTargetsProvider, SpoilerBlock, SpoilerSpan } from "../lib/markdown";
 import {
   FavoriteButton,
@@ -43,6 +44,7 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
   // Itens do índice que valem pra página toda (só entram na aba Geral), na ordem do original.
   const sharedToc: { id: string; label: string }[] = [];
   if (data.posts?.length || data.escritos?.length) sharedToc.push({ id: "posts", label: "Escritos" });
+  if (data.aparicoes?.length) sharedToc.push({ id: "aparicoes", label: "Aparições" });
   const relLabel = relationsSectionLabel(data.links, data.backlinks, data.events);
   if (relLabel) sharedToc.push({ id: "relacoes", label: relLabel });
   if (affinitiesOf(data.links).length) sharedToc.push({ id: "afinidades", label: "Afinidades" });
@@ -156,6 +158,7 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
           </div>
         )}
 
+        <AparicoesSection aparicoes={data.aparicoes} />
         <RelationsSection data={data} />
         <AffinitiesSection data={data} />
 
