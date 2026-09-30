@@ -186,6 +186,41 @@ h1 { font-family: var(--font-display); font-weight: 500; font-size: 32px; margin
 .toc ol.toc-sub { list-style: none; padding-left: 12px; font-size: 13px; }
 .toc ol.toc-sub li.toc-deep { padding-left: 14px; }
 .toc .toc-num { color: var(--faint); margin-right: 6px; font-variant-numeric: tabular-nums; }
+
+/* Coluna ao lado do texto (2026-09-30): em tela larga, a ficha e embaixo dela as páginas
+   relacionadas e o índice que acompanha a leitura (fica parado enquanto se rola). Em tela menor
+   a coluna some e a ficha volta a flutuar ao lado do texto, como antes. */
+.page-rail { display: none; }
+@media (max-width: 999.98px) { .entry-aside { display: contents; } }
+@media (min-width: 1000px) {
+  .entry-main { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 32px; align-items: start; }
+  .entry-main > .entry-panels { grid-column: 1; grid-row: 1; min-width: 0; }
+  .entry-main > .entry-aside { grid-column: 2; grid-row: 1; align-self: stretch; width: 250px; }
+  .entry-aside > .infobox { float: none; width: auto; margin: 0 0 20px; }
+  .page-rail { display: contents; }
+}
+.rail-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; margin: 0 0 20px; }
+.rail-head { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--faint); margin-bottom: 8px; }
+.rail-related ul { list-style: none; margin: 0; padding: 0; }
+.rail-related li + li { margin-top: 8px; }
+.rail-related a { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
+.rail-related img, .rail-noimg { flex: none; width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: var(--surface-2); border: 1px solid var(--border); }
+.rail-noimg { display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--muted); }
+.rail-rel-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.rail-rel-title { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rail-related a:hover .rail-rel-title { text-decoration: underline; }
+.rail-rel-why { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rail-toc { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow: auto; }
+.rail-toc ol { list-style: none; margin: 0; padding: 0; font-size: 14px; }
+.rail-toc li { margin: 2px 0; }
+.rail-toc a { display: block; padding: 3px 8px; border-left: 2px solid transparent; color: var(--ink); text-decoration: none; }
+.rail-toc a:hover { color: var(--gold-ink); }
+.rail-toc a[aria-current] { border-left-color: var(--gold); color: var(--gold-ink); }
+.rail-toc li.on > a { font-weight: 600; }
+.rail-toc ol ol { margin: 2px 0 6px; font-size: 13px; }
+.rail-toc ol ol a { padding-left: 18px; }
+.rail-toc ol ol li.deep a { padding-left: 30px; }
+.rail-toc ol ol li.on > a { font-weight: 400; }
 /* alvo de toque no celular (achado do critique de 2026-09-22: ~22px medido, abaixo de 44px) —
    padding+margem negativa cresce a área clicável sem separar mais os itens visualmente. */
 @media (max-width: 619px) {
@@ -815,6 +850,15 @@ body.pg-site:not(.pg-home) .toc { background: var(--pg-page); border-color: var(
 body.pg-site:not(.pg-home) .toc-head { font-size: 12.5px; letter-spacing: 0.06em; color: var(--pg-muted); }
 body.pg-site:not(.pg-home) .toc a { color: var(--pg-link); border-bottom: 0; }
 body.pg-site:not(.pg-home) .toc a:hover { text-decoration: underline; }
+@media (min-width: 1000px) { body.pg-site:not(.pg-home) .entry-main > .entry-aside { width: 290px; } }
+@media (min-width: 1100px) { body.pg-site:not(.pg-home) .entry-main > .entry-aside { width: 320px; } }
+@media (min-width: 1000px) { body.pg-site:not(.pg-home) .entry-aside > .infobox { width: auto; margin: 0 0 20px; } }
+body.pg-site:not(.pg-home) .rail-box { background: var(--pg-page); border-color: var(--pg-line); border-radius: 10px; padding: 14px 16px; }
+body.pg-site:not(.pg-home) .rail-head { font-size: 12.5px; letter-spacing: 0.06em; color: var(--pg-muted); }
+body.pg-site:not(.pg-home) .rail-related a, body.pg-site:not(.pg-home) .rail-toc a { color: var(--pg-ink); }
+body.pg-site:not(.pg-home) .rail-rel-why { color: var(--pg-muted); }
+body.pg-site:not(.pg-home) .rail-toc a:hover, body.pg-site:not(.pg-home) .rail-toc a[aria-current] { color: var(--pg-link); }
+body.pg-site:not(.pg-home) .rail-toc a[aria-current] { border-left-color: var(--pg-link); }
 body.pg-site:not(.pg-home) .cit-text { font-size: 18px; }
 body.pg-site:not(.pg-home) .cit-meta a { color: var(--pg-link); }
 

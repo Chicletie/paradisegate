@@ -6,7 +6,8 @@ import { pgShortDate } from "../lib/format";
 import { quoteNorm } from "../lib/quotes";
 import { affinitiesOf, relationsSectionLabel } from "../lib/relations";
 import { Infobox } from "../components/Infobox";
-import { ArticleBundle } from "../components/ArticleBundle";
+import { ArticleBundle, articleAnchors, type TocItem } from "../components/ArticleBundle";
+import { PageRail } from "../components/PageRail";
 import { GalleryPanel } from "../components/GalleryPanel";
 import { CitationsPanel } from "../components/CitationsPanel";
 import { TaxonomyPanel } from "../components/TaxonomyPanel";
@@ -53,12 +54,23 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
   // Com abas próprias, a principal leva o nome que o autor deu (ex. "Paradise Gate") e não há
   // "Geral"; sem abas próprias, "Geral" só aparece pra voltar da Galeria/Citações.
   const hasVariants = !!data.variants?.length;
-  const tabPanels: { label: string; content: ReactNode; extra?: boolean }[] = [
-    { label: (hasVariants && data.mainTab) || "Geral", content: <ArticleBundle bundle={data} anchorPrefix="geral-" epigraph={epigraph} extraToc={sharedToc} /> },
+  const tabPanels: { label: string; content: ReactNode; extra?: boolean; toc?: TocItem[] }[] = [
+    {
+      label: (hasVariants && data.mainTab) || "Geral",
+      content: <ArticleBundle bundle={data} anchorPrefix="geral-" epigraph={epigraph} extraToc={sharedToc} />,
+      toc: articleAnchors(data, "geral-", "", sharedToc).tocEntries,
+    },
   ];
   (data.variants || []).forEach((variant, vi) => {
-    tabPanels.push({ label: variant.label || "Versão", content: <ArticleBundle bundle={variant} anchorPrefix={`v${vi}-`} idPrefix={(anchorWords(variant.label) || "versao-" + (vi + 1)) + "-"} epigraph={epigraph} /> });
+    const idPrefix = (anchorWords(variant.label) || "versao-" + (vi + 1)) + "-";
+    tabPanels.push({
+      label: variant.label || "Versão",
+      content: <ArticleBundle bundle={variant} anchorPrefix={`v${vi}-`} idPrefix={idPrefix} epigraph={epigraph} />,
+      toc: articleAnchors(variant, `v${vi}-`, idPrefix).tocEntries,
+    });
   });
+  // tags públicas (as em spoiler não puxam página relacionada)
+  const publicTags = (data.tags || []).filter((t) => t.vis !== "spoiler" && !t.at).map((t) => t.text);
   if (data.gallery?.length) tabPanels.push({ label: "Galeria", extra: true, content: <GalleryPanel gallery={data.gallery} title={data.title} /> });
   if (data.citacoes?.length) tabPanels.push({ label: "Citações", extra: true, content: <CitationsPanel citacoes={data.citacoes} title={data.title} /> });
   if (data.taxonomy?.length) tabPanels.push({ label: "Taxonomia", extra: true, content: <TaxonomyPanel taxonomy={data.taxonomy} /> });
@@ -116,12 +128,21 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
 
         {/* Infobox entra só agora (depois das abas): ela flutua à direita a partir daqui, então
             as abas ficam acima dela em vez de presas atrás/embaixo (mesma ordem de wiki-core.js). */}
-        <Infobox data={data} />
-        {tabPanels.map((p, i) => (
-          <div key={i} hidden={i !== activeTab}>
-            {p.content}
+        {/* Em tela larga, texto e coluna lado a lado: a ficha e, embaixo dela, as relacionadas e o
+            índice que acompanha a leitura. Em tela menor a coluna some e a ficha flutua como antes. */}
+        <div className="entry-main">
+          <aside className="entry-aside">
+            <Infobox data={data} />
+            <PageRail wikiId={wikiId} toc={tabPanels[activeTab]?.toc || []} links={data.links} backlinks={data.backlinks} tags={publicTags} />
+          </aside>
+          <div className="entry-panels">
+            {tabPanels.map((p, i) => (
+              <div key={i} hidden={i !== activeTab}>
+                {p.content}
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
 
         {((data.posts && data.posts.length > 0) || (data.escritos && data.escritos.length > 0) || nPostsR > 0) && (
           <div className="posts-wrap">

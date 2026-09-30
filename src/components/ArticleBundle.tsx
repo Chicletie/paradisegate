@@ -20,7 +20,7 @@ function slugifyAnchor(s: string | undefined, i: string): string {
   );
 }
 
-interface TocItem {
+export interface TocItem {
   id: string;
   label: string;
   /** Subtítulos da seção (### e ####), já numerados; os com {-} não entram. */
@@ -48,36 +48,18 @@ function tocSubs(text: string | undefined, ids: string[], n: number): TocItem["s
 }
 
 /** Abre a seção recolhida onde está o alvo (o próprio <details> ou um título dentro dele). */
-function openFor(id: string) {
+export function openFor(id: string) {
   const target = document.getElementById(id);
   const d = target instanceof HTMLDetailsElement ? target : target?.closest("details");
   if (d) d.open = true;
   revealInTabs(id);
 }
 
-/**
- * Porta de buildArticle na wiki original — usado tanto pra "Geral" quanto pra cada
- * variante de obra (mesma forma de dado, cada uma vira uma aba). A epígrafe (citação em
- * destaque da entrada) abre toda aba de texto, igual ao original.
- */
-export function ArticleBundle({
-  bundle,
-  anchorPrefix,
-  idPrefix = "",
-  epigraph,
-  extraToc = [],
-}: {
-  bundle: WikiArticleBundle;
-  anchorPrefix: string;
-  /** Antes de toda âncora desta aba (as abas próprias: "disfarce-"); a principal não tem. */
-  idPrefix?: string;
-  epigraph?: WikiCitation | null;
-  extraToc?: { id: string; label: string }[];
-}) {
+/** As âncoras de uma aba (seções e os títulos de cada uma) e o índice dela. A página e o índice
+ * da coluna lateral (PageRail) usam a mesma conta, pra os links nunca se desencontrarem. */
+export function articleAnchors(bundle: WikiArticleBundle, anchorPrefix: string, idPrefix = "", extraToc: { id: string; label: string }[] = []) {
   const longFields = (bundle.fields || []).filter((f) => f.type === "nota");
   const sections = bundle.sections || [];
-  // Restrito no lugar só na aba Geral (as variantes de obra seguem com o restrito no fim).
-  const geral = anchorPrefix === "geral-";
   const lfOld = longFields.map((f, i) => slugifyAnchor(f.key, anchorPrefix + "lf" + i));
   const scOld = sections.map((s, i) => slugifyAnchor(s.title || "Seção", anchorPrefix + "sc" + i));
   // Âncoras legíveis, na ordem da página (seção, os títulos dela, a seção seguinte…).
@@ -100,6 +82,31 @@ export function ArticleBundle({
     ...sections.map((s, i) => ({ id: scIds[i], label: s.title || "Seção", subs: tocSubs(s.body, scHeads[i], longFields.length + i + 1) })),
     ...extraToc,
   ];
+  return { longFields, sections, lfOld, scOld, lfIds, lfHeads, scIds, scHeads, tocEntries };
+}
+
+/**
+ * Porta de buildArticle na wiki original — usado tanto pra "Geral" quanto pra cada
+ * variante de obra (mesma forma de dado, cada uma vira uma aba). A epígrafe (citação em
+ * destaque da entrada) abre toda aba de texto, igual ao original.
+ */
+export function ArticleBundle({
+  bundle,
+  anchorPrefix,
+  idPrefix = "",
+  epigraph,
+  extraToc = [],
+}: {
+  bundle: WikiArticleBundle;
+  anchorPrefix: string;
+  /** Antes de toda âncora desta aba (as abas próprias: "disfarce-"); a principal não tem. */
+  idPrefix?: string;
+  epigraph?: WikiCitation | null;
+  extraToc?: { id: string; label: string }[];
+}) {
+  const { longFields, sections, lfOld, scOld, lfIds, lfHeads, scIds, scHeads, tocEntries } = articleAnchors(bundle, anchorPrefix, idPrefix, extraToc);
+  // Restrito no lugar só na aba Geral (as variantes de obra seguem com o restrito no fim).
+  const geral = anchorPrefix === "geral-";
 
   // Notas de rodapé da aba, na ordem do texto: cada bloco começa a contar de onde o anterior
   // parou, e a lista fica no fim.
