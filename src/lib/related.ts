@@ -20,7 +20,7 @@ export interface RelatedPage {
   why: string;
 }
 
-const SPOILER = /\|\|(?:\[\[[^\]\[]+\]\]|[^|])+\|\|/g;
+const SPOILER = /\|\|(?:\[\[[^\][]+\]\]|[^|])+\|\|/g;
 const WIKI_LINK = /\]\(wiki:([^)#\s]+)/g;
 
 /** As páginas com link no texto (`[nome](wiki:<id>)`), fora dos trechos em spoiler. */
