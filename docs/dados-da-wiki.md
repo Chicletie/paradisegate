@@ -185,6 +185,8 @@ Lido por `src/lib/markdown.tsx`:
 | `> fala` + `> — quem disse` | citação (desde 2026-09-29): linhas `>` seguidas são um bloco só; a última começando com — (ou ― – --) vira a linha de quem disse, embaixo. Uma linha só, sem autor, sai como antes |
 | `::principal <links>` / `::ver <links>` | linha sozinha: "Artigo principal: …" / "Ver também: …", discreta, no topo da parte (desde 2026-09-29) |
 | `((texto da nota))` | nota de rodapé (desde 2026-09-29): vira [1] no texto e a nota vai pra lista "Notas" no fim da aba, numerada por aba, com link de volta. Pode ter link dentro (ex.: a sessão de onde veio). Dentro de um spoiler, fica na tarja também na lista. Fora de um texto de artigo (ficha, cartão) aparece ali mesmo, entre parênteses |
+| `![legenda](https://…)` sozinha na linha | figura (desde 2026-09-29): imagem pequena à direita do texto (largura cheia no celular), legenda embaixo; clicar amplia. Sem legenda, ou no meio de uma frase, a imagem sai como antes |
+| `::aba Nome` … `::fim-abas` | abas dentro de uma seção ou nota (desde 2026-09-29): cada `::aba` começa uma aba; `::fim-abas` fecha (sem ele, a última vai até o fim do texto). Título dentro de aba entra no índice, e o índice abre a aba certa |
 | `\|\|trecho\|\|` | spoiler só naquele trecho: tarja lisa que revela no toque. Lido como markdown por dentro; escondido, o 1º toque só revela, nunca segue um link |
 | `\|\|@{<id da temporada>} trecho\|\|` | spoiler por temporada: igual, mas abre sozinho pra quem marcou que já viu até essa temporada (obras e temporadas em `spoilerObras` da página). A marca `@{…}` nunca aparece |
 | `[texto](https://…)` | link externo, em outra aba |

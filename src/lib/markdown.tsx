@@ -1,7 +1,9 @@
 import { memberHref } from "./member";
-import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { flushSync } from "react-dom";
 import { Link } from "react-router-dom";
 import { useSpoilerAt } from "./spoilerProgress";
+import { Lightbox } from "../components/Lightbox";
 
 // Porta literal do markdown da casa de wiki-core.js (mdInline/renderMarkdown/fieldValue,
 // wiki original; contrato em docs/dados-da-wiki.md, "Texto dentro da página") — mesmo regex de
@@ -412,6 +414,107 @@ export function footnotesOf(text: string | undefined): { text: string; at?: stri
 }
 
 const QUOTE_BY = /^\s*(?:[—―–]|--)\s*/;
+/** `![legenda](url)` sozinha na linha, com legenda: figura ao lado do texto. */
+const FIGURE_LINE = /^\s*!\[([^\]]*\S[^\]]*)\]\(([^)\s]+)\)\s*$/;
+const TAB_START = /^\s*::aba\s+(.*\S)\s*$/;
+const TAB_END = /^\s*::fim-abas\s*$/;
+
+/** Evento que pede pra mostrar um ponto da página que pode estar dentro de uma aba fechada
+ * (índice, nota de rodapé). `detail` = id do elemento. */
+const WIKI_REVEAL = "wiki-reveal";
+/** Abre a aba (de dentro de uma seção) onde mora o elemento `id`, antes de rolar até ele. */
+export function revealInTabs(id: string) {
+  window.dispatchEvent(new CustomEvent(WIKI_REVEAL, { detail: id }));
+}
+
+/** Figura do texto: pequena à direita (largura cheia no celular), legenda embaixo; clicar
+ * amplia. */
+function Figure({ url, caption }: { url: string; caption: string }) {
+  const [zoom, setZoom] = useState(false);
+  const plain = mdPlain(caption);
+  return (
+    <figure className="md-figure">
+      <button type="button" className="md-figure-zoom" aria-label={"Ampliar imagem: " + plain} onClick={() => setZoom(true)}>
+        <img src={url} alt={plain} loading="lazy" />
+      </button>
+      <figcaption>{mdInline(caption)}</figcaption>
+      {zoom && <Lightbox items={[{ url, caption: plain }]} onClose={() => setZoom(false)} />}
+    </figure>
+  );
+}
+
+/** Abas dentro de uma seção (`::aba Nome` … `::fim-abas`). Todas as abas ficam na página (a
+ * busca do navegador acha o texto); a fechada só fica escondida. Um título ou nota de dentro
+ * de uma aba fechada abre a aba certa antes de rolar. */
+function SectionTabs({ tabs }: { tabs: { name: string; body: ReactNode[] }[] }) {
+  const [active, setActive] = useState(0);
+  const base = useId();
+  const panels = useRef<(HTMLDivElement | null)[]>([]);
+  useEffect(() => {
+    function show(id: string) {
+      if (!id) return;
+      const k = panels.current.findIndex((p) => !!p && !!p.querySelector("#" + CSS.escape(id)));
+      if (k < 0 || !panels.current[k]!.hidden) return;
+      // abre já (antes do navegador pular pra âncora) e rola até o ponto
+      flushSync(() => setActive(k));
+      document.getElementById(id)?.scrollIntoView();
+    }
+    const onReveal = (ev: Event) => show(String((ev as CustomEvent).detail || ""));
+    const onHash = () => show(decodeURIComponent(location.hash.slice(1)));
+    window.addEventListener(WIKI_REVEAL, onReveal);
+    window.addEventListener("hashchange", onHash);
+    const first = setTimeout(onHash, 0); // página aberta já com #âncora
+    return () => {
+      clearTimeout(first);
+      window.removeEventListener(WIKI_REVEAL, onReveal);
+      window.removeEventListener("hashchange", onHash);
+    };
+  }, []);
+  function onKey(ev: React.KeyboardEvent<HTMLButtonElement>, k: number) {
+    const d = ev.key === "ArrowRight" ? 1 : ev.key === "ArrowLeft" ? -1 : 0;
+    if (!d) return;
+    const n = (k + d + tabs.length) % tabs.length;
+    setActive(n);
+    (ev.currentTarget.parentElement?.children[n] as HTMLElement | undefined)?.focus();
+  }
+  return (
+    <div className="md-tabs">
+      <div className="md-tabs-bar" role="tablist">
+        {tabs.map((t, k) => (
+          <button
+            key={k}
+            type="button"
+            role="tab"
+            id={base + "t" + k}
+            aria-controls={base + "p" + k}
+            aria-selected={k === active}
+            tabIndex={k === active ? 0 : -1}
+            className={"work-tab" + (k === active ? " on" : "")}
+            onClick={() => setActive(k)}
+            onKeyDown={(ev) => onKey(ev, k)}
+          >
+            {mdInline(t.name)}
+          </button>
+        ))}
+      </div>
+      {tabs.map((t, k) => (
+        <div
+          key={k}
+          ref={(el) => {
+            panels.current[k] = el;
+          }}
+          role="tabpanel"
+          id={base + "p" + k}
+          aria-labelledby={base + "t" + k}
+          className="md-tab-panel"
+          hidden={k !== active}
+        >
+          {t.body}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 /** Porta de renderMarkdown: parágrafos, cabeçalhos, listas, citação, código, `<hr>` — cada
  * chamada é o próprio `.prose` (mesma unidade que o corpo de um campo/seção/post).
@@ -426,7 +529,7 @@ export function RenderMarkdown({ text, anchorBase, fnPrefix, fnStart = 0 }: { te
   const md = (s: string) => mdInline(s, fn);
   let headingN = 0;
 
-  function flushList() {
+  function flushList(blocks: ReactNode[]) {
     if (!listBuf) return;
     const items = listBuf.items;
     blocks.push(
@@ -447,101 +550,138 @@ export function RenderMarkdown({ text, anchorBase, fnPrefix, fnStart = 0 }: { te
     listBuf = null;
   }
 
-  for (let i = 0; i < lines.length; i++) {
-    const ln = lines[i];
-    if (/^\s*```/.test(ln)) {
-      flushList();
-      const buf: string[] = [];
-      i++;
-      while (i < lines.length && !/^\s*```/.test(lines[i])) {
-        buf.push(lines[i]);
-        i++;
-      }
-      blocks.push(
-        <pre key={blockKey++}>
-          <code>{buf.join("\n")}</code>
-        </pre>,
-      );
-      continue;
-    }
-    if (/^\s*$/.test(ln)) {
-      flushList();
-      continue;
-    }
-    if (/^\s*([-*_])\s*\1\s*\1\s*$/.test(ln)) {
-      flushList();
-      blocks.push(<hr key={blockKey++} />);
-      continue;
-    }
-    const h = ln.match(/^(#{1,6})\s+(.*)/);
-    if (h) {
-      flushList();
-      const level = Math.min(6, h[1].length + 2);
-      const HTag = `h${level}` as keyof React.JSX.IntrinsicElements;
-      const hp = headingParts(h[2]);
-      const hid = anchorBase != null ? anchorBase + "h" + headingN + "-" + anchorSlug(hp.text) : undefined;
-      headingN++;
-      blocks.push(
-        <HTag key={blockKey++} id={hid}>
-          {md(hp.text)}
-        </HTag>,
-      );
-      continue;
-    }
-    // "::principal [[Página]]" / "::ver [[A]], [[B]]": linha discreta mandando pra outra página
-    const hat = ln.match(/^\s*::(principal|ver)\s+(.*)$/);
-    if (hat) {
-      flushList();
-      blocks.push(
-        <p key={blockKey++} className="md-hatnote">
-          {hat[1] === "principal" ? "Artigo principal: " : "Ver também: "}
-          {md(hat[2])}
-        </p>,
-      );
-      continue;
-    }
-    if (/^\s*>\s?/.test(ln)) {
-      flushList();
-      // linhas ">" seguidas são uma citação só; a última começando com "—" é quem disse
-      const q: string[] = [];
-      while (i < lines.length && /^\s*>/.test(lines[i])) q.push(lines[i++].replace(/^\s*>\s?/, ""));
-      i--;
-      while (q.length && !q[q.length - 1].trim()) q.pop();
-      const by = q.length > 1 && QUOTE_BY.test(q[q.length - 1]) ? q.pop()!.replace(QUOTE_BY, "") : null;
-      if (!by && q.length === 1) {
-        blocks.push(<blockquote key={blockKey++}>{md(q[0])}</blockquote>);
+  // Um texto (ou uma aba dele): os contadores de título e de nota seguem a ordem do texto
+  // inteiro, igual a markdownHeadings e footnotesOf.
+  function parse(lines: string[], blocks: ReactNode[], inTab: boolean) {
+    for (let i = 0; i < lines.length; i++) {
+      const ln = lines[i];
+      if (!inTab && TAB_START.test(ln)) {
+        // "::aba Nome" … "::fim-abas" (ou o fim do texto): cada "::aba" começa uma aba
+        flushList(blocks);
+        const tabs: { name: string; lines: string[] }[] = [];
+        let fence = false;
+        for (; i < lines.length; i++) {
+          const l = lines[i];
+          if (/^\s*```/.test(l)) fence = !fence;
+          if (!fence && TAB_END.test(l)) break;
+          const t = fence ? null : TAB_START.exec(l);
+          if (t) tabs.push({ name: t[1], lines: [] });
+          else tabs[tabs.length - 1].lines.push(l);
+        }
+        blocks.push(
+          <SectionTabs
+            key={blockKey++}
+            tabs={tabs.map((t) => {
+              const body: ReactNode[] = [];
+              parse(t.lines, body, true);
+              flushList(body);
+              return { name: t.name, body };
+            })}
+          />,
+        );
         continue;
       }
-      const paras: string[][] = [[]];
-      q.forEach((l) => (l.trim() ? paras[paras.length - 1].push(l) : paras[paras.length - 1].length && paras.push([])));
-      blocks.push(
-        <blockquote key={blockKey++} className="md-quote">
-          {paras
-            .filter((p) => p.length)
-            .map((p, pi) => (
-              <p key={pi}>{md(p.join(" "))}</p>
-            ))}
-          {by && <footer className="md-quote-by">{["— ", ...md(by)]}</footer>}
-        </blockquote>,
-      );
-      continue;
-    }
-    const task = ln.match(/^\s*[-*+]\s+\[([ xX])\]\s+(.*)/);
-    const item = ln.match(/^\s*[-*+]\s+(.*)/);
-    const oitem = ln.match(/^\s*\d+[.)]\s+(.*)/);
-    if (task || item || oitem) {
-      const ordered = !!oitem && !item;
-      if (!listBuf || listBuf.ordered !== ordered) {
-        flushList();
-        listBuf = { ordered, items: [] };
+      if (TAB_END.test(ln)) continue;
+      if (/^\s*```/.test(ln)) {
+        flushList(blocks);
+        const buf: string[] = [];
+        i++;
+        while (i < lines.length && !/^\s*```/.test(lines[i])) {
+          buf.push(lines[i]);
+          i++;
+        }
+        blocks.push(
+          <pre key={blockKey++}>
+            <code>{buf.join("\n")}</code>
+          </pre>,
+        );
+        continue;
       }
-      listBuf.items.push(task ? task[2] : item ? item[1] : oitem![1]);
-      continue;
+      if (/^\s*$/.test(ln)) {
+        flushList(blocks);
+        continue;
+      }
+      if (/^\s*([-*_])\s*\1\s*\1\s*$/.test(ln)) {
+        flushList(blocks);
+        blocks.push(<hr key={blockKey++} />);
+        continue;
+      }
+      const h = ln.match(/^(#{1,6})\s+(.*)/);
+      if (h) {
+        flushList(blocks);
+        const level = Math.min(6, h[1].length + 2);
+        const HTag = `h${level}` as keyof React.JSX.IntrinsicElements;
+        const hp = headingParts(h[2]);
+        const hid = anchorBase != null ? anchorBase + "h" + headingN + "-" + anchorSlug(hp.text) : undefined;
+        headingN++;
+        blocks.push(
+          <HTag key={blockKey++} id={hid}>
+            {md(hp.text)}
+          </HTag>,
+        );
+        continue;
+      }
+      // "::principal [[Página]]" / "::ver [[A]], [[B]]": linha discreta mandando pra outra página
+      const hat = ln.match(/^\s*::(principal|ver)\s+(.*)$/);
+      if (hat) {
+        flushList(blocks);
+        blocks.push(
+          <p key={blockKey++} className="md-hatnote">
+            {hat[1] === "principal" ? "Artigo principal: " : "Ver também: "}
+            {md(hat[2])}
+          </p>,
+        );
+        continue;
+      }
+      if (/^\s*>\s?/.test(ln)) {
+        flushList(blocks);
+        // linhas ">" seguidas são uma citação só; a última começando com "—" é quem disse
+        const q: string[] = [];
+        while (i < lines.length && /^\s*>/.test(lines[i])) q.push(lines[i++].replace(/^\s*>\s?/, ""));
+        i--;
+        while (q.length && !q[q.length - 1].trim()) q.pop();
+        const by = q.length > 1 && QUOTE_BY.test(q[q.length - 1]) ? q.pop()!.replace(QUOTE_BY, "") : null;
+        if (!by && q.length === 1) {
+          blocks.push(<blockquote key={blockKey++}>{md(q[0])}</blockquote>);
+          continue;
+        }
+        const paras: string[][] = [[]];
+        q.forEach((l) => (l.trim() ? paras[paras.length - 1].push(l) : paras[paras.length - 1].length && paras.push([])));
+        blocks.push(
+          <blockquote key={blockKey++} className="md-quote">
+            {paras
+              .filter((p) => p.length)
+              .map((p, pi) => (
+                <p key={pi}>{md(p.join(" "))}</p>
+              ))}
+            {by && <footer className="md-quote-by">{["— ", ...md(by)]}</footer>}
+          </blockquote>,
+        );
+        continue;
+      }
+      const task = ln.match(/^\s*[-*+]\s+\[([ xX])\]\s+(.*)/);
+      const item = ln.match(/^\s*[-*+]\s+(.*)/);
+      const oitem = ln.match(/^\s*\d+[.)]\s+(.*)/);
+      if (task || item || oitem) {
+        const ordered = !!oitem && !item;
+        if (!listBuf || listBuf.ordered !== ordered) {
+          flushList(blocks);
+          listBuf = { ordered, items: [] };
+        }
+        listBuf.items.push(task ? task[2] : item ? item[1] : oitem![1]);
+        continue;
+      }
+      flushList(blocks);
+      const fig = FIGURE_LINE.exec(ln);
+      if (fig) {
+        blocks.push(<Figure key={blockKey++} url={fig[2]} caption={fig[1]} />);
+        continue;
+      }
+      blocks.push(<p key={blockKey++}>{md(ln)}</p>);
     }
-    flushList();
-    blocks.push(<p key={blockKey++}>{md(ln)}</p>);
   }
-  flushList();
+  parse(lines, blocks, false);
+  flushList(blocks);
 
   return <div className="prose">{blocks}</div>;
 }
