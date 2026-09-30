@@ -60,6 +60,12 @@ typography:
     fontWeight: 400
     lineHeight: 1.2
     letterSpacing: "0.07em"
+  page-section:
+    fontFamily: "Castoro Titling, Castoro, Georgia, serif"
+    fontSize: "22px"
+    fontWeight: 400
+    lineHeight: 1.2
+    letterSpacing: "0.05em"
   title:
     fontFamily: "Castoro, Georgia, serif"
     fontSize: "17px"
@@ -268,6 +274,7 @@ Uma paleta de azuis noturnos sobre um corpo claro azulado, com um único metal (
 - **Numeral** (Castoro Titling, 42px, 1, `tabular-nums`): o ano em foco. O numeral romano da carta usa a mesma família a 15px com 0.16em.
 - **Wordmark** (Castoro Titling, 22px, 0.07em; 19px abaixo de 560px): "Paradise Gate" no cabeçalho.
 - **Headline** (Castoro Titling 400, 17px, 0.07em): títulos de seção, precedidos pela estrela e seguidos de régua de 1px.
+- **Page Section** (Castoro Titling 400, 22px, 0.05em): o nome da seção dentro de uma página da wiki (História, Aparições, Relações…), com a mesma estrela e régua. É o maior título do texto da página: o `##` do autor fica um degrau abaixo (Castoro Titling, 1.15em) e o `###` outro (Castoro 600, 1.08em), cada um com mais espaço em cima que embaixo. O texto da página tem no máximo 42rem de largura.
 - **Title** (Castoro 400, 16–19px, 1.25): nomes de página em cartões, lista, peças do dia e eventos.
 - **Body** (Hanken Grotesk 400, 14.5px, 1.55): números da wiki e texto corrido de interface; 15–15.5px na data e na busca.
 - **Label** (Hanken Grotesk 400–600, 12.5–13.5px, sem caixa alta, espaçamento 0): metadados, contagem, legendas, chips, botões.
@@ -288,6 +295,8 @@ Uma paleta de azuis noturnos sobre um corpo claro azulado, com um único metal (
 Contêiner central de 1160px com respiro lateral de 24px (16px no celular). Três faixas empilhadas: cabeçalho (uma linha, ~66px, marca à esquerda, busca de até 560px centralizada, entrar à direita), faixa do dia (grade `260px | 1fr`, gap 52px: carta à esquerda; título, data, citação e duas peças à direita) e corpo (grade `1fr | 320px`, gap 44px: feeds à esquerda, coluna lateral com Ano em foco, Explorar e A wiki em números à direita; "Todas as páginas" numa faixa de largura total embaixo das duas colunas). Com busca ou filtro ativo, a faixa do dia (só na busca por texto), os feeds e a coluna lateral saem do caminho e o índice sobe pro topo.
 
 Ritmo: 44px entre seções, 16px entre título de seção e conteúdo, 12–14px entre cartões, 6–8px entre chips. Novidades em grade de capas retrato (`minmax(152px, 1fr)`, capa 4:5); Todas as páginas num único painel com divisórias finas (`minmax(205px, 1fr)`, cinco colunas no desktop) e miniatura 44px; a contagem ao lado do título vira "N de 42" com filtro ativo.
+
+Página de uma entrada da wiki, a partir de 1000px: grade `1fr | 290px` (320px a partir de 1100px), gap 32px. Na coluna, a ficha e, embaixo dela, "Relacionadas" (até cinco páginas com miniatura de 44px) e "Nesta página", o índice da aba que fica parado enquanto se rola e marca o item atual com o `link-wash`. Abaixo de 1000px a coluna some e a ficha flutua ao lado do texto.
 
 Responsivo: abaixo de 860px o corpo vira uma coluna na ordem feeds → coluna lateral → índice. Abaixo de 760px o índice mostra 12 páginas e um botão "Ver todas as N páginas". Abaixo de 760px a busca desce para a própria linha no cabeçalho e a faixa do dia empilha título, carta (230px), citação e peças. Abaixo de 560px as peças viram uma coluna, a carta cai para 200px, as capas ficam em duas colunas e a lista em uma.
 

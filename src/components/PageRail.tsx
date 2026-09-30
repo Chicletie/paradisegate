@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { objPos } from "../lib/format";
 import { relatedPages } from "../lib/related";
@@ -42,11 +42,14 @@ export function PageRail({ wikiId, toc, links, backlinks, tags }: { wikiId: stri
 /** Índice que fica parado na coluna enquanto se rola; abre os subtítulos da seção atual. */
 function RailToc({ toc }: { toc: TocItem[] }) {
   const [current, setCurrent] = useState<string | null>(null);
+  const nav = useRef<HTMLElement>(null);
   useEffect(() => {
     const ids = toc.flatMap((t) => [t.id, ...(t.subs || []).map((s) => s.id)]);
     let frame = 0;
     const update = () => {
       frame = 0;
+      // coluna escondida (tela menor que 1000px): nada a marcar
+      if (!nav.current?.offsetParent) return;
       let cur: string | null = null;
       for (const id of ids) {
         const el = document.getElementById(id);
@@ -70,7 +73,7 @@ function RailToc({ toc }: { toc: TocItem[] }) {
   }, [toc]);
   const activeTop = toc.find((t) => t.id === current || (t.subs || []).some((s) => s.id === current))?.id;
   return (
-    <nav className="rail-box rail-toc" aria-label="Nesta página">
+    <nav ref={nav} className="rail-box rail-toc" aria-label="Nesta página">
       <div className="rail-head">Nesta página</div>
       <ol>
         {toc.map((t) => (
