@@ -6,6 +6,7 @@ import { PgHeader } from "../components/PgHeader";
 import { PgFooter } from "../components/PgFooter";
 import { EntryView } from "./EntryView";
 import { SeasonView } from "./SeasonView";
+import { ObraView } from "./ObraView";
 import { ErrorPage } from "./ErrorPage";
 import type { WikiPublicDoc } from "../types";
 
@@ -16,7 +17,7 @@ type LoadState =
   | { status: "ready"; data: WikiPublicDoc };
 
 /**
- * Busca `wikiPublic/{slug}` e mostra a entrada ou a temporada — porta do trecho final de
+ * Busca `wikiPublic/{slug}` e mostra a entrada, a obra ou a temporada — porta do trecho final de
  * wikiCoreBoot na wiki original: `data.kind === "temporada" ? renderSeason :
  * renderEntry`, com as mesmas mensagens de erro.
  */
@@ -69,6 +70,8 @@ export function EntryPage() {
           </div>
         ) : state.data.kind === "temporada" ? (
           <SeasonView data={state.data} wikiId={slug!} />
+        ) : state.data.kind === "obra" ? (
+          <ObraView data={state.data} wikiId={slug!} />
         ) : state.data.kind === "escrito" ? null : (
           <EntryView data={state.data} wikiId={slug!} />
         )}

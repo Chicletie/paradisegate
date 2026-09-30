@@ -279,6 +279,28 @@ export interface WikiEntryDoc extends WikiArticleBundle {
   restritoSlots?: RestritoSlotMark[];
   /** Ordem de nascimento da própria pessoa (só quando o ano aparece), pra árvore genealógica. */
   birthKey?: number;
+  /** Obras e temporadas em que aparece (automáticas pelos capítulos, mais as à mão). */
+  aparicoes?: WikiAparicao[];
+}
+
+/** Uma aparição: obra › temporada, com estreia e contagem (docs/dados-da-wiki.md, "Obras"). */
+export interface WikiAparicao {
+  obra: string;
+  /** Página da obra, quando está no ar. */
+  obraId?: string | null;
+  /** Tipo da obra: "Campanha de RPG", "Romance", "Conto"… */
+  tipo?: string;
+  /** "sessão" (campanha) ou "capítulo" (as outras obras). */
+  palavra?: string;
+  /** Sem temporada = a obra toda. */
+  temporada?: string;
+  temporadaId?: string | null;
+  /** Primeiro capítulo em que aparece: n = número na página da temporada; ancora = #sessao-<id>. */
+  estreia?: { titulo: string; n: number; ancora?: string };
+  total?: number;
+  nota?: string;
+  /** Spoiler por obra: aparição numa temporada depois da primeira. */
+  at?: string;
 }
 
 export interface WikiSeasonSession {
@@ -290,6 +312,8 @@ export interface WikiSeasonSession {
   vis?: FieldVisibility;
   /** Spoiler por obra: id da temporada em que o trecho é revelado (ver `spoilerObras`). */
   at?: string;
+  /** O texto inteiro do capítulo, num escrito publicado (/wiki/_escritos/<id>). */
+  escrito?: { titulo: string; id: string };
 }
 
 export interface WikiSeasonDoc {
@@ -297,6 +321,11 @@ export interface WikiSeasonDoc {
   title: string;
   universe?: string;
   universeId?: string;
+  /** A obra da temporada (id = página dela, quando está no ar). Páginas antigas não têm. */
+  obra?: { name: string; id: string | null };
+  tipo?: string;
+  /** "sessão" ou "capítulo"; sem ele, "sessão". */
+  palavra?: string;
   system?: string;
   status?: string;
   sessionCount?: number;
@@ -324,8 +353,26 @@ export interface WikiWritingDoc extends WritingMeta {
   publishedAt?: string;
 }
 
-// wikiPublic/{slug} guarda uma entry, uma temporada ou um escrito — discriminado por `kind`.
-export type WikiPublicDoc = WikiEntryDoc | WikiSeasonDoc | WikiWritingDoc;
+/** Página de uma obra (campanha, livro, série…): wikiPublic/<slug>, kind "obra". */
+export interface WikiObraDoc {
+  kind: "obra";
+  title: string;
+  tipo?: string;
+  universe?: string;
+  universeId?: string;
+  status?: string;
+  system?: string;
+  synopsis?: string;
+  palavra?: string;
+  temporadas?: { name: string; id: string | null; status?: string; synopsis?: string; total?: number }[];
+  /** Elenco principal; quem só entra depois da primeira temporada vem com `at`. */
+  elenco?: { name: string; id: string | null; at?: string }[];
+  spoilerObras?: SpoilerObra[];
+  publishedAt?: string;
+}
+
+// wikiPublic/{slug} guarda uma entry, uma temporada, uma obra ou um escrito — discriminado por `kind`.
+export type WikiPublicDoc = WikiEntryDoc | WikiSeasonDoc | WikiObraDoc | WikiWritingDoc;
 
 // --- Conta do leitor (etapa 4) — mesmas formas que wiki-core.js lê e grava hoje. ---
 

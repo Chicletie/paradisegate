@@ -198,6 +198,23 @@ details.wiki-section.post:last-child { border-bottom: 0; }
 .post-summary { cursor: pointer; font-family: var(--font-wb); font-size: 16px; font-weight: 600; color: var(--ink); }
 .post-summary::marker { color: var(--muted); }
 
+/* Aparições (página do personagem) e página da obra: listas simples, obra › temporada */
+.aparicoes-wrap { clear: both; margin-top: 8px; }
+.aparicoes, .obra-elenco { margin: 4px 0 12px; padding-left: 20px; }
+.aparicoes > li { margin-bottom: 8px; }
+.aparicoes ul { margin: 2px 0 0; padding-left: 18px; }
+.aparicoes ul li { margin: 2px 0; }
+.aparicoes-obra { font-weight: 600; }
+.aparicoes-tipo, .aparicoes-meta, .obra-temporada-meta { color: var(--muted); font-size: 0.92em; }
+.obra-temporadas { margin: 4px 0 12px; padding-left: 22px; }
+.obra-temporadas > li { margin-bottom: 10px; }
+.obra-temporada-head { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; font-weight: 600; }
+.obra-temporada-meta { font-weight: 400; }
+.obra-elenco { columns: 2 12em; }
+.season-escrito { margin: 6px 0 0; font-style: italic; }
+.aparicoes a, .obra-temporadas a, .obra-elenco a, .season-escrito a { color: var(--pg-link, var(--gold-ink)); text-underline-offset: 3px; }
+.aparicoes a:hover, .obra-temporadas a:hover, .obra-elenco a:hover, .season-escrito a:hover { color: var(--pg-link-hover, var(--gold-ink)); }
+
 /* linha do tempo pessoal (aba dentro de Relações) — espinha vertical, cada evento é um nó
    clicável (expande a descrição em markdown, com [[links]] resolvidos quando possível). */
 .wb-tl { position: relative; padding-left: 22px; margin: 4px 0; }
