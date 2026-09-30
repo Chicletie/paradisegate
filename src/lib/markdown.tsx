@@ -75,7 +75,7 @@ function PlainWikiLink({ text }: { text: string }) {
 }
 
 const INLINE_TOKEN_SOURCE =
-  "(!\\[[^\\]]*\\]\\([^)\\s]+\\)|`[^`]+`|\\[\\[[^\\]\\[]+\\]\\]|\\[[^\\]]+\\]\\((?:https?:|mailto:|wiki:|membro:)[^)\\s]+\\)|\\|\\|(?:\\[\\[[^\\]\\[]+\\]\\]|[^|])+\\|\\||\\*\\*[^*]+\\*\\*|__[^_]+__|~~[^~]+~~|\\*[^*\\n]+\\*|(?:^|\\s)_[^_\\n]+_(?=\\s|$))";
+  "(\\(\\((?:\\[[^\\]]*\\]\\([^)\\s]*\\)|[^()])+\\)\\)|!\\[[^\\]]*\\]\\([^)\\s]+\\)|`[^`]+`|\\[\\[[^\\]\\[]+\\]\\]|\\[[^\\]]+\\]\\((?:https?:|mailto:|wiki:|membro:)[^)\\s]+\\)|\\|\\|(?:\\[\\[[^\\]\\[]+\\]\\]|[^|])+\\|\\||\\*\\*[^*]+\\*\\*|__[^_]+__|~~[^~]+~~|\\*[^*\\n]+\\*|(?:^|\\s)_[^_\\n]+_(?=\\s|$))";
 
 /**
  * `||trecho||`: tarja só naquele trecho, lido como markdown por dentro (pode ter link).
@@ -239,7 +239,13 @@ function wikiHref(raw: string): string {
   return "/wiki/" + id + (i === -1 ? "" : "#" + encodeURIComponent(wikiLinkTarget(raw.slice(i + 1))));
 }
 
-export function mdInline(s: string | undefined): ReactNode[] {
+/** Contador das notas de rodapé de um trecho (numeradas por aba; `prefix` separa as abas). */
+export interface FootnoteCounter {
+  n: number;
+  prefix: string;
+}
+
+export function mdInline(s: string | undefined, fn?: FootnoteCounter): ReactNode[] {
   const nodes: ReactNode[] = [];
   const re = new RegExp(INLINE_TOKEN_SOURCE, "g");
   let last = 0;
@@ -258,7 +264,21 @@ export function mdInline(s: string | undefined): ReactNode[] {
       nodes.push(text.slice(last, at));
     }
     const k = key++;
-    if (tok.charAt(0) === "!") {
+    if (tok.slice(0, 2) === "((") {
+      // Nota de rodapé: número que leva pra lista "Notas" no fim da aba. Fora de um texto com
+      // lista (ficha, cartão), a nota fica ali mesmo, entre parênteses.
+      const inner = tok.slice(2, -2);
+      if (fn) {
+        const num = ++fn.n;
+        nodes.push(
+          <sup key={k} className="md-fn" id={"fnref-" + fn.prefix + num}>
+            <a href={"#fn-" + fn.prefix + num} aria-label={"nota " + num}>
+              {"[" + num + "]"}
+            </a>
+          </sup>,
+        );
+      } else nodes.push(<span key={k} className="md-fn-inline">{[" (", ...mdInline(inner), ")"]}</span>);
+    } else if (tok.charAt(0) === "!") {
       const im = tok.match(/^!\[([^\]]*)\]\(([^)\s]+)\)$/);
       if (im) nodes.push(<img key={k} className="wb-img" src={im[2]} alt={im[1] || ""} loading="lazy" />);
     } else if (tok.charAt(0) === "`") {
@@ -303,7 +323,7 @@ export function mdInline(s: string | undefined): ReactNode[] {
       const sm = /^@\{([^}]*)\}\s*/.exec(inner);
       nodes.push(
         <InlineSpoiler key={k} at={sm ? sm[1] : undefined}>
-          {mdInline(sm ? inner.slice(sm[0].length) : inner)}
+          {mdInline(sm ? inner.slice(sm[0].length) : inner, fn)}
         </InlineSpoiler>,
       );
     } else {
@@ -315,13 +335,96 @@ export function mdInline(s: string | undefined): ReactNode[] {
   return nodes;
 }
 
+/** Título do markdown: "### Nome {-}" fica fora do índice (a marca não aparece). */
+function headingParts(raw: string): { text: string; toc: boolean } {
+  const m = /\s*\{-\}\s*$/.exec(raw);
+  return m ? { text: raw.slice(0, m.index), toc: false } : { text: raw, toc: true };
+}
+/** Texto simples de um trecho de markdown da casa (pro índice). */
+export function mdPlain(s: string): string {
+  return String(s || "")
+    .replace(/\(\((?:\[[^\]]*\]\([^)\s]*\)|[^()])+\)\)/g, "")
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/\[\[([^\]|]+\|)?([^\]]+)\]\]/g, "$2")
+    .replace(/\|\|(@\{[^}]*\}\s*)?/g, "")
+    .replace(/[*_~`]/g, "")
+    .trim();
+}
+function anchorSlug(s: string): string {
+  return mdPlain(s)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 30);
+}
+/** Os títulos de um texto, na ordem, com a âncora que RenderMarkdown dá a cada um (`base`
+ * igual). `level` = número de # (1–6); `toc` = entra no índice. */
+export function markdownHeadings(text: string | undefined, base: string): { level: number; text: string; id: string; toc: boolean }[] {
+  const out: { level: number; text: string; id: string; toc: boolean }[] = [];
+  let fence = false;
+  String(text || "")
+    .split("\n")
+    .forEach((ln) => {
+      if (/^\s*```/.test(ln)) {
+        fence = !fence;
+        return;
+      }
+      if (fence) return;
+      const h = ln.match(/^(#{1,6})\s+(.*)/);
+      if (!h) return;
+      const p = headingParts(h[2]);
+      out.push({ level: h[1].length, text: mdPlain(p.text), id: base + "h" + out.length + "-" + anchorSlug(p.text), toc: p.toc });
+    });
+  return out;
+}
+
+/** As notas de rodapé de um texto, na ordem em que o texto numera. `at`: a nota estava dentro
+ * de um spoiler (true = spoiler comum; texto = id da temporada) e fica na tarja na lista. */
+export function footnotesOf(text: string | undefined): { text: string; at?: string | true }[] {
+  const out: { text: string; at?: string | true }[] = [];
+  function walk(s: string, at?: string | true) {
+    const re = new RegExp(INLINE_TOKEN_SOURCE, "g");
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(s))) {
+      const tok = m[0].replace(/^\s_/, "_");
+      if (tok.slice(0, 2) === "((") out.push({ text: tok.slice(2, -2), at });
+      else if (tok.slice(0, 2) === "||") {
+        const inner = tok.slice(2, -2);
+        const sm = /^@\{([^}]*)\}\s*/.exec(inner);
+        walk(sm ? inner.slice(sm[0].length) : inner, at || (sm ? sm[1] : true));
+      }
+    }
+  }
+  let fence = false;
+  String(text || "")
+    .split("\n")
+    .forEach((ln) => {
+      if (/^\s*```/.test(ln)) {
+        fence = !fence;
+        return;
+      }
+      if (!fence) walk(ln);
+    });
+  return out;
+}
+
+const QUOTE_BY = /^\s*(?:[—―–]|--)\s*/;
+
 /** Porta de renderMarkdown: parágrafos, cabeçalhos, listas, citação, código, `<hr>` — cada
- * chamada é o próprio `.prose` (mesma unidade que o corpo de um campo/seção/post). */
-export function RenderMarkdown({ text }: { text: string | undefined }) {
+ * chamada é o próprio `.prose` (mesma unidade que o corpo de um campo/seção/post).
+ * `anchorBase` dá âncora aos títulos (pro índice); `fnPrefix`/`fnStart` numeram as notas de
+ * rodapé (a lista fica no fim da aba, ver ArticleBundle). */
+export function RenderMarkdown({ text, anchorBase, fnPrefix, fnStart = 0 }: { text: string | undefined; anchorBase?: string; fnPrefix?: string; fnStart?: number }) {
   const lines = String(text || "").split("\n");
   const blocks: ReactNode[] = [];
   let listBuf: { ordered: boolean; items: string[] } | null = null;
   let blockKey = 0;
+  const fn: FootnoteCounter | undefined = fnPrefix != null ? { n: fnStart, prefix: fnPrefix } : undefined;
+  const md = (s: string) => mdInline(s, fn);
+  let headingN = 0;
 
   function flushList() {
     if (!listBuf) return;
@@ -330,13 +433,13 @@ export function RenderMarkdown({ text }: { text: string | undefined }) {
       listBuf.ordered ? (
         <ol key={blockKey++}>
           {items.map((item, i) => (
-            <li key={i}>{mdInline(item)}</li>
+            <li key={i}>{md(item)}</li>
           ))}
         </ol>
       ) : (
         <ul key={blockKey++}>
           {items.map((item, i) => (
-            <li key={i}>{mdInline(item)}</li>
+            <li key={i}>{md(item)}</li>
           ))}
         </ul>
       ),
@@ -375,12 +478,52 @@ export function RenderMarkdown({ text }: { text: string | undefined }) {
       flushList();
       const level = Math.min(6, h[1].length + 2);
       const HTag = `h${level}` as keyof React.JSX.IntrinsicElements;
-      blocks.push(<HTag key={blockKey++}>{mdInline(h[2])}</HTag>);
+      const hp = headingParts(h[2]);
+      const hid = anchorBase != null ? anchorBase + "h" + headingN + "-" + anchorSlug(hp.text) : undefined;
+      headingN++;
+      blocks.push(
+        <HTag key={blockKey++} id={hid}>
+          {md(hp.text)}
+        </HTag>,
+      );
+      continue;
+    }
+    // "::principal [[Página]]" / "::ver [[A]], [[B]]": linha discreta mandando pra outra página
+    const hat = ln.match(/^\s*::(principal|ver)\s+(.*)$/);
+    if (hat) {
+      flushList();
+      blocks.push(
+        <p key={blockKey++} className="md-hatnote">
+          {hat[1] === "principal" ? "Artigo principal: " : "Ver também: "}
+          {md(hat[2])}
+        </p>,
+      );
       continue;
     }
     if (/^\s*>\s?/.test(ln)) {
       flushList();
-      blocks.push(<blockquote key={blockKey++}>{mdInline(ln.replace(/^\s*>\s?/, ""))}</blockquote>);
+      // linhas ">" seguidas são uma citação só; a última começando com "—" é quem disse
+      const q: string[] = [];
+      while (i < lines.length && /^\s*>/.test(lines[i])) q.push(lines[i++].replace(/^\s*>\s?/, ""));
+      i--;
+      while (q.length && !q[q.length - 1].trim()) q.pop();
+      const by = q.length > 1 && QUOTE_BY.test(q[q.length - 1]) ? q.pop()!.replace(QUOTE_BY, "") : null;
+      if (!by && q.length === 1) {
+        blocks.push(<blockquote key={blockKey++}>{md(q[0])}</blockquote>);
+        continue;
+      }
+      const paras: string[][] = [[]];
+      q.forEach((l) => (l.trim() ? paras[paras.length - 1].push(l) : paras[paras.length - 1].length && paras.push([])));
+      blocks.push(
+        <blockquote key={blockKey++} className="md-quote">
+          {paras
+            .filter((p) => p.length)
+            .map((p, pi) => (
+              <p key={pi}>{md(p.join(" "))}</p>
+            ))}
+          {by && <footer className="md-quote-by">{["— ", ...md(by)]}</footer>}
+        </blockquote>,
+      );
       continue;
     }
     const task = ln.match(/^\s*[-*+]\s+\[([ xX])\]\s+(.*)/);
@@ -396,7 +539,7 @@ export function RenderMarkdown({ text }: { text: string | undefined }) {
       continue;
     }
     flushList();
-    blocks.push(<p key={blockKey++}>{mdInline(ln)}</p>);
+    blocks.push(<p key={blockKey++}>{md(ln)}</p>);
   }
   flushList();
 

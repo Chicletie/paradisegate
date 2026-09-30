@@ -128,6 +128,17 @@ h1 { font-family: var(--font-display); font-weight: 500; font-size: 32px; margin
 .prose code.wb-code { font-family: ui-monospace, monospace; background: var(--accent-wash); padding: 1px 5px; border-radius: 3px; font-size: 0.9em; }
 .prose blockquote { margin: 10px 0; padding: 4px 14px; border-left: 3px solid var(--gold); color: var(--muted); overflow-wrap: anywhere; word-break: break-word; }
 .prose a { color: var(--gold-ink); }
+/* Ferramentas de texto (2026-09-29): citação com quem disse, "Artigo principal / Ver também",
+   notas de rodapé. */
+.prose blockquote.md-quote p { margin: 0 0 6px; }
+.prose .md-quote-by { margin-top: 2px; font-size: 0.92em; font-style: normal; color: var(--faint); }
+.prose .md-hatnote { margin: 0 0 12px; padding-left: 14px; font-style: italic; font-size: 0.95em; color: var(--muted); }
+.prose sup.md-fn { font-size: 0.72em; line-height: 0; margin-left: 1px; }
+.prose sup.md-fn a { text-decoration: none; }
+.md-notes ol { margin: 4px 0 0; padding-left: 26px; font-size: 14px; color: var(--muted); }
+.md-notes li { margin: 4px 0; overflow-wrap: anywhere; }
+.md-notes li:target, .prose sup.md-fn:target { background: var(--accent-wash); border-radius: 3px; }
+.md-fn-back { text-decoration: none; color: var(--faint); }
 
 @media (min-width: 620px) {
    /* Keep the article flowing beside the infobox in Firefox as well as Chromium. */
@@ -155,6 +166,10 @@ h1 { font-family: var(--font-display); font-weight: 500; font-size: 32px; margin
 .toc li { margin: 3px 0; }
 .toc a { color: var(--ink); text-decoration: none; border-bottom: 1px dotted var(--border-strong); }
 .toc a:hover { color: var(--gold-ink); }
+/* subtítulos das seções: numeração escrita (1.1, 1.1.1), sem a do navegador */
+.toc ol.toc-sub { list-style: none; padding-left: 12px; font-size: 13px; }
+.toc ol.toc-sub li.toc-deep { padding-left: 14px; }
+.toc .toc-num { color: var(--faint); margin-right: 6px; font-variant-numeric: tabular-nums; }
 /* alvo de toque no celular (achado do critique de 2026-09-22: ~22px medido, abaixo de 44px) —
    padding+margem negativa cresce a área clicável sem separar mais os itens visualmente. */
 @media (max-width: 619px) {
