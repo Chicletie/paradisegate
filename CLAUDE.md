@@ -108,6 +108,10 @@ Valem pros dois (e pro Claude de cada um), em toda mudança:
 - **Sorteio do dia** (`src/lib/daily.ts`): igual pra todo visitante, reset às 00h de Brasília,
   quem foi publicado hoje só concorre amanhã. `daily.golden.json` é a referência; não ajuste à
   mão.
+- **Claro/escuro**: o escuro se escreve uma vez só, em `@media (prefers-color-scheme: dark) { … }`
+  (sem at-rule dentro). No build, `scripts/tema-css.mjs` faz dele também a versão escolhida à mão
+  (`<html data-theme="dark">`, botão `ThemeToggle` no cabeçalho; `data-theme="light"` desliga o
+  automático). Fora o `color-scheme` do topo do `wiki.css`, não escreva `[data-theme]` à mão no CSS.
 - **Navegar numa SPA não recarrega a página**: `ScrollToTop` volta ao topo (ou à âncora) a cada
   navegação, e a home remonta quando `?q=`/`?tipo=`/`?aleatoria=` muda. `usePgBody` é efeito de
   layout: as classes do `<body>` valem antes de qualquer medida.

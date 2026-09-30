@@ -5,6 +5,7 @@ import { pgPlural } from "../lib/format";
 import { searchHref } from "../lib/search";
 import { PgSearchIcon } from "./PgIcons";
 import { LoginBar } from "./AccountMenu";
+import { ThemeToggle } from "./ThemeToggle";
 import { featuresOf, useJogoAccess } from "../jogo/access";
 
 /** Busca controlada por quem chama (a home: filtra a lista a cada letra; Enter abre a busca). */
@@ -32,6 +33,7 @@ export function PgHeader({ search }: { search?: HeaderSearch }) {
           </Link>
         </div>
         {search ? <HomeSearch search={search} /> : <SearchBox />}
+        <ThemeToggle />
         <LoginBar />
       </div>
       <PgNavBar />
