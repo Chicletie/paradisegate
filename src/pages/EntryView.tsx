@@ -26,6 +26,7 @@ import {
 } from "../components/EntryActions";
 import { PageObrasProvider, SpoilerProgressBar } from "../components/SpoilerProgress";
 import { WritingCard } from "./EscritosPage";
+import { anchorWords } from "../lib/anchors";
 import type { WikiEntryDoc, WikiPost } from "../types";
 
 /**
@@ -56,7 +57,7 @@ export function EntryView({ data, wikiId }: { data: WikiEntryDoc; wikiId: string
     { label: (hasVariants && data.mainTab) || "Geral", content: <ArticleBundle bundle={data} anchorPrefix="geral-" epigraph={epigraph} extraToc={sharedToc} /> },
   ];
   (data.variants || []).forEach((variant, vi) => {
-    tabPanels.push({ label: variant.label || "Versão", content: <ArticleBundle bundle={variant} anchorPrefix={`v${vi}-`} epigraph={epigraph} /> });
+    tabPanels.push({ label: variant.label || "Versão", content: <ArticleBundle bundle={variant} anchorPrefix={`v${vi}-`} idPrefix={(anchorWords(variant.label) || "versao-" + (vi + 1)) + "-"} epigraph={epigraph} /> });
   });
   if (data.gallery?.length) tabPanels.push({ label: "Galeria", extra: true, content: <GalleryPanel gallery={data.gallery} title={data.title} /> });
   if (data.citacoes?.length) tabPanels.push({ label: "Citações", extra: true, content: <CitationsPanel citacoes={data.citacoes} title={data.title} /> });

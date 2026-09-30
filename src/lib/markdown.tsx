@@ -518,9 +518,23 @@ function SectionTabs({ tabs }: { tabs: { name: string; body: ReactNode[] }[] }) 
 
 /** Porta de renderMarkdown: parágrafos, cabeçalhos, listas, citação, código, `<hr>` — cada
  * chamada é o próprio `.prose` (mesma unidade que o corpo de um campo/seção/post).
- * `anchorBase` dá âncora aos títulos (pro índice); `fnPrefix`/`fnStart` numeram as notas de
- * rodapé (a lista fica no fim da aba, ver ArticleBundle). */
-export function RenderMarkdown({ text, anchorBase, fnPrefix, fnStart = 0 }: { text: string | undefined; anchorBase?: string; fnPrefix?: string; fnStart?: number }) {
+ * `anchorBase` dá âncora aos títulos (pro índice); com `headingIds` (os nomes legíveis, na
+ * ordem dos títulos, ver lib/anchors.ts) a âncora é o nome e a antiga fica em `data-old-id`,
+ * pros links já mandados. `fnPrefix`/`fnStart` numeram as notas de rodapé (a lista fica no
+ * fim da aba, ver ArticleBundle). */
+export function RenderMarkdown({
+  text,
+  anchorBase,
+  headingIds,
+  fnPrefix,
+  fnStart = 0,
+}: {
+  text: string | undefined;
+  anchorBase?: string;
+  headingIds?: string[];
+  fnPrefix?: string;
+  fnStart?: number;
+}) {
   const lines = String(text || "").split("\n");
   const blocks: ReactNode[] = [];
   let listBuf: { ordered: boolean; items: string[] } | null = null;
@@ -612,10 +626,11 @@ export function RenderMarkdown({ text, anchorBase, fnPrefix, fnStart = 0 }: { te
         const level = Math.min(6, h[1].length + 2);
         const HTag = `h${level}` as keyof React.JSX.IntrinsicElements;
         const hp = headingParts(h[2]);
-        const hid = anchorBase != null ? anchorBase + "h" + headingN + "-" + anchorSlug(hp.text) : undefined;
+        const oldId = anchorBase != null ? anchorBase + "h" + headingN + "-" + anchorSlug(hp.text) : undefined;
+        const hid = headingIds?.[headingN] ?? oldId;
         headingN++;
         blocks.push(
-          <HTag key={blockKey++} id={hid}>
+          <HTag key={blockKey++} id={hid} data-old-id={hid !== oldId ? oldId : undefined}>
             {md(hp.text)}
           </HTag>,
         );

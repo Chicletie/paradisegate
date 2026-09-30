@@ -1,5 +1,6 @@
 import { useLayoutEffect } from "react";
 import { useLocation, useNavigationType } from "react-router-dom";
+import { revealInTabs } from "../lib/markdown";
 
 /**
  * No site de hoje cada link recarrega a página, que abre no topo (ou na âncora, ex.:
@@ -22,10 +23,19 @@ export function ScrollToTop() {
     const id = decodeURIComponent(hash.slice(1));
     let tries = 0;
     const timer = window.setInterval(() => {
-      const el = document.getElementById(id);
+      // Link antigo de seção (`#sec-geral-lf2-hist-ria…`): acha pelo data-old-id e troca o
+      // endereço pela âncora legível de hoje.
+      const el = document.getElementById(id) || document.querySelector<HTMLElement>(`[data-old-id="${CSS.escape(id)}"]`);
       if (el || ++tries > 50) {
         window.clearInterval(timer);
-        el?.scrollIntoView();
+        if (!el) return;
+        if (el.id !== id) {
+          history.replaceState(history.state, "", "#" + el.id);
+          const d = el instanceof HTMLDetailsElement ? el : el.closest("details");
+          if (d) d.open = true;
+          revealInTabs(el.id);
+        }
+        el.scrollIntoView();
       }
     }, 100);
     return () => window.clearInterval(timer);

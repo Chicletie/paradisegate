@@ -1,10 +1,12 @@
 import { Fragment } from "react";
 import { RenderMarkdown, SpoilerBlock, footnotesOf, markdownHeadings, mdInline, revealInTabs } from "../lib/markdown";
+import { PAGE_ANCHORS, makeAnchorNamer } from "../lib/anchors";
 import { QuoteEpigraph } from "../lib/quotes";
 import type { WikiArticleBundle, WikiCitation } from "../types";
 import { SwapBody } from "./EntryActions";
 import { RestritoBlocks } from "./RestritoPlace";
 
+/** Âncora antiga (`sec-geral-lf2-hist-ria`): fica em `data-old-id`, pros links já mandados. */
 function slugifyAnchor(s: string | undefined, i: string): string {
   return (
     "sec-" +
@@ -26,8 +28,10 @@ interface TocItem {
 }
 
 /** Subtítulos de um texto pro índice: o nível mais alto da seção vira 1.1, 1.2…; o de baixo, 1.1.1. */
-function tocSubs(text: string | undefined, base: string, n: number): TocItem["subs"] {
-  const hs = markdownHeadings(text, base).filter((h) => h.toc);
+function tocSubs(text: string | undefined, ids: string[], n: number): TocItem["subs"] {
+  const hs = markdownHeadings(text, "")
+    .map((h, k) => ({ ...h, id: ids[k] }))
+    .filter((h) => h.toc);
   if (!hs.length) return undefined;
   const top = Math.min(...hs.map((h) => h.level));
   let a = 0,
@@ -59,11 +63,14 @@ function openFor(id: string) {
 export function ArticleBundle({
   bundle,
   anchorPrefix,
+  idPrefix = "",
   epigraph,
   extraToc = [],
 }: {
   bundle: WikiArticleBundle;
   anchorPrefix: string;
+  /** Antes de toda âncora desta aba (as abas próprias: "disfarce-"); a principal não tem. */
+  idPrefix?: string;
   epigraph?: WikiCitation | null;
   extraToc?: { id: string; label: string }[];
 }) {
@@ -71,11 +78,26 @@ export function ArticleBundle({
   const sections = bundle.sections || [];
   // Restrito no lugar só na aba Geral (as variantes de obra seguem com o restrito no fim).
   const geral = anchorPrefix === "geral-";
-  const lfIds = longFields.map((f, i) => slugifyAnchor(f.key, anchorPrefix + "lf" + i));
-  const scIds = sections.map((s, i) => slugifyAnchor(s.title || "Seção", anchorPrefix + "sc" + i));
+  const lfOld = longFields.map((f, i) => slugifyAnchor(f.key, anchorPrefix + "lf" + i));
+  const scOld = sections.map((s, i) => slugifyAnchor(s.title || "Seção", anchorPrefix + "sc" + i));
+  // Âncoras legíveis, na ordem da página (seção, os títulos dela, a seção seguinte…).
+  const name = makeAnchorNamer([...PAGE_ANCHORS, ...extraToc.map((t) => t.id)]);
+  const named = (text: string | undefined) => idPrefix + name(text);
+  const lfIds: string[] = [];
+  const lfHeads: string[][] = [];
+  longFields.forEach((f, i) => {
+    lfIds[i] = named(f.key);
+    lfHeads[i] = markdownHeadings(f.value, "").map((h) => named(h.text));
+  });
+  const scIds: string[] = [];
+  const scHeads: string[][] = [];
+  sections.forEach((s, i) => {
+    scIds[i] = named(s.title || "Seção");
+    scHeads[i] = markdownHeadings(s.body, "").map((h) => named(h.text));
+  });
   const tocEntries: TocItem[] = [
-    ...longFields.map((f, i) => ({ id: lfIds[i], label: f.key, subs: tocSubs(f.value, lfIds[i] + "-", i + 1) })),
-    ...sections.map((s, i) => ({ id: scIds[i], label: s.title || "Seção", subs: tocSubs(s.body, scIds[i] + "-", longFields.length + i + 1) })),
+    ...longFields.map((f, i) => ({ id: lfIds[i], label: f.key, subs: tocSubs(f.value, lfHeads[i], i + 1) })),
+    ...sections.map((s, i) => ({ id: scIds[i], label: s.title || "Seção", subs: tocSubs(s.body, scHeads[i], longFields.length + i + 1) })),
     ...extraToc,
   ];
 
@@ -89,7 +111,9 @@ export function ArticleBundle({
   // nota de um bloco inteiro em spoiler fica na tarja também na lista
   const blockAt = [undefined, ...longFields.map((f) => (f.vis === "spoiler" ? f.at || true : undefined)), ...sections.map((s) => (s.vis === "spoiler" ? s.at || true : undefined))];
   const notes = notesPer.flatMap((list, i) => list.map((n) => ({ text: n.text, at: n.at || blockAt[i] })));
-  const md = (text: string | undefined, i: number, base?: string) => <RenderMarkdown text={text} anchorBase={base} fnPrefix={fnPrefix} fnStart={starts[i]} />;
+  const md = (text: string | undefined, i: number, base?: string, ids?: string[]) => (
+    <RenderMarkdown text={text} anchorBase={base} headingIds={ids} fnPrefix={fnPrefix} fnStart={starts[i]} />
+  );
 
   return (
     <div className="article">
@@ -130,11 +154,11 @@ export function ArticleBundle({
           <Fragment key={id}>
             {geral && <RestritoBlocks area="notas" index={i} />}
             {/* Dobra igual às seções (2026-09-29): pro leitor, bloco "nota" e seção são a mesma coisa. */}
-            <details className="wiki-section" id={id} open>
+            <details className="wiki-section" id={id} data-old-id={lfOld[i]} open>
             <summary className="cathead">{f.key}</summary>
             {/* Troca confidencial só na aba Geral: variantes de obra não têm versão confidencial. */}
             <SwapBody slot={anchorPrefix === "geral-" ? "lf:" + i : undefined} fieldKey={f.key}>
-              {f.vis === "spoiler" ? <SpoilerBlock at={f.at}>{md(f.value, 1 + i, id + "-")}</SpoilerBlock> : md(f.value, 1 + i, id + "-")}
+              {f.vis === "spoiler" ? <SpoilerBlock at={f.at}>{md(f.value, 1 + i, lfOld[i] + "-", lfHeads[i])}</SpoilerBlock> : md(f.value, 1 + i, lfOld[i] + "-", lfHeads[i])}
             </SwapBody>
             </details>
           </Fragment>
@@ -146,14 +170,14 @@ export function ArticleBundle({
         return (
           <Fragment key={id}>
           {geral && <RestritoBlocks area="secoes" index={i} />}
-          <details className="wiki-section" id={id} open>
+          <details className="wiki-section" id={id} data-old-id={scOld[i]} open>
             <summary className="cathead">
               {s.title || "Seção"}
             </summary>
             {s.vis === "spoiler" ? (
-              <SpoilerBlock at={s.at}>{md(s.body, 1 + longFields.length + i, id + "-")}</SpoilerBlock>
+              <SpoilerBlock at={s.at}>{md(s.body, 1 + longFields.length + i, scOld[i] + "-", scHeads[i])}</SpoilerBlock>
             ) : (
-              md(s.body, 1 + longFields.length + i, id + "-")
+              md(s.body, 1 + longFields.length + i, scOld[i] + "-", scHeads[i])
             )}
           </details>
           </Fragment>

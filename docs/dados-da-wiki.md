@@ -204,7 +204,7 @@ Lido por `src/lib/markdown.tsx`:
 | Escrito | Aparece como |
 |---|---|
 | `**negrito**`, `*itálico*`, `~~riscado~~`, `` `código` `` | o de sempre |
-| `## Título`, `### Subtítulo` | título; dentro de uma seção ou nota, entra no índice da página como subitem numerado (1.1, 1.1.1) e ganha âncora. `### Título {-}` fica fora do índice (a marca `{-}` não aparece) — desde 2026-09-29 |
+| `## Título`, `### Subtítulo` | título; dentro de uma seção ou nota, entra no índice da página como subitem numerado (1.1, 1.1.1) e ganha âncora. `### Título {-}` fica fora do índice (a marca `{-}` não aparece) — desde 2026-09-29. A âncora é o próprio título, sem acento (`#terceiro-casamento`; repetido ganha `-2`; numa aba própria vem o nome da aba antes, `#disfarce-origem`); o endereço antigo (`#sec-geral-lf2-…`) continua abrindo o mesmo ponto — desde 2026-09-30 |
 | `> fala` + `> — quem disse` | citação (desde 2026-09-29): linhas `>` seguidas são um bloco só; a última começando com — (ou ― – --) vira a linha de quem disse, embaixo. Uma linha só, sem autor, sai como antes |
 | `::principal <links>` / `::ver <links>` | linha sozinha: "Artigo principal: …" / "Ver também: …", discreta, no topo da parte (desde 2026-09-29) |
 | `((texto da nota))` | nota de rodapé (desde 2026-09-29): vira [1] no texto e a nota vai pra lista "Notas" no fim da aba, numerada por aba, com link de volta. Pode ter link dentro (ex.: a sessão de onde veio). Dentro de um spoiler, fica na tarja também na lista. Fora de um texto de artigo (ficha, cartão) aparece ali mesmo, entre parênteses |
