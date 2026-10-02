@@ -9,6 +9,7 @@ import { SeasonView } from "./SeasonView";
 import { ObraView } from "./ObraView";
 import { ErrorPage } from "./ErrorPage";
 import type { WikiPublicDoc } from "../types";
+import { tituloWiki } from "../lib/titulo";
 
 type LoadState =
   | { status: "loading" }
@@ -44,7 +45,7 @@ export function EntryPage() {
 
   const readyTitle = state.status === "ready" ? state.data.title : null;
   useEffect(() => {
-    if (readyTitle !== null) document.title = readyTitle || "wiki";
+    if (readyTitle !== null) document.title = tituloWiki(readyTitle);
   }, [readyTitle]);
 
   // Documento de escrito aberto pelo endereço cru: vai pro endereço dele.

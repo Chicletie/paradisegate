@@ -6,7 +6,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import {
-  fieldsToObject, mergeEntries, describeEntry, describeMember, memberPhotoFile, describeWriting, headTags, injectHead, membersOf, safeSlug, sitemap, writingsOf, SITE, SITE_NAME,
+  fieldsToObject, mergeEntries, describeEntry, describeMember, memberPhotoFile, describeWriting, headTags, injectHead, membersOf, safeSlug, sitemap, writingsOf, articleJsonLd, SITE, SITE_NAME, WIKI_NAME,
 } from "./seo.mjs";
 
 const DIST = path.resolve(process.argv[2] || "dist");
@@ -51,7 +51,7 @@ try {
 }
 
 const page = (title, tags) => injectHead(template, title, tags);
-const homeTitle = `${SITE_NAME} · Wiki`;
+const homeTitle = WIKI_NAME;
 const home = page(homeTitle, headTags({ title: homeTitle, description: HOME_DESC, path: "/wiki", image: DEFAULT_IMAGE }));
 // /wiki pode ser servido como wiki.html ou wiki/index.html, conforme o GitHub Pages resolver a
 // pasta wiki/ ao lado; os dois existem e são iguais.
@@ -62,12 +62,12 @@ write("index.html", page(SITE_NAME, headTags({ title: SITE_NAME, description: HO
 // site) — só prevê a prévia de link pra quem abrir o endereço direto.
 const homeMarca = `${SITE_NAME} · Home`;
 write("home.html", page(homeMarca, headTags({ title: homeMarca, description: BRAND_DESC, path: "/home", image: DEFAULT_IMAGE })));
-const tl = `Linha do tempo · ${SITE_NAME}`;
+const tl = `Linha do tempo · ${WIKI_NAME}`;
 write("wiki/_timeline.html", page(tl, headTags({ title: tl, description: "Os acontecimentos de Paradise Gate, ano a ano.", path: "/wiki/_timeline", image: DEFAULT_IMAGE })));
-const pf = `Seu perfil · ${SITE_NAME}`;
+const pf = `Seu perfil · ${WIKI_NAME}`;
 write("wiki/_perfil.html", page(pf, headTags({ title: pf, description: HOME_DESC, path: "/wiki/_perfil", noindex: true })));
 
-const bs = `Busca · ${SITE_NAME}`;
+const bs = `Busca · ${WIKI_NAME}`;
 write("wiki/_busca.html", page(bs, headTags({ title: bs, description: HOME_DESC, path: "/wiki/_busca", noindex: true })));
 
 const urls = [{ path: "/wiki" }, { path: "/wiki/_timeline" }];
@@ -76,18 +76,22 @@ for (const id of Object.keys(entries).sort()) {
   const e = entries[id] || {};
   const slug = safeSlug(id);
   if (!slug || !e.title) continue;
-  const title = `${e.title} · ${SITE_NAME}`;
+  const title = `${e.title} · ${WIKI_NAME}`;
+  const description = describeEntry(e);
+  const lastmod = /^\d{4}-\d{2}-\d{2}$/.test(e.updatedAt || "") ? e.updatedAt : null;
   write(`wiki/${slug}.html`, page(title, headTags({
-    title, description: describeEntry(e), path: `/wiki/${slug}`, image: e.cover || DEFAULT_IMAGE, type: "article",
+    title, description, path: `/wiki/${slug}`, image: e.cover || DEFAULT_IMAGE, type: "article",
+    // Só o retrato da própria página: a imagem padrão não serve de miniatura no Google.
+    jsonLd: articleJsonLd({ name: e.title, description, path: `/wiki/${slug}`, image: e.cover || null, dateModified: lastmod }),
   })));
-  urls.push({ path: `/wiki/${slug}`, lastmod: /^\d{4}-\d{2}-\d{2}$/.test(e.updatedAt || "") ? e.updatedAt : null });
+  urls.push({ path: `/wiki/${slug}`, lastmod });
   count++;
 }
 // Escritos: a lista geral (pasta, porque cada escrito mora dentro dela) e uma página por escrito
 // com página própria. Spoiler entra sem trecho na prévia.
 const writings = writingsOf(entries);
 if (writings.length) {
-  const es = `Escritos · ${SITE_NAME}`;
+  const es = `Escritos · ${WIKI_NAME}`;
   write("wiki/_escritos/index.html", page(es, headTags({
     title: es, description: "Contos, crônicas, narrações de sessão, causos de mesa, cartas e bastidores de Paradise Gate.", path: "/wiki/_escritos", image: DEFAULT_IMAGE,
   })));
@@ -97,7 +101,7 @@ let wcount = 0;
 for (const w of writings) {
   const slug = safeSlug(w.id);
   if (!slug || !w.title) continue;
-  const title = `${w.title} · ${SITE_NAME}`;
+  const title = `${w.title} · ${WIKI_NAME}`;
   write(`wiki/_escritos/${slug}.html`, page(title, headTags({
     title, description: describeWriting(w), path: `/wiki/_escritos/${slug}`, image: DEFAULT_IMAGE, type: "article",
   })));

@@ -4,6 +4,8 @@
 
 export const SITE = "https://paradisegate.com.br";
 export const SITE_NAME = "Paradise Gate";
+// Nome das páginas da wiki no título (aba do navegador e resultado do Google).
+export const WIKI_NAME = "Paradise Gate Wiki";
 
 /** Valor tipado da API REST do Firestore ({stringValue: "x"}, {mapValue: …}…) → JS comum. */
 export function fromFirestore(v) {
@@ -132,7 +134,7 @@ export function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ESC[c]); }
 
 /** Tags de <head> de uma página: descrição, canônico e a prévia de link (Open Graph/Twitter). */
 // squareImage: foto pequena e quadrada (a do perfil) vai como miniatura, sem esticar em faixa larga.
-export function headTags({ title, description, path, image, noindex, squareImage, type = "website" }) {
+export function headTags({ title, description, path, image, noindex, squareImage, type = "website", jsonLd }) {
   const url = SITE + path;
   const t = [
     `<meta name="description" content="${esc(description)}" />`,
@@ -148,8 +150,33 @@ export function headTags({ title, description, path, image, noindex, squareImage
     `<meta name="twitter:description" content="${esc(description)}" />`,
   ];
   if (image) t.push(`<meta property="og:image" content="${esc(image)}" />`, `<meta name="twitter:image" content="${esc(image)}" />`);
-  if (noindex) t.push(`<meta name="robots" content="noindex" />`);
+  // Página que vai pro Google: deixa ele mostrar a imagem grande no resultado.
+  t.push(noindex ? `<meta name="robots" content="noindex" />` : `<meta name="robots" content="max-image-preview:large" />`);
+  // Dados estruturados (schema.org): título e retrato do jeito que o Google mais respeita.
+  if (jsonLd) t.push(`<script type="application/ld+json">${jsonForScript(jsonLd)}</script>`);
   return t.join("\n");
+}
+
+// JSON pra dentro de <script>: troca "<" pelo escape de unicode do JSON, pra nenhum texto da
+// wiki fechar o </script> antes da hora (o JSON continua o mesmo pra quem lê).
+const LT_ESCAPE = "\\" + "u003c";
+export function jsonForScript(data) { return JSON.stringify(data).split("<").join(LT_ESCAPE); }
+
+/** Dados estruturados de uma página da wiki (schema.org Article): título, resumo, retrato e a wiki. */
+export function articleJsonLd({ name, description, path, image, dateModified }) {
+  const d = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: name,
+    description,
+    url: SITE + path,
+    mainEntityOfPage: SITE + path,
+    isPartOf: { "@type": "WebSite", name: WIKI_NAME, url: SITE + "/wiki" },
+    publisher: { "@type": "Organization", name: SITE_NAME, url: SITE },
+  };
+  if (image) d.image = [image];
+  if (dateModified) d.dateModified = dateModified;
+  return d;
 }
 
 /** O index.html do build com outro <title> e as tags acima antes do </head>. */

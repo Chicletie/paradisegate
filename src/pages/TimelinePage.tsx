@@ -8,6 +8,7 @@ import { PgHeader } from "../components/PgHeader";
 import { PgFooter } from "../components/PgFooter";
 import { ErrorPage } from "./ErrorPage";
 import type { WikiIndex } from "../types";
+import { tituloWiki } from "../lib/titulo";
 
 /**
  * Linha do tempo geral (`/wiki/_timeline`, `?ano=` preenche o filtro de ano) — porta de
@@ -39,7 +40,7 @@ function TimelineLoaded({ index }: { index: WikiIndex }) {
   const [onlyMajor, setOnlyMajor] = useState(false);
 
   useEffect(() => {
-    document.title = "Linha do tempo · Paradise Gate";
+    document.title = tituloWiki("Linha do tempo");
   }, []);
 
   const shown = filterTimeline(events, type, year.trim(), onlyMajor);

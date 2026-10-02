@@ -11,6 +11,7 @@ import { PgFooter } from "../components/PgFooter";
 import { PageObrasProvider, SpoilerProgressBar } from "../components/SpoilerProgress";
 import { ErrorPage } from "./ErrorPage";
 import type { WikiWritingDoc } from "../types";
+import { tituloWiki } from "../lib/titulo";
 
 type LoadState = { status: "loading" } | { status: "not-found" } | { status: "error" } | { status: "ready"; data: WikiWritingDoc };
 
@@ -41,7 +42,7 @@ export function EscritoPage() {
 
   const title = state.status === "ready" ? state.data.title : null;
   useEffect(() => {
-    if (title !== null) document.title = (title || "Escrito") + " · Paradise Gate";
+    if (title !== null) document.title = tituloWiki(title || "Escrito");
   }, [title]);
 
   if (state.status === "not-found") return <ErrorPage message="Este escrito não existe mais. O link pode ter sido despublicado." />;

@@ -10,6 +10,7 @@ import { PgFooter } from "../components/PgFooter";
 import { PgSearchIcon } from "../components/PgIcons";
 import { ErrorPage } from "./ErrorPage";
 import type { WikiIndex } from "../types";
+import { tituloWiki } from "../lib/titulo";
 
 const PAGE = 20;
 const wikiHref = (id: string) => `/wiki/${encodeURIComponent(id)}`;
@@ -64,7 +65,7 @@ function SearchLoaded({ index }: { index: WikiIndex }) {
   const suggestions = useMemo(() => (q.trim() && !all.length ? didYouMean(entries, q) : []), [entries, q, all.length]);
 
   useEffect(() => {
-    document.title = (q.trim() ? `“${q.trim()}” · Busca` : "Busca") + " · Paradise Gate";
+    document.title = tituloWiki(q.trim() ? `“${q.trim()}” · Busca` : "Busca");
   }, [q]);
 
   function go(next: { q?: string; tipo?: string; ordem?: string }) {

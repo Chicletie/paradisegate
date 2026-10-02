@@ -26,6 +26,7 @@ import { PgFooter } from "../components/PgFooter";
 import { PgConstellation, PgNoCover, PgSectionHead } from "../components/PgIcons";
 import { TarotCard } from "../components/TarotCard";
 import { ErrorPage } from "./ErrorPage";
+import { tituloWiki } from "../lib/titulo";
 
 const PAGE = 8;
 const wikiHref = (id: string) => `/wiki/${encodeURIComponent(id)}`;
@@ -85,7 +86,7 @@ function HomeLoaded({ entries }: { entries: HomeEntry[] }) {
   usePgBody("home");
 
   useEffect(() => {
-    document.title = "🪶 Paradise Gate · Wiki";
+    document.title = "🪶 " + tituloWiki();
   }, []);
   // ?tipo= vindo da barra de navegação: abre já rolado até a lista filtrada. Hoje essa rolagem
   // acontece antes de o rodapé entrar na página (renderHome anexa o rodapé por último), então
