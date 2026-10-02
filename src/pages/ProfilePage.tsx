@@ -17,6 +17,7 @@ import { Avatar, SignInButton } from "../components/AccountMenu";
 import { FichasSection, MestreNotesSection } from "../jogo/Fichas";
 import { featuresOf, useJogoAccess } from "../jogo/access";
 import type { AuthUser, WikiRestritoItem, WikiSuggestion } from "../types";
+import { tituloWiki } from "../lib/titulo";
 
 const SECTIONS: [string, string][] = [
   ["identidade", "Identidade"],
@@ -39,7 +40,7 @@ export function ProfilePage() {
   usePgBody();
   const { user, ready } = useAccount();
   useEffect(() => {
-    document.title = "Seu perfil · Paradise Gate";
+    document.title = tituloWiki("Seu perfil");
   }, []);
   return (
     <>

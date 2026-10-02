@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FICHA_INCOMPLETA, cleanText, clip, describeEntry, fromFirestore, headTags, injectHead, mergeEntries, safeSlug, sitemap } from "./seo.mjs";
+import { FICHA_INCOMPLETA, WIKI_NAME, articleJsonLd, cleanText, clip, describeEntry, fromFirestore, headTags, injectHead, mergeEntries, safeSlug, sitemap } from "./seo.mjs";
 
 describe("cleanText", () => {
   it("tira o spoiler inteiro, inclusive com link dentro", () => {
@@ -54,6 +54,23 @@ describe("html", () => {
     expect(safeSlug("alucard-whitefang")).toBe("alucard-whitefang");
     expect(safeSlug("../x")).toBeNull();
     expect(safeSlug("a b")).toBeNull();
+  });
+  it("página pro Google libera a imagem grande; noindex não", () => {
+    expect(headTags({ title: "a", description: "b", path: "/wiki/x" })).toContain('content="max-image-preview:large"');
+    const n = headTags({ title: "a", description: "b", path: "/wiki/_busca", noindex: true });
+    expect(n).toContain('content="noindex"');
+    expect(n).not.toContain("max-image-preview");
+  });
+  it("dados estruturados com retrato, sem deixar texto fechar o <script>", () => {
+    const ld = articleJsonLd({ name: "Dementor", description: "x </script><b>", path: "/wiki/dementor", image: "https://i/d.jpg", dateModified: "2026-09-30" });
+    expect(ld.image).toEqual(["https://i/d.jpg"]);
+    expect(ld.isPartOf.name).toBe(WIKI_NAME);
+    const t = headTags({ title: "a", description: "b", path: "/wiki/dementor", jsonLd: ld });
+    const bloco = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(t);
+    expect(bloco).not.toBeNull();
+    expect(bloco[1]).not.toContain("<");
+    expect(JSON.parse(bloco[1])).toEqual(ld);
+    expect(articleJsonLd({ name: "a", description: "b", path: "/wiki/a", image: null }).image).toBeUndefined();
   });
   it("sitemap com lastmod", () => {
     expect(sitemap([{ path: "/wiki/a", lastmod: "2026-09-20" }])).toContain("<loc>https://paradisegate.com.br/wiki/a</loc><lastmod>2026-09-20</lastmod>");

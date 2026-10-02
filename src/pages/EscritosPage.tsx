@@ -13,6 +13,7 @@ import { PgFooter } from "../components/PgFooter";
 import { PageObrasProvider } from "../components/SpoilerProgress";
 import { ErrorPage } from "./ErrorPage";
 import type { WikiIndex } from "../types";
+import { tituloWiki } from "../lib/titulo";
 
 const PAGE = 24;
 const KEYS: (keyof WritingFilter)[] = ["tipo", "canone", "origem", "tag", "pagina"];
@@ -60,7 +61,7 @@ function EscritosLoaded({ index }: { index: WikiIndex }) {
   const pageTitle = f.pagina ? all.find((w) => w.entries.some((e) => e.id === f.pagina))?.entries.find((e) => e.id === f.pagina)?.title : "";
 
   useEffect(() => {
-    document.title = (f.tipo && f.tipo !== "-" ? (WRITING_KINDS.find((k) => k.id === f.tipo)?.plural || "Escritos") : "Escritos") + " · Paradise Gate";
+    document.title = tituloWiki(f.tipo && f.tipo !== "-" ? (WRITING_KINDS.find((k) => k.id === f.tipo)?.plural || "Escritos") : "Escritos");
   }, [f.tipo]);
 
   function go(next: WritingFilter) {
