@@ -336,6 +336,10 @@ details.wiki-section.post:last-child { border-bottom: 0; }
 body.pg-site:not(.pg-home) .cit-narr { font-size: 18px; }
 body.pg-site .cit-seal { font-family: var(--pg-f-ui); color: var(--pg-muted); }
 .cit-meta a { color: var(--gold-ink); }
+/* Autoria das citações (aba e epígrafe): quem/para quem numa linha, onde e a obra na seguinte;
+   um nome ou a obra nunca quebra no meio (a linha quebra entre os nomes). */
+.q-who, .q-ctx { display: block; }
+.q-name { white-space: nowrap; }
 
 dl.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; margin: 0; clear: both; }
 dl.fields dt { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
