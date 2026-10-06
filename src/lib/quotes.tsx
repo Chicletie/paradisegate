@@ -26,8 +26,14 @@ export function quoteNorm(q: WikiCitation | null | undefined, pageTitle: string)
   };
 }
 
-function QuoteRefNode({ r }: { r: QuoteRef }) {
-  return r.id ? <Link to={`/wiki/${encodeURIComponent(r.id)}`}>{r.name}</Link> : <span>{r.name}</span>;
+function QuoteRefNode({ r, className }: { r: QuoteRef; className?: string }) {
+  return r.id ? (
+    <Link className={className} to={`/wiki/${encodeURIComponent(r.id)}`}>
+      {r.name}
+    </Link>
+  ) : (
+    <span className={className}>{r.name}</span>
+  );
 }
 
 /** Diálogo em forma de roteiro: nome à esquerda, fala à direita, rubrica "(rindo)" apagada,
@@ -60,30 +66,73 @@ export function QuoteDialogue({ q, className }: { q: WikiCitation; className?: s
  * primeiro; onde e a obra depois do ponto. `omitSpeaker` evita repetir o nome na lista da
  * própria página de quem falou. */
 export function quoteAttrKids(q: WikiCitation, omitSpeaker: boolean): ReactNode[] {
+  const { who, ctx } = quoteAttrParts(q, omitSpeaker);
+  const kids = who.slice();
+  ctx.forEach((b, i) => {
+    if (kids.length) kids.push(" · ");
+    kids.push(<Fragment key={"ctx" + i}>{b}</Fragment>);
+  });
+  return kids;
+}
+
+/** A autoria em duas partes: `who` (quem, como, para quem) e `ctx` (onde e a obra, um item
+ * cada). Nomes e obra levam a classe `q-name`, que não quebra no meio. */
+export function quoteAttrParts(q: WikiCitation, omitSpeaker: boolean): { who: ReactNode[]; ctx: ReactNode[] } {
   const first: ReactNode[][] = [];
-  if (q.kind !== "dialogo" && q.speaker?.name && !omitSpeaker) first.push([<QuoteRefNode key="sp" r={q.speaker} />]);
+  if (q.kind !== "dialogo" && q.speaker?.name && !omitSpeaker) first.push([<QuoteRefNode key="sp" r={q.speaker} className="q-name" />]);
   if (q.how) first.push([q.how]);
   if (q.to && q.to.length) {
     const t: ReactNode[] = ["para "];
     q.to.forEach((r, i) => {
       if (i) t.push(i === q.to!.length - 1 ? " e " : ", ");
-      t.push(<QuoteRefNode key={i} r={r} />);
+      t.push(<QuoteRefNode key={"to" + i} r={r} className="q-name" />);
     });
     first.push(t);
   }
-  let kids: ReactNode[] = [];
+  let who: ReactNode[] = [];
   first.forEach((bits, i) => {
-    if (i) kids.push(", ");
-    kids = kids.concat(bits);
+    if (i) who.push(", ");
+    who = who.concat(bits);
   });
-  const second: ReactNode[] = [];
-  if (q.where?.name) second.push(<QuoteRefNode key="wh" r={q.where} />);
-  if (q.group) second.push(q.group);
-  second.forEach((b) => {
-    if (kids.length) kids.push(" · ");
-    kids.push(b);
+  const ctx: ReactNode[] = [];
+  if (q.where?.name) ctx.push(<QuoteRefNode key="wh" r={q.where} className="q-name" />);
+  if (q.group)
+    ctx.push(
+      <span key="gr" className="q-name">
+        {q.group}
+      </span>,
+    );
+  return { who, ctx };
+}
+
+/** Autoria em linhas: quem/para quem numa, onde e a obra na seguinte (só quebra se houver as
+ * duas). `lead` (o selo da narração) abre a segunda; `extra` (a nota, na aba Citações) fecha. */
+export function QuoteAttrLines({ q, omitSpeaker, lead, extra }: { q: WikiCitation; omitSpeaker: boolean; lead?: ReactNode[]; extra?: ReactNode[] }) {
+  const { who, ctx } = quoteAttrParts(q, omitSpeaker);
+  const tail: ReactNode[] = [];
+  (lead || []).concat(ctx, extra || []).forEach((b, i) => {
+    if (i) tail.push(" · ");
+    tail.push(<Fragment key={"t" + i}>{b}</Fragment>);
   });
-  return kids;
+  if (!who.length && !tail.length) return null;
+  return (
+    <>
+      {who.length > 0 && (
+        <span className="q-who">
+          {"— "}
+          {who.map((a, i) => (
+            <Fragment key={i}>{a}</Fragment>
+          ))}
+        </span>
+      )}
+      {tail.length > 0 && (
+        <span className="q-ctx">
+          {who.length ? null : "— "}
+          {tail}
+        </span>
+      )}
+    </>
+  );
 }
 
 export const narrSeal = (q: WikiCitation) => "narração de " + (q.narr === "livro" ? "livro" : "mesa");
@@ -107,8 +156,8 @@ export function QuoteBody({ q }: { q: WikiCitation }) {
 /** Epígrafe: a citação em destaque da entrada, antes da visão geral — aspas grandes, texto em
  * itálico, autoria alinhada à direita. */
 export function QuoteEpigraph({ q }: { q: WikiCitation }) {
-  const attr: ReactNode[] = quoteAttrKids(q, false);
-  if (q.kind === "narracao") attr.unshift(narrSeal(q), ...(attr.length ? [" · "] : []));
+  const attr = <QuoteAttrLines q={q} omitSpeaker={false} lead={q.kind === "narracao" ? [narrSeal(q)] : undefined} />;
+  const hasAttr = quoteAttrKids(q, false).length > 0 || q.kind === "narracao";
   const inner =
     q.kind === "narracao" ? (
       <blockquote className="wb-epi-text is-narr">
@@ -124,14 +173,7 @@ export function QuoteEpigraph({ q }: { q: WikiCitation }) {
   return (
     <figure className={"wb-epigraph" + (q.kind === "dialogo" ? " is-dialogue" : "")}>
       {q.vis === "spoiler" ? <SpoilerBlock>{inner}</SpoilerBlock> : inner}
-      {attr.length > 0 && (
-        <figcaption className="wb-epi-attr">
-          {"— "}
-          {attr.map((a, i) => (
-            <Fragment key={i}>{a}</Fragment>
-          ))}
-        </figcaption>
-      )}
+      {hasAttr && <figcaption className="wb-epi-attr">{attr}</figcaption>}
     </figure>
   );
 }
